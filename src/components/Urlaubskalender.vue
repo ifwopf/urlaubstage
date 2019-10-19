@@ -2,9 +2,31 @@
   <div v-if="$store.state.dataReady">
     <h1 class="jahrtitel">2019</h1>
     <div class="counters">
-      <span class="count" v-if="cat.id!==1" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']" v-bind:key="cat.id"
-            :style="cat.style">{{ cat['name']}} : {{ $store.getters.getCatCount(cat.id)}}</span>
-    </div><br/>
+      <span class="count" v-if="cat.id!==1" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
+            v-bind:key="cat.id"
+            :style="cat.style" v-on:click="click_on_cat(cat.id)">
+        <span class="catEdit" v-if="parseInt(selectedCat)===cat.id" :key="cat.id">
+          <i class="material-icons catEdits" @click.stop="deleteCat" id="deleteCat">delete</i>
+          <i class="material-icons catEdits" @click.stop="showColorEdit" id="editCatColor">color_lens</i>
+          <i class="material-icons catEdits" @click.stop="showNameEdit" id="editCatName">edit</i>
+        </span>
+        <span v-if="!editName || parseInt(selectedCat)!==cat.id">
+          {{ cat['name']}} : {{ $store.getters.getCatCount(cat.id)}}
+        </span>
+        <input v-model="catName" @change="" @click.stop="" type="text"
+               v-autowidth="{maxWidth: '960px', minWidth: '20px', comfortZone: 20}"
+               v-if="editName && parseInt(selectedCat)===cat.id" class="input"/>
+        <i class="material-icons" @click="changeName" v-if="editName && parseInt(selectedCat)===cat.id">save</i>
+
+        <select v-if="editColor && parseInt(selectedCat)===cat.id" @click.stop="" @change.stop="updateColor($event)"
+                :style="catColor" v-model="catColor">
+        <option v-if="editColor && parseInt(selectedCat)===cat.id">Select Color</option>
+        <option v-for="color in colors" :style="color" :value="color"></option>
+        </select>
+      <i class="material-icons" v-if="editColor && parseInt(selectedCat)===cat.id" @click="changeColor">save</i>
+      </span>
+    </div>
+    <br/>
 
     <div class="monat" v-for="(month, index) in $store.getters.getInfo" :key="index">
       <h3 class="monatstitel">{{ months_en[index] }}</h3>
@@ -16,23 +38,25 @@
         <div class="wochentag" style="grid-row: 1; grid-column: 5">Fr</div>
         <div class="wochentag" style="grid-row: 1; grid-column: 6">Sa</div>
         <div class="wochentag" style="grid-row: 1; grid-column: 7">So</div>
-        <div class="tagrahmen" v-bind:id="day.id" v-for="day in month" v-bind:style="[$store.getters.getElementMapByIDStyle(day.id), $store.getters.getCatByID(day.cat_id).style,
+        <div class="tagrahmen" @click="mouse_on_day" v-bind:id="day.id" v-for="day in month" v-bind:style="[$store.getters.getElementMapByIDStyle(day.id), $store.getters.getCatByID(day.cat_id).style,
         day.clicked ? {'border-color': 'red'} : {'border-color': 'white'}]" v-bind:key="day.id">
-          <div class="tag" v-if="day['weekday']=== 'Samstag' && day.cat_id === 1" :month_id="day.month-1" v-bind:key="day.id" ref="tag"
+          <div class="tag" v-if="day['weekday']=== 'Samstag' && day.cat_id === 1" :month_id="day.month-1"
+               v-bind:key="day.id" ref="tag"
                v-bind:id="day['id']"
                style="color: darkgrey"
-               >
+          >
             {{ day['day'] }}
           </div>
-          <div class="tag" v-else-if="day['weekday']=== 'Sonntag' && day.cat_id === 1" :month_id="day.month-1" v-bind:key="day.id" ref="tag"
+          <div class="tag" v-else-if="day['weekday']=== 'Sonntag' && day.cat_id === 1" :month_id="day.month-1"
+               v-bind:key="day.id" ref="tag"
                v-bind:id="day['id']"
                style="color: darkred"
-               >
+          >
             {{ day['day'] }}
           </div>
           <div class="tag" v-else-if="true" :month_id="day.month-1" v-bind:key="day.id" ref="tag" v-bind:id="day['id']"
                v-bind:style=""
-               >
+          >
             {{ day['day'] }}
           </div>
         </div>
@@ -44,28 +68,33 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import {mapGetters} from 'vuex'
-  import * as Selection from "@simonwep/selection-js";
+  import * as Selection from '@simonwep/selection-js'
   import dayBox from '@/components/dayBox'
+
 
   export default {
     name: 'Urlaubskalender',
     components: {dayBox},
+    props: ['year'],
     created () {
       // fetch the data when the view is created and the data is
       // already being observed
-      this.$store.dispatch('ready')
+      console.log(this.year)
+      this.$store.dispatch('ready', this.year)
     },
     data () {
       return {
         cat_box: false,
         edit_box: false,
+        editName: false,
+        editColor: false,
         top: 0,
         left: 0,
         cat_name: '',
-        in_cat_name: '',
-        in_cat_color: '',
+        catName: '',
+        catColor: '',
+        selectedCat: null,
         months_en: {
           0: 'Januar',
           1: 'Februar',
@@ -79,7 +108,10 @@
           9: 'Oktober',
           10: 'November',
           11: 'Dezember'
-        }
+        },
+        colors: [{'background-color': '#b4b9cc'}, {'background-color': '#7387b0'}, {'background-color': '#ffca62'},
+          {'background-color': '#ee5f82'}, {'background-color': '#f986a2'}, {'background-color': '#E0B3E6'},
+          {'background-color': 'aquamarine'}]
       }
     },
     computed: {
@@ -95,30 +127,83 @@
         'getElementMapByIDStyle'
       ]),
       mouse_on_day (event) {
-        if(!this.containsObject(this.$store.state.element_map[event.target.id], this.$store.state.clicked)){
+        if (!event.ctrlKey && !event.metaKey) {
+          // clearClicked
+          this.$store.dispatch('resetClicked')
+        }
+        if (!this.containsObject(this.$store.state.element_map[event.target.id], this.$store.state.clicked)) {
           this.$store.dispatch('setClicked', event.target.id)
         }
-        else{
+        else {
           this.$store.dispatch('removeClicked', event.target.id)
         }
       },
-      open_edit (event) {
-        this.clicked_cat = event.target.id
-        this.in_cat_name = this.cats[this.clicked_cat].name
-        this.in_cat_color = this.cats[this.clicked_cat].style['background-color']
-        this.edit_box = !this.edit_box
-      },
-      containsObject(obj, list) {
-        var i;
-        for (i = 0; i < list.length; i++) {
-          if (list[i] === obj) {
-            return true;
+      click_on_cat (catID) {
+        if(!this.editColor && !this.editName || catID != this.selectedCat){
+          this.editColor = false
+          this.editName = false
+          this.selectedCat = catID
+          this.catName = this.$store.getters.getCats[this.selectedCat].name
+          this.catColor = this.$store.getters.getCats[this.selectedCat].style
+          if (!event.ctrlKey) {
+            // clearClicked
+            this.$store.dispatch('resetClicked')
+          }
+          for (var i = 0; i < 12; i++) {
+            for (var j = 0; j < this.$store.getters.getInfo[i].length; j++) {
+              var day = this.$store.getters.getInfo[i][j]
+              if (parseInt(day.cat_id) === parseInt(catID)) {
+                if (this.containsObject(this.$store.state.element_map[day.id], this.$store.state.clicked)) {
+
+                }
+                else {
+                  this.$store.dispatch('setClicked', day.id)
+                }
+              }
+            }
           }
         }
-        return false;
+      },
+      containsObject (obj, list) {
+        var i
+        for (i = 0; i < list.length; i++) {
+          if (list[i] === obj) {
+            return true
+          }
+        }
+        return false
+      },
+      deleteCat () {
+        this.$store.dispatch('deleteCat', this.selectedCat)
+      },
+      showColorEdit () {
+        this.editColor = true
+        this.editName = false
+      },
+      updateColor(event){
+        console.log(this.catColor)
+      },
+      showNameEdit () {
+        this.editName = true
+        this.editColor = false
+      },
+      resizeInput (value) {
+        console.log(value)
+        //$('#hide').text(value)
+        //$(<'#txt').width($('#hide').width())
+      },
+      changeName () {
+        var payload = {'name': this.catName, 'id': this.selectedCat}
+        this.$store.dispatch('changeCatName', payload)
+        this.editName = false
+      },
+      changeColor () {
+        var payload = {'color': this.catColor, 'id': this.selectedCat}
+        this.$store.dispatch('changeCatColor', payload)
+        this.editColor = false
       }
     },
-    mounted() {
+    mounted () {
       Selection.create({
 
         // Class for the selection-area-element
@@ -136,10 +221,10 @@
         mode: 'touch',
 
         // Enable single-click selection (Also disables range-selection via shift + ctrl)
-        singleClick: true,
+        singleClick: false,
 
         // Query selectors from elements which can be selected
-        selectables: [".tagrahmen"],
+        selectables: ['.tagrahmen'],
 
         // Query selectors for elements from where a selection can be start
         startareas: ['html'],
@@ -166,29 +251,30 @@
           this.$store.dispatch('resetClicked')
           // Unselect all elements
           for (const el of evt.selected) {
-            el.classList.remove('selected');
-            evt.inst.removeFromSelection(el);
+            el.classList.remove('selected')
+            evt.inst.removeFromSelection(el)
           }
           // Clear previous selection
-          evt.inst.clearSelection();
+          evt.inst.clearSelection()
         }
 
       }).on('move', evt => {
         for (const el of evt.selected) {
-          if (this.containsObject(this.$store.state.element_map[el.id], this.$store.state.clicked)){
+          if (this.containsObject(this.$store.state.element_map[el.id], this.$store.state.clicked)) {
+            //this.$store.dispatch('removeClicked', el.id)
           }
           else {
             //console.log(el)
             //console.log(el.id)
             this.$store.dispatch('setClicked', el.id)
           }
-          el.classList.remove('selected');
-          evt.inst.removeFromSelection(el);
+          el.classList.remove('selected')
+          evt.inst.removeFromSelection(el)
         }
         //console.log('move', evt);
       }).on('stop', evt => {
         //console.log('stop', evt);
-      });
+      })
     }
   }
 </script>
@@ -205,7 +291,7 @@
     display: grid;
     grid-template-columns: 14% 14% 14% 14% 14% 14% 14%;
     grid-template-rows: 25px 25px 25px 25px 25px 25px;
-    text-align:center;
+    text-align: center;
 
   }
 
@@ -214,28 +300,37 @@
     width: 100%;
   }
 
-  @media only screen and (min-width: 451px) {
+  @media only screen and (min-width: 961px) {
     .monat {
       max-width: 450px;
       display: inline-block;
       vertical-align: top;
-      margin-right: 10px;
+      margin-right: 1%;
     }
   }
 
-  @media only screen and (max-width: 450px) {
+  @media only screen and (min-width: 601px) and (max-width: 960px) {
+    .monat {
+      width: 49%;
+      display: inline-block;
+      vertical-align: top;
+      margin-right: 1%;
+    }
+  }
+
+  @media only screen and (max-width: 600px) {
     .monat {
       margin: auto;
     }
   }
-
 
   .tag {
     padding: 1px;
     border: none;
 
   }
-  .tagrahmen{
+
+  .tagrahmen {
     border-radius: 15%;
     margin: 1px;
     cursor: pointer;
@@ -264,6 +359,7 @@
     width: 100%;
     opacity: 1;
   }
+
   .edit_box_shadow {
     width: 100%;
     min-height: 10%;
@@ -289,18 +385,33 @@
 
   .count {
     margin: 5px;
-    display:block;
-    float:left;
+    display: block;
+    float: left;
     border-radius: 15%;
     padding: 3px;
+    cursor: pointer;
   }
-  .wochentag, .monatstitel, .jahrtitel{
+
+  .wochentag, .monatstitel, .jahrtitel {
     color: #426BC0;
     background-color: ivory;
     text-align: center;
     width: inherit;
   }
-  .counters{
-    display:flow-root;
+
+  .counters {
+    display: flow-root;
+  }
+
+  .catEdits {
+  }
+  .input {
+    background-color: inherit;
+    border: none;
+    font-size: inherit;
+    opacity: 0.5;
+  }
+  .material-icons {
+    font-size: inherit;
   }
 </style>

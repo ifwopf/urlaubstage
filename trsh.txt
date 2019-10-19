@@ -1,0 +1,32 @@
+      toTheLeft ({commit, dispatch, state}) {
+        var index = state.catMap.indexOf(state.clickedCat[0].id)
+        if (index === 0) {
+          if (!state.border) {
+            commit('setBorder', true)
+          } else {
+            index = state.catMap.length - 1
+            commit('setBorder', false)
+            dispatch('changeCat', index)
+          }
+        } else {
+          index -= 1
+          commit('setBorder', false)
+          dispatch('changeCat', index)
+        }
+      },
+      toTheRight ({commit, dispatch, state}) {
+        var index = state.catMap.indexOf(state.clickedCat[0].id)
+        if (index === state.catMap.length - 1) {
+          if (!state.border) {
+            commit('setBorder', true)
+          } else {
+            index = 0
+            commit('setBorder', false)
+            dispatch('changeCat', index)
+          }
+        } else {
+          index += 1
+          commit('setBorder', false)
+          dispatch('changeCat', index)
+        }
+      },

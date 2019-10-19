@@ -1,8 +1,16 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import VueInputAutowidth from 'vue-input-autowidth'
+
+// imports of AJAX functions will go here
+import { authenticate, register } from '@/api'
+import { isValidJwt, EventBus } from '@/utils'
 
 Vue.use(Vuex)
+Vue.use(VueInputAutowidth)
+
+const backendURL = "https://urlaubskalender.herokuapp.com" //http://127.0.0.1:5000
 
 function compare (a, b) {
   if (a.day < b.day) {
@@ -17,6 +25,8 @@ function compare (a, b) {
 export default new Vuex.Store(
   {
     state: {
+      user: {},
+      jwt: '',
       info: null,
       cats: null,
       cat_count: {},
@@ -39,7 +49,6 @@ export default new Vuex.Store(
     },
     mutations: {
       mapElement (state, payload) {
-        // console.log(state.element_map[id])
         state.element_map[payload.id] = state.info[payload.month][payload.day]
       },
       set_info (state, infoed) {
@@ -123,6 +132,12 @@ export default new Vuex.Store(
         state.cats[state.clickedCat[0].id].style['background-color'] = payload.color
         state.cats[state.clickedCat[0].id].name = payload.name
       },
+      editCatColor (state, payload) {
+        state.cats[payload.id].style['background-color'] = payload.color['background-color']
+      },
+      editCatName (state, payload) {
+        state.cats[payload.id].name = payload.name
+      },
       addCat (state, newCat) {
         state.cat_count[newCat.id] = 0
         state.cats[newCat.id] = newCat
@@ -154,59 +169,53 @@ export default new Vuex.Store(
       },
       setBorder (state, border) {
         state.border = border
+      },
+      setUserData (state, payload) {
+        state.userData = payload.userData
+      },
+      setJwtToken (state, payload) {
+        localStorage.token = payload.jwt.token
+        state.jwt = payload.jwt
       }
     },
     actions: {
-      ready ({ commit, state }) {
-        fetch('http://127.0.0.1:5000/urlaub/api/v1.0/days/2019')
-          .then(response => response.json())
-          .then((data) => {
-            commit('set_cats', data['cats'])
-            commit('set_info', data['days'])
-            commit('set_dataReady', true)
+      login (context, userData) {
+        context.commit('setUserData', { userData })
+        return authenticate(userData)
+          .then(response => context.commit('setJwtToken', { jwt: response.data }))
+          .catch(error => {
+            console.log('Error Authenticating: ', error)
+            EventBus.$emit('failedAuthentication', error)
           })
       },
-      toTheLeft ({commit, dispatch, state}) {
-        var index = state.catMap.indexOf(state.clickedCat[0].id)
-        if (index === 0) {
-          if (!state.border) {
-            commit('setBorder', true)
-          } else {
-            index = state.catMap.length - 1
-            commit('setBorder', false)
-            dispatch('changeCat', index)
-          }
-        } else {
-          index -= 1
-          commit('setBorder', false)
-          dispatch('changeCat', index)
-        }
+      register (context, userData) {
+        context.commit('setUserData', { userData })
+        return register(userData)
+          .then(context.dispatch('login', userData))
+          .catch(error => {
+            console.log('Error Registering: ', error)
+            EventBus.$emit('failedRegistering: ', error)
+          })
       },
-      toTheRight ({commit, dispatch, state}) {
-        var index = state.catMap.indexOf(state.clickedCat[0].id)
-        if (index === state.catMap.length - 1) {
-          if (!state.border) {
-            commit('setBorder', true)
-          } else {
-            index = 0
-            commit('setBorder', false)
-            dispatch('changeCat', index)
-          }
-        } else {
-          index += 1
-          commit('setBorder', false)
-          dispatch('changeCat', index)
-        }
+      ready ({ commit, state, jwt }, year) {
+        var yearstring = backendURL + '/urlaub/api/v1.0/days/' + year
+        axios.get(yearstring, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
+          //.then(response => response.json())
+          .then((response) => {
+            commit('set_cats', response.data['cats'])
+            commit('set_info', response.data['days'])
+            commit('set_dataReady', true)
+          })
       },
       editCatDisplay ({commit, dispatch, state}){
         commit('setBorder', true)
       },
       changeCat ({commit, state}, index) {
         commit('changeClickedCat', state.cats[state.catMap[index]])
-        axios.post('http://127.0.0.1:5000/urlaub/api/v1.0/change_cat', {
+        axios.post(backendURL + 'urlaub/api/v1.0/change_cat', {
           cat_id: state.clickedCat[0].id,
           days: state.clicked
-        })
+        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
           .then(function (response) {
           })
           .catch(function (error) {
@@ -215,10 +224,11 @@ export default new Vuex.Store(
       },
       changeCatDropDown ({commit, state}, catID) {
         commit('changeClickedCat', state.cats[catID])
-        axios.post('http://127.0.0.1:5000/urlaub/api/v1.0/change_cat', {
+        axios.post(backendURL + '/urlaub/api/v1.0/change_cat',  {
           cat_id: catID,
-          days: state.clicked
-        })
+          days: state.clicked,
+
+        }, {headers: { Authorization: `Bearer: ${state.jwt.token}` }})
           .then(function (response) {
           })
           .catch(function (error) {
@@ -227,12 +237,38 @@ export default new Vuex.Store(
       },
       editCat ({commit, state}, payload) {
         commit('editCat', payload)
-        axios.post('http://127.0.0.1:5000/urlaub/api/v1.0/editCat', {
+        axios.post(backendURL + '/urlaub/api/v1.0/editCat', {
           catId: state.clickedCat[0].id,
           catColor: payload.color,
           catName: payload.name
-        })
+        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
           .then(function (response) {
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      },
+      changeCatName({commit, state}, payload) {
+        commit('editCatName', payload)
+        axios.post(backendURL + '/urlaub/api/v1.0/editCatName', {
+          catId: payload.id,
+          catName: payload.name
+        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+          .then(function (response) {
+
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      },
+      changeCatColor({commit, state}, payload) {
+        commit('editCatColor', payload)
+        axios.post(backendURL + '/urlaub/api/v1.0/editCatColor', {
+          catId: payload.id,
+          catColor: payload.color['background-color']
+        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+          .then(function (response) {
+
           })
           .catch(function (error) {
             console.log(error)
@@ -259,11 +295,11 @@ export default new Vuex.Store(
         }
       },
       addCat ({commit, state}, catName) {
-        axios.post('http://127.0.0.1:5000/urlaub/api/v1.0/add_cat', {
+        axios.post(backendURL + '/urlaub/api/v1.0/add_cat', {
           cat_name: catName,
           cat_color: '#0959E2',
           clicked: state.clicked
-        })
+        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
           .then(function (response) {
             commit('addCat', response.data)
           })
@@ -271,20 +307,20 @@ export default new Vuex.Store(
             console.log(error)
           })
       },
-      deleteCat ({commit, state}) {
-        axios.post('http://127.0.0.1:5000/urlaub/api/v1.0/deleteCat', {
-          catID: state.clickedCat[0].id
-        })
+      deleteCat ({commit, state}, catID) {
+        axios.post(backendURL + '/urlaub/api/v1.0/deleteCat', {
+          catID: catID
+        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
           .then(function (response) {
             for (var i = 0; i < 11; i++) {
               for (var j = 0; j < state.info[i].length; j++) {
-                if (state.info[i][j]['cat_id'] === state.clickedCat[0].id) {
+                if (state.info[i][j]['cat_id'] === catID) {
                   var payload = {'month': i, 'day': j}
                   commit('alterCatRefs', payload)
                 }
               }
             }
-            commit('deleteCat', state.clickedCat[0].id)
+            commit('deleteCat', catID)
           })
           .catch(function (error) {
             console.log(error)
@@ -293,6 +329,9 @@ export default new Vuex.Store(
 
     },
     getters: {
+      isAuthenticated (state) {
+        return isValidJwt(state.jwt.token)
+      },
       getCatByID: (state) => (id) => {
         return state.cats[id]
       },

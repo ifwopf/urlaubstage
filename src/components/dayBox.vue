@@ -6,15 +6,7 @@
       {{ selectedDaysString }}
       </span>
       <input v-if="$store.state.border" id="new_category" v-model="catName" placeholder="cat name">
-      <button v-if="!$store.state.border && !edit" class="edit_button" v-bind:id="$store.state.clickedCat[0].id" @click="open_edit">edit</button>
-      <button v-if="!$store.state.border && !edit" @click="deleteCat">delete Category</button>
       <button v-if="$store.state.border" @click="addNewCat">send</button>
-      <input v-if="edit" id="editCatName" v-model="catEditName">
-      <select v-if="edit" :style="" v-model="catEditColor">
-        <option v-if="edit">Select Color</option>
-        <option v-for="color in this.colors" :style="color" :value="color"></option>
-      </select>
-      <button v-if="edit" @click="editCat">save</button>
       <select v-if="!edit" :style="$store.state.clickedCat[0].style" @change="catDropChange($event)">
         <option v-if="!edit">Select Cat</option>
         <option v-for="cat in this.$store.state.cats" v-bind:style="cat.style" :value="cat.id">{{ cat.name}}</option>
@@ -124,12 +116,8 @@ export default {
     },
     editCat () {
       var payload = {'color': this.catEditColor['background-color'], 'name': this.catEditName}
-      console.log(payload)
       this.$store.dispatch('editCat', payload)
       this.edit = !this.edit
-    },
-    deleteCat () {
-      this.$store.dispatch('deleteCat')
     },
     resetDayBox () {
       this.edit = false
