@@ -1,6 +1,6 @@
 <template>
   <div v-if="$store.state.dataReady">
-    <h1 class="jahrtitel">2019</h1>
+    <h1 class="jahrtitel">{{ year }}</h1>
     <div class="counters">
       <span class="count" v-if="cat.id!==1" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
             v-bind:key="cat.id"
@@ -332,7 +332,6 @@
 
   .tagrahmen {
     border-radius: 15%;
-    margin: 1px;
     cursor: pointer;
   }
 

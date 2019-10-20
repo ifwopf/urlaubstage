@@ -2,6 +2,10 @@
   <div v-show='$store.getters.getDayBox' class="dayBox">
     <div v-if="$store.state.clickedCat.length !== 0" v-bind:key="$store.state.clickedCat[0].id">
       <button id="x" @click="resetDayBox">X</button>
+      <button id="lock" @click="toggleLock">
+        <i v-if="!locked" class="material-icons">lock_open</i>
+        <i v-else class="material-icons">lock</i>
+      </button>
       <span id="selectedDaysText">
       {{ selectedDaysString }}
       </span>
@@ -29,6 +33,7 @@ export default {
       catEditName: '',
       catEditColor: '',
       edit: false,
+      locked: false,
       colors: [{'background-color': '#b4b9cc'}, {'background-color': '#7387b0'}, {'background-color': '#ffca62'},
         {'background-color': '#ee5f82'}, {'background-color': '#f986a2'}, {'background-color': '#E0B3E6'},
         {'background-color': 'aquamarine'} ]
@@ -122,6 +127,15 @@ export default {
     resetDayBox () {
       this.edit = false
       this.$store.dispatch('resetClicked')
+      this.$store.dispatch('resetCatClicked')
+    },
+    toggelLocked () {
+      if(this.locked){
+        this.locked = false
+      }
+      else{
+        this.locked = true
+      }
     },
     catDropChange(event) {
       if(event.target.value !== "new"){
