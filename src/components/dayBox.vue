@@ -2,10 +2,10 @@
   <div v-show='$store.getters.getDayBox' class="dayBox">
     <div v-if="$store.state.clickedCat.length !== 0" v-bind:key="$store.state.clickedCat[0].id">
       <div id="buttonBox">
-        <button id="x" @click="resetDayBox"><i class="material-icons">clear</i></button>
+        <button id="x" @click="resetDayBox"><i class="material-icons md-48">clear</i></button>
         <button id="lock" @click="toggleLock">
-          <i v-if="!$store.state.locked" class="material-icons">lock_open</i>
-          <i v-else class="material-icons">lock</i>
+          <i v-if="!$store.state.locked" class="material-icons md-48">lock_open</i>
+          <i v-else class="material-icons md-48">lock</i>
         </button>
       </div>
       <span id="selectedDaysText">
@@ -13,7 +13,7 @@
       </span>
       <input v-if="$store.state.border" id="new_category" v-model="catName" placeholder="cat name">
       <button v-if="$store.state.border" @click="addNewCat">send</button>
-      <select v-if="!edit" :style="$store.state.clickedCat[0].style" @change="catDropChange($event)">
+      <select id="selectCat" v-if="!edit" :style="$store.state.clickedCat[0].style" @change="catDropChange($event)">
         <option v-if="!edit">Select Cat</option>
         <option v-for="cat in this.$store.state.cats" v-bind:style="cat.style" :value="cat.id">{{ cat.name}}</option>
         <option v-if="!edit" value="new">new</option>
@@ -155,7 +155,7 @@ export default {
     background-color: mistyrose;
     display: inline-block;
     text-align: center;
-    height: 10%;
+    height: 15%;
     position: fixed;
     bottom: 20px;
     right: 5%;
@@ -163,6 +163,7 @@ export default {
     opacity: 1;
     border-radius: 25px;
     margin: auto;
+    font-size: 20px;
   }
 
   #buttonBox{
@@ -187,13 +188,17 @@ export default {
     min-height: 20px;
   }
   #x, #lock {
-    margin-left: 10px;
-    margin-top: 10px;
+    width: 100%;
     border: none;
     background-color: inherit;
+    font-size: 40px !important;
   }
   #selectedDaysText{
     display: block;
     margin-top: 10px;
+  }
+  #selectCat {
+    width: 75%;
+    font-size: inherit;
   }
 </style>

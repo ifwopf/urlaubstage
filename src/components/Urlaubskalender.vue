@@ -410,4 +410,8 @@
   .material-icons {
     font-size: inherit;
   }
+
+  body{
+    margin: 0px;
+  }
 </style>
