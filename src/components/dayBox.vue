@@ -1,11 +1,13 @@
 <template>
   <div v-show='$store.getters.getDayBox' class="dayBox">
     <div v-if="$store.state.clickedCat.length !== 0" v-bind:key="$store.state.clickedCat[0].id">
-      <button id="x" @click="resetDayBox">X</button>
-      <button id="lock" @click="toggleLock">
-        <i v-if="!$store.state.locked" class="material-icons">lock_open</i>
-        <i v-else class="material-icons">lock</i>
-      </button>
+      <div id="buttonBox">
+        <button id="x" @click="resetDayBox"><i class="material-icons">clear</i></button>
+        <button id="lock" @click="toggleLock">
+          <i v-if="!$store.state.locked" class="material-icons">lock_open</i>
+          <i v-else class="material-icons">lock</i>
+        </button>
+      </div>
       <span id="selectedDaysText">
       {{ selectedDaysString }}
       </span>
@@ -150,17 +152,22 @@ export default {
 <style scoped>
   .dayBox {
     color: black;
-    background-color: gold;
+    background-color: mistyrose;
     display: inline-block;
     text-align: center;
     height: 10%;
     position: fixed;
     bottom: 20px;
-    right: 10%;
-    width: 80%;
+    right: 5%;
+    width: 90%;
     opacity: 1;
     border-radius: 25px;
     margin: auto;
+  }
+
+  #buttonBox{
+    width: 20%;
+    float: left;
   }
 
   .cat_button {
@@ -179,8 +186,7 @@ export default {
     margin-right: auto;
     min-height: 20px;
   }
-  #x {
-    float: left;
+  #x, #lock {
     margin-left: 10px;
     margin-top: 10px;
     border: none;
