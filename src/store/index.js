@@ -37,6 +37,7 @@ export default new Vuex.Store(
       clicked: [],
       clickedCat: [],
       border: false,
+      locked: false,
       weekday: {
         'Montag': 1,
         'Dienstag': 2,
@@ -176,6 +177,14 @@ export default new Vuex.Store(
       setJwtToken (state, payload) {
         localStorage.token = payload.jwt.token
         state.jwt = payload.jwt
+      },
+      toggleLock(state) {
+        if(state.locked){
+          state.locked = false
+        }
+        else{
+          state.locked = true
+        }
       }
     },
     actions: {
@@ -325,7 +334,7 @@ export default new Vuex.Store(
           .catch(function (error) {
             console.log(error)
           })
-      }
+      },
 
     },
     getters: {

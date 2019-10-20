@@ -89,9 +89,6 @@
         edit_box: false,
         editName: false,
         editColor: false,
-        top: 0,
-        left: 0,
-        cat_name: '',
         catName: '',
         catColor: '',
         selectedCat: null,
@@ -127,7 +124,7 @@
         'getElementMapByIDStyle'
       ]),
       mouse_on_day (event) {
-        if (!event.ctrlKey && !event.metaKey) {
+        if (!event.ctrlKey && !event.metaKey && ! this.$store.state.locked) {
           // clearClicked
           this.$store.dispatch('resetClicked')
         }
@@ -145,7 +142,7 @@
           this.selectedCat = catID
           this.catName = this.$store.getters.getCats[this.selectedCat].name
           this.catColor = this.$store.getters.getCats[this.selectedCat].style
-          if (!event.ctrlKey) {
+          if (!event.ctrlKey && !this.$store.state.locked) {
             // clearClicked
             this.$store.dispatch('resetClicked')
           }
@@ -246,7 +243,7 @@
         //console.log('start', evt);
 
         // Remove class if user don't press the control key or ⌘ key
-        if (!evt.oe.ctrlKey && !evt.oe.metaKey) {
+        if (!evt.oe.ctrlKey && !evt.oe.metaKey && !this.$store.state.locked) {
           // clearClicked
           this.$store.dispatch('resetClicked')
           // Unselect all elements

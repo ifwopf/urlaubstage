@@ -3,7 +3,7 @@
     <div v-if="$store.state.clickedCat.length !== 0" v-bind:key="$store.state.clickedCat[0].id">
       <button id="x" @click="resetDayBox">X</button>
       <button id="lock" @click="toggleLock">
-        <i v-if="!locked" class="material-icons">lock_open</i>
+        <i v-if="!$store.state.locked" class="material-icons">lock_open</i>
         <i v-else class="material-icons">lock</i>
       </button>
       <span id="selectedDaysText">
@@ -127,15 +127,10 @@ export default {
     resetDayBox () {
       this.edit = false
       this.$store.dispatch('resetClicked')
-      this.$store.dispatch('resetCatClicked')
+      //this.$store.dispatch('resetCatClicked')
     },
-    toggelLocked () {
-      if(this.locked){
-        this.locked = false
-      }
-      else{
-        this.locked = true
-      }
+    toggleLock () {
+      this.$store.commit('toggleLock')
     },
     catDropChange(event) {
       if(event.target.value !== "new"){
