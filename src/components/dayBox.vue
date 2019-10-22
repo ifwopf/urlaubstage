@@ -153,15 +153,11 @@ export default {
   .dayBox {
     color: black;
     background-color: mistyrose;
-    display: inline-block;
     text-align: center;
     height: 15%;
-    position: fixed;
-    bottom: 20px;
-    right: 5%;
-    width: 90%;
-    opacity: 1;
-    border-radius: 25px;
+    position: sticky;
+    bottom: 10px;
+    border-radius: 10px;
     margin: auto;
     font-size: 20px;
   }

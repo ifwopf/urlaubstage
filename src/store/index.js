@@ -36,6 +36,7 @@ export default new Vuex.Store(
       dayBox: false,
       clicked: [],
       clickedCat: [],
+      clickedCatCounter: null,
       border: false,
       locked: false,
       weekday: {
@@ -103,6 +104,7 @@ export default new Vuex.Store(
           Vue.set(state.element_map[id],'id', id)
         }
         state.clicked = []
+        state.clickedCatCounter = null
         state.clickedCat = []
         state.border = false
         state.edit = false
@@ -118,8 +120,9 @@ export default new Vuex.Store(
       setClickedCat (state, dayID) {
         state.clickedCat.push(state.cats[state.element_map[dayID].cat_id])
       },
-
-
+      setClickedCatCounter (state, catID){
+        state.clickedCatCounter = catID
+      },
       changeClickedCat (state, cat) {
         var count = state.clickedCat.length;
         for(var i = 0; i < count; i++) {

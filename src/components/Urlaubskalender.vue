@@ -2,9 +2,9 @@
   <div v-if="$store.state.dataReady">
     <h1 class="jahrtitel">{{ year }}</h1>
     <div class="counters">
-      <span class="count" v-if="cat.id!==1" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
+      <span class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
             v-bind:key="cat.id"
-            :style="cat.style" v-on:click="click_on_cat(cat.id)">
+            :style="cat.style" @click="click_on_cat(cat.id)">
         <span class="catEdit" v-if="parseInt(selectedCat)===cat.id" :key="cat.id">
           <i class="material-icons catEdits" @click.stop="deleteCat" id="deleteCat">delete</i>
           <i class="material-icons catEdits" @click.stop="showColorEdit" id="editCatColor">color_lens</i>
@@ -136,30 +136,38 @@
         }
       },
       click_on_cat (catID) {
-        if(!this.editColor && !this.editName || catID != this.selectedCat){
-          this.editColor = false
-          this.editName = false
-          this.selectedCat = catID
-          this.catName = this.$store.getters.getCats[this.selectedCat].name
-          this.catColor = this.$store.getters.getCats[this.selectedCat].style
-          if (!event.ctrlKey && !this.$store.state.locked) {
-            // clearClicked
-            this.$store.dispatch('resetClicked')
-          }
-          for (var i = 0; i < 12; i++) {
-            for (var j = 0; j < this.$store.getters.getInfo[i].length; j++) {
-              var day = this.$store.getters.getInfo[i][j]
-              if (parseInt(day.cat_id) === parseInt(catID)) {
-                if (this.containsObject(this.$store.state.element_map[day.id], this.$store.state.clicked)) {
+        if(this.$store.state.clicked.length > 0){
+          this.$store.dispatch('changeCatDropDown', catID)
+        }
+        else{
+          if(!this.editColor && !this.editName || catID !== this.selectedCat){
+            this.editColor = false
+            this.editName = false
+            this.selectedCat = catID //to be deleted
+            this.$store.commit('setClickedCatCounter', catID)
 
-                }
-                else {
-                  this.$store.dispatch('setClicked', day.id)
+            this.catName = this.$store.getters.getCats[this.selectedCat].name
+            this.catColor = this.$store.getters.getCats[this.selectedCat].style
+            if (!event.ctrlKey && !this.$store.state.locked) {
+              // clearClicked
+              this.$store.dispatch('resetClicked')
+            }
+            for (var i = 0; i < 12; i++) {
+              for (var j = 0; j < this.$store.getters.getInfo[i].length; j++) {
+                var day = this.$store.getters.getInfo[i][j]
+                if (parseInt(day.cat_id) === parseInt(catID)) {
+                  if (this.containsObject(this.$store.state.element_map[day.id], this.$store.state.clicked)) {
+
+                  }
+                  else {
+                    this.$store.dispatch('setClicked', day.id)
+                  }
                 }
               }
             }
           }
         }
+
       },
       containsObject (obj, list) {
         var i
@@ -397,6 +405,10 @@
 
   .counters {
     display: flow-root;
+    position: sticky;
+    top: 5px;
+    background-color: mistyrose;
+    border-radius: 10px;
   }
 
   .catEdits {
