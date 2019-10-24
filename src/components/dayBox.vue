@@ -1,24 +1,15 @@
 <template>
   <div v-show='$store.getters.getDayBox' class="dayBox">
-    <div v-if="$store.state.clickedCat.length !== 0" v-bind:key="$store.state.clickedCat[0].id">
-      <div id="buttonBox">
-        <button id="x" @click="resetDayBox"><i class="material-icons md-48">clear</i></button>
-        <button id="lock" @click="toggleLock">
-          <i v-if="!$store.state.locked" class="material-icons md-48">lock_open</i>
-          <i v-else class="material-icons md-48">lock</i>
-        </button>
-      </div>
-      <span id="selectedDaysText">
-      {{ selectedDaysString }}
-      </span>
-      <input v-if="$store.state.border" id="new_category" v-model="catName" placeholder="cat name">
-      <button v-if="$store.state.border" @click="addNewCat">send</button>
-      <select id="selectCat" v-if="!edit" :style="$store.state.clickedCat[0].style" @change="catDropChange($event)">
-        <option v-if="!edit">Select Cat</option>
-        <option v-for="cat in this.$store.state.cats" v-bind:style="cat.style" :value="cat.id">{{ cat.name}}</option>
-        <option v-if="!edit" value="new">new</option>
-      </select>
+    <div id="buttonBox">
+      <button id="x" @click="resetDayBox"><i class="material-icons md-48">clear</i></button>
+      <button id="lock" @click="toggleLock">
+        <i v-if="!$store.state.locked" class="material-icons md-48">lock_open</i>
+        <i v-else class="material-icons md-48">lock</i>
+      </button>
     </div>
+    <span id="selectedDaysText">
+    {{ selectedDaysString }}
+    </span>
   </div>
 </template>
 <script>
@@ -88,8 +79,8 @@ export default {
   },
   methods: {
     open_edit () {
-      this.catEditName = this.$store.state.clickedCat[0].name
-      this.catEditColor = this.$store.state.clickedCat[0].style['background-color']
+      //this.catEditName = this.$store.state.clickedCat[0].name
+      //this.catEditColor = this.$store.state.clickedCat[0].style['background-color']
       this.edit = true
     },
     addNewCat () {

@@ -5,26 +5,12 @@
       <span class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
             v-bind:key="cat.id"
             :style="cat.style" @click="click_on_cat(cat.id)">
-        <span class="catEdit" v-if="parseInt(selectedCat)===cat.id" :key="cat.id">
-          <i class="material-icons catEdits" @click.stop="deleteCat" id="deleteCat">delete</i>
-          <i class="material-icons catEdits" @click.stop="showColorEdit" id="editCatColor">color_lens</i>
-          <i class="material-icons catEdits" @click.stop="showNameEdit" id="editCatName">edit</i>
-        </span>
-        <span v-if="!editName || parseInt(selectedCat)!==cat.id">
-          {{ cat['name']}} : {{ $store.getters.getCatCount(cat.id)}}
-        </span>
-        <input v-model="catName" @change="" @click.stop="" type="text"
-               v-autowidth="{maxWidth: '960px', minWidth: '20px', comfortZone: 20}"
-               v-if="editName && parseInt(selectedCat)===cat.id" class="input"/>
-        <i class="material-icons" @click="changeName" v-if="editName && parseInt(selectedCat)===cat.id">save</i>
-
-        <select v-if="editColor && parseInt(selectedCat)===cat.id" @click.stop="" @change.stop="updateColor($event)"
-                :style="catColor" v-model="catColor">
-        <option v-if="editColor && parseInt(selectedCat)===cat.id">Select Color</option>
-        <option v-for="color in colors" :style="color" :value="color"></option>
-        </select>
-      <i class="material-icons" v-if="editColor && parseInt(selectedCat)===cat.id" @click="changeColor">save</i>
+        {{ cat['name']}} : {{ $store.getters.getCatCount(cat.id)}}
+        <i class="material-icons md-48" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
+      <span @click="openAddCat"> <i class="material-icons md-48">add</i></span>
+      <input v-if="$store.state.border" id="new_category" v-model="catName" placeholder="cat name">
+      <button v-if="$store.state.border" @click="addNewCat">send</button>
     </div>
     <br/>
 
@@ -38,7 +24,8 @@
         <div class="wochentag" style="grid-row: 1; grid-column: 5">Fr</div>
         <div class="wochentag" style="grid-row: 1; grid-column: 6">Sa</div>
         <div class="wochentag" style="grid-row: 1; grid-column: 7">So</div>
-        <div class="tagrahmen" @click="mouse_on_day" v-bind:id="day.id" v-for="day in month" v-bind:style="[$store.getters.getElementMapByIDStyle(day.id), $store.getters.getCatByID(day.cat_id).style,
+        <div class="tagrahmen" @click="mouse_on_day" v-bind:id="day.id" v-for="day in month"
+             v-bind:style="[$store.getters.getElementMapByIDStyle(day.id), $store.getters.getCatByID(day.cat_id).style,
         day.clicked ? {'border-color': 'red'} : {'border-color': 'white'}]" v-bind:key="day.id">
           <div class="tag" v-if="day['weekday']=== 'Samstag' && day.cat_id === 1" :month_id="day.month-1"
                v-bind:key="day.id" ref="tag"
@@ -64,6 +51,7 @@
     </div>
     <div class="edit_box_shadow">&nbsp;</div>
     <day-box/>
+    <cat-edit-box/>
   </div>
 </template>
 
@@ -71,24 +59,22 @@
   import {mapGetters} from 'vuex'
   import * as Selection from '@simonwep/selection-js'
   import dayBox from '@/components/dayBox'
+  import catEditBox from '@/components/catEditBox'
 
 
   export default {
     name: 'Urlaubskalender',
-    components: {dayBox},
+    components: {dayBox, catEditBox},
     props: ['year'],
     created () {
       // fetch the data when the view is created and the data is
       // already being observed
-      console.log(this.year)
       this.$store.dispatch('ready', this.year)
     },
     data () {
       return {
         cat_box: false,
         edit_box: false,
-        editName: false,
-        editColor: false,
         catName: '',
         catColor: '',
         selectedCat: null,
@@ -144,8 +130,8 @@
             this.editColor = false
             this.editName = false
             this.selectedCat = catID //to be deleted
-            this.$store.commit('setClickedCatCounter', catID)
-
+            this.$store.commit('setClickedCatCounter', parseInt(catID))
+            this.$store.commit('setClickedCatName', this.$store.getters.getCats[catID].name)
             this.catName = this.$store.getters.getCats[this.selectedCat].name
             this.catColor = this.$store.getters.getCats[this.selectedCat].style
             if (!event.ctrlKey && !this.$store.state.locked) {
@@ -178,35 +164,29 @@
         }
         return false
       },
-      deleteCat () {
-        this.$store.dispatch('deleteCat', this.selectedCat)
-      },
-      showColorEdit () {
-        this.editColor = true
-        this.editName = false
-      },
-      updateColor(event){
-        console.log(this.catColor)
-      },
-      showNameEdit () {
-        this.editName = true
-        this.editColor = false
-      },
       resizeInput (value) {
         console.log(value)
         //$('#hide').text(value)
         //$(<'#txt').width($('#hide').width())
       },
-      changeName () {
-        var payload = {'name': this.catName, 'id': this.selectedCat}
-        this.$store.dispatch('changeCatName', payload)
-        this.editName = false
+      showCatEdit () {
+        this.$store.commit('showCatEdit')
       },
-      changeColor () {
-        var payload = {'color': this.catColor, 'id': this.selectedCat}
-        this.$store.dispatch('changeCatColor', payload)
-        this.editColor = false
-      }
+      openAddCat () {
+        this.$store.dispatch('editCatDisplay')
+      },
+      addNewCat () {
+        var doppelt = false
+        for (var i = 0; i < this.$store.state.cats.length; i++) {
+          if (this.catName === this.$store.state.cats[i].name) {
+            doppelt = true
+          }
+        }
+        if (!doppelt) {
+          this.$store.dispatch('addCat', this.catName)
+          this.catName = ''
+        }
+      },
     },
     mounted () {
       Selection.create({
@@ -420,7 +400,7 @@
     opacity: 0.5;
   }
   .material-icons {
-    font-size: inherit;
+    cursor: pointer;
   }
 
   body{
