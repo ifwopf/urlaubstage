@@ -155,7 +155,9 @@ export default {
 
   #buttonBox{
     width: 20%;
+    height: 100%;
     float: left;
+    position: relative;
   }
 
   .cat_button {
@@ -179,6 +181,16 @@ export default {
     border: none;
     background-color: inherit;
     font-size: 40px !important;
+  }
+  #lock {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+  }
+  #x {
+    position: absolute;
+    top: 5px;
+    left: 0;
   }
   #selectedDaysText{
     display: block;

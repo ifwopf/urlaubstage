@@ -83,6 +83,8 @@
       },
       closeCatEditBox () {
         this.$store.commit('hideCatEdit')
+        this.editName = false
+        this.editColor = false
       }
     }
   }

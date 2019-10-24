@@ -6,9 +6,9 @@
             v-bind:key="cat.id"
             :style="cat.style" @click="click_on_cat(cat.id)">
         {{ cat['name']}} : {{ $store.getters.getCatCount(cat.id)}}
-        <i class="material-icons md-48" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
+        <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
-      <span @click="openAddCat"> <i class="material-icons md-48">add</i></span>
+      <span @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
       <input v-if="$store.state.border" id="new_category" v-model="catName" placeholder="cat name">
       <button v-if="$store.state.border" @click="addNewCat">send</button>
     </div>
@@ -389,6 +389,7 @@
     top: 5px;
     background-color: mistyrose;
     border-radius: 10px;
+    font-size: 24px;
   }
 
   .catEdits {
@@ -401,6 +402,11 @@
   }
   .material-icons {
     cursor: pointer;
+    vertical-align: middle;
+  }
+  #plus {
+    padding: 3px;
+    margin: 5px;
   }
 
   body{
