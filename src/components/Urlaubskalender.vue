@@ -26,7 +26,7 @@
         <div class="wochentag" style="grid-row: 1; grid-column: 7">So</div>
         <div class="tagrahmen" @click="mouse_on_day" v-bind:id="day.id" v-for="day in month"
              v-bind:style="[$store.getters.getElementMapByIDStyle(day.id), $store.getters.getCatByID(day.cat_id).style,
-        day.clicked ? {'border-color': 'red'} : {'border-color': 'white'}]" v-bind:key="day.id">
+        day.clicked ? {'border-color': 'black'} : {'border-color': 'white'}]" v-bind:key="day.id">
           <div class="tag" v-if="day['weekday']=== 'Samstag' && day.cat_id === 1" :month_id="day.month-1"
                v-bind:key="day.id" ref="tag"
                v-bind:id="day['id']"
@@ -274,10 +274,8 @@
 <style scoped>
   .grid {
     display: grid;
-    grid-template-columns: 14% 14% 14% 14% 14% 14% 14%;
-    grid-template-rows: 25px 25px 25px 25px 25px 25px;
     text-align: center;
-
+    line-height: 1.3;
   }
 
   .monat {
@@ -310,14 +308,14 @@
   }
 
   .tag {
-    padding: 1px;
     border: none;
 
   }
 
   .tagrahmen {
-    border-radius: 15%;
     cursor: pointer;
+    margin: 1px;
+    border-width: 1px;
   }
 
   .cat_box {
@@ -371,14 +369,13 @@
     margin: 5px;
     display: block;
     float: left;
-    border-radius: 15%;
     padding: 3px;
     cursor: pointer;
   }
 
   .wochentag, .monatstitel, .jahrtitel {
-    color: #426BC0;
-    background-color: ivory;
+    color: #000;
+    background-color: ghostwhite;
     text-align: center;
     width: inherit;
   }
@@ -387,8 +384,10 @@
     display: flow-root;
     position: sticky;
     top: 5px;
-    background-color: mistyrose;
-    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 10px 5px 5px grey;
+    border: solid;
+    border-width: 1px;
     font-size: 24px;
   }
 

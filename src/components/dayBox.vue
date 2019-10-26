@@ -143,12 +143,14 @@ export default {
 <style scoped>
   .dayBox {
     color: black;
-    background-color: mistyrose;
+    background-color: #ffffff;
     text-align: center;
     height: 15%;
     position: sticky;
     bottom: 10px;
-    border-radius: 10px;
+    box-shadow: 10px 5px 5px grey;
+    border: solid;
+    border-width: 1px;
     margin: auto;
     font-size: 20px;
   }
