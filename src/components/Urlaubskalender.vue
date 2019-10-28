@@ -8,9 +8,10 @@
         {{ cat['name']}} : {{ $store.getters.getCatCount(cat.id)}}
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
-      <span @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
-      <input v-if="$store.state.border" id="new_category" v-model="catName" placeholder="cat name">
-      <button v-if="$store.state.border" @click="addNewCat">send</button>
+      <span v-if="!$store.state.border" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
+      <span v-if="$store.state.border" @click="closeAddCat"> <i id="cancel" class="material-icons">clear</i></span>
+      <input class="inputName" v-if="$store.state.border" id="new_category" v-model="catName" placeholder="cat name">
+      <i id="send" class="material-icons" v-if="$store.state.border" @click="addNewCat">send</i>
     </div>
     <br/>
 
@@ -69,6 +70,7 @@
     created () {
       // fetch the data when the view is created and the data is
       // already being observed
+      //$(".second_div").css({'width': ($(".first_div").width() + 'px')});
       this.$store.dispatch('ready', this.year)
     },
     data () {
@@ -174,6 +176,9 @@
       },
       openAddCat () {
         this.$store.dispatch('editCatDisplay')
+      },
+      closeAddCat () {
+        this.$store.commit('setBorder', false)
       },
       addNewCat () {
         var doppelt = false
@@ -377,7 +382,6 @@
     color: #000;
     background-color: ghostwhite;
     text-align: center;
-    width: inherit;
   }
 
   .counters {
@@ -385,7 +389,7 @@
     position: sticky;
     top: 5px;
     background-color: #fff;
-    box-shadow: 10px 5px 5px grey;
+    box-shadow: 5px 2.5px 2.5px grey;
     border: solid;
     border-width: 1px;
     font-size: 24px;
@@ -403,8 +407,13 @@
     cursor: pointer;
     vertical-align: middle;
   }
-  #plus {
+  #plus, #cancel, #send {
     padding: 3px;
+    margin: 5px;
+    float: left;
+  }
+  .inputName {
+    font-size: 24px;
     margin: 5px;
   }
 

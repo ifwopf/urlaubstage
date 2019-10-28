@@ -41,9 +41,13 @@ export default {
     ]),
     selectedDaysString: function() {
       function compare (a, b) {
-        if (a.id < b.id)
+        if (a.month < b.month)
           return -1;
-        if (a.id > b.id)
+        else if (a.month === b.month){
+          if (a.day < b.day)
+            return -1;
+        }
+        else
           return 1;
         return 0;
       }
@@ -119,6 +123,7 @@ export default {
     },
     resetDayBox () {
       this.edit = false
+      this.$store.commit('setBorder', false)
       this.$store.dispatch('resetClicked')
       //this.$store.dispatch('resetCatClicked')
     },
@@ -148,9 +153,9 @@ export default {
     height: 15%;
     position: sticky;
     bottom: 10px;
-    box-shadow: 10px 5px 5px grey;
+    box-shadow: 5px 2.5px 2.5px grey;
     border: solid;
-    border-width: 1px;
+    border-width: 0.5px;
     margin: auto;
     font-size: 20px;
   }

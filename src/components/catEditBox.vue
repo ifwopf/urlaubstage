@@ -1,9 +1,5 @@
 <template>
   <div v-if="$store.state.catEditBox" class="centerBox">
-      <i class="material-icons catEdits md-48" @click.stop="deleteCat" id="deleteCat">delete</i>
-      <i class="material-icons catEdits md-48" @click.stop="showColorEdit" id="editCatColor">color_lens</i>
-      <i class="material-icons catEdits md-48" @click.stop="showNameEdit" id="editCatName">edit</i>
-      <i class="material-icons md-48" @click.stop="closeCatEditBox">clear</i>
     <span v-if="!editName">
           {{ $store.getters.getCatByID(this.$store.state.clickedCatCounter).name }}
         </span>
@@ -11,6 +7,11 @@
            v-autowidth="{maxWidth: '960px', minWidth: '20px', comfortZone: 20}"
            v-if="editName" class="input"/>
     <i class="material-icons" @click="changeName" v-if="editName">save</i>
+    <i class="material-icons catEdits md-48" @click.stop="deleteCat" id="deleteCat">delete</i>
+    <i class="material-icons catEdits md-48" @click.stop="showColorEdit" id="editCatColor">color_lens</i>
+    <i class="material-icons catEdits md-48" @click.stop="showNameEdit" id="editCatName">edit</i>
+    <i class="material-icons md-48" @click.stop="closeCatEditBox">clear</i>
+
 
     <select v-if="editColor" @click.stop=""
             :style="catColor" v-model="catColor">
@@ -26,6 +27,7 @@
   import axios from 'axios'
   import {mapActions} from 'vuex'
   import {mapGetters} from 'vuex'
+
   export default {
     name: 'catEditBox',
     data () {
@@ -49,7 +51,7 @@
       ]),
       catNameInit:
         {
-          get() {
+          get () {
             return this.$store.state.clickedCatName
           },
           set (val) {
@@ -96,6 +98,15 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    background-color: mistyrose;
+    background-color: #fff;
+    box-shadow: 5px 2.5px 2.5px grey;
+    border: solid;
+    border-width: 0.5px;
+    font-size: 24px;
+    padding: 5px;
+  }
+
+  .material-icons {
+    cursor: pointer;
   }
 </style>
