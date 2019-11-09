@@ -1,24 +1,54 @@
 <template>
   <div v-if="$store.state.catEditBox" class="centerBox">
-    <span v-if="!editName">
+    <span class="nameDisplay" v-if="!editName" :style="{backgroundColor: catColor}">
           {{ $store.getters.getCatByID(this.$store.state.clickedCatCounter).name }}
         </span>
-    <input v-model="catNameInit" @change="" @click.stop="" type="text"
-           v-autowidth="{maxWidth: '960px', minWidth: '20px', comfortZone: 20}"
-           v-if="editName" class="input"/>
+    <input class="nameDisplay input" v-model="catNameInit" @change="" @click.stop="" type="text"
+           :style="{backgroundColor: catColor}" v-if="editName"/>
+    <i class="material-icons" @click="reset" v-if="editName || editColor">arrow_back</i>
     <i class="material-icons" @click="changeName" v-if="editName">save</i>
-    <i class="material-icons catEdits md-48" @click.stop="deleteCat" id="deleteCat">delete</i>
-    <i class="material-icons catEdits md-48" @click.stop="showColorEdit" id="editCatColor">color_lens</i>
-    <i class="material-icons catEdits md-48" @click.stop="showNameEdit" id="editCatName">edit</i>
+    <i class="material-icons catEdits md-48" v-if="!editName && !editColor" @click.stop="deleteCat" id="deleteCat">delete</i>
+    <i class="material-icons catEdits md-48" v-if="!editName && !editColor" @click.stop="showColorEdit" id="editCatColor">color_lens</i>
+    <i class="material-icons catEdits md-48" v-if="!editName && !editColor" @click.stop="showNameEdit" id="editCatName">edit</i>
+    <i class="material-icons" v-if="editColor" @click="changeColor">save</i>
     <i class="material-icons md-48" @click.stop="closeCatEditBox">clear</i>
 
 
-    <select v-if="editColor" @click.stop=""
-            :style="catColor" v-model="catColor">
-      <option v-if="editColor">Select Color</option>
-      <option v-for="color in colors" :style="color" :value="color"></option>
-    </select>
-    <i class="material-icons" v-if="editColor" @click="changeColor">save</i>
+
+    <div v-if="editColor" class="gridContainer">
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 255, 255)' }"
+           @click="setColor" style="grid-column: 1; grid-row: 1; background-color: rgb(255, 255, 255)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 255, 153)' }"
+           @click="setColor" style="grid-column: 2; grid-row: 1; background-color: rgb(255, 255, 153)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 255, 0)' }"
+           @click="setColor" style="grid-column: 3; grid-row: 1; background-color: rgb(255, 255, 0)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 153, 0)' }"
+           @click="setColor" style="grid-column: 4; grid-row: 1; background-color: rgb(255, 153, 0)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(204, 255, 51)' }"
+           @click="setColor" style="grid-column: 1; grid-row: 2; background-color: rgb(204, 255, 51)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(102, 255, 51)' }"
+           @click="setColor" style="grid-column: 2; grid-row: 2; background-color: rgb(102, 255, 51)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(51, 204, 51)' }"
+           @click="setColor" style="grid-column: 3; grid-row: 2; background-color: rgb(51, 204, 51)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(0, 255, 255)' }"
+           @click="setColor" style="grid-column: 4; grid-row: 2; background-color: rgb(0, 255, 255)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(51, 204, 255)' }"
+           @click="setColor" style="grid-column: 1; grid-row: 3; background-color: rgb(51, 204, 255)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(102, 153, 255)' }"
+           @click="setColor" style="grid-column: 2; grid-row: 3; background-color: rgb(102, 153, 255)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(0, 102, 255)' }"
+           @click="setColor" style="grid-column: 3; grid-row: 3; background-color: rgb(0, 102, 255)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(153, 102, 0)' }"
+           @click="setColor" style="grid-column: 4; grid-row: 3; background-color: rgb(153, 102, 0)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 204, 255)' }"
+           @click="setColor" style="grid-column: 1; grid-row: 4; background-color: rgb(255, 204, 255)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 102, 204)' }"
+           @click="setColor" style="grid-column: 2; grid-row: 4; background-color: rgb(255, 102, 204)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 102, 102)' }"
+           @click="setColor" style="grid-column: 3; grid-row: 4; background-color: rgb(255, 102, 102)"></div>
+      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 0, 0)' }"
+           @click="setColor" style="grid-column: 4; grid-row: 4; background-color: rgb(255, 0, 0)"></div>
+    </div>
   </div>
 </template>
 <script>
@@ -33,7 +63,7 @@
     data () {
       return {
         catName: null,
-        catColor: null,
+        catColor: this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color'],
         editName: false,
         editColor: false,
         edit: false,
@@ -71,22 +101,32 @@
         this.editName = false
       },
       changeColor () {
-        var payload = {'color': this.catColor, 'id': this.$store.state.clickedCatCounter}
+        var payload = {'catColor': this.catColor, 'id': this.$store.state.clickedCatCounter}
         this.$store.dispatch('changeCatColor', payload)
         this.editColor = false
       },
       showColorEdit () {
         this.editColor = true
         this.editName = false
+        this.catColor = this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color']
       },
       showNameEdit () {
         this.editName = true
         this.editColor = false
       },
       closeCatEditBox () {
+        this.catColor = this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color']
         this.$store.commit('hideCatEdit')
         this.editName = false
         this.editColor = false
+      },
+      reset() {
+        this.editName = false
+        this.editColor = false
+        this.catColor = this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color']
+      },
+      setColor(e){
+        this.catColor = e.target.style['background-color']
       }
     }
   }
@@ -104,9 +144,32 @@
     border-width: 0.5px;
     font-size: 24px;
     padding: 5px;
+    text-align: center;
   }
 
   .material-icons {
     cursor: pointer;
   }
+
+  .nameDisplay {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+  }
+
+  .gridContainer {
+    display: grid;
+  }
+  .colorField {
+    margin: 3px;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    border: 1px solid white;
+  }
+  .bordered{
+    border: 1px solid black !important;
+  }
+
 </style>

@@ -30,3 +30,6 @@
           dispatch('changeCat', index)
         }
       },
+
+
+v-autowidth="{maxWidth: '960px', minWidth: '20px', comfortZone: 20}"

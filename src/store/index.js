@@ -10,7 +10,7 @@ import { isValidJwt, EventBus } from '@/utils'
 Vue.use(Vuex)
 Vue.use(VueInputAutowidth)
 
-const backendURL = "https://urlaubskalender.herokuapp.com" //http://127.0.0.1:5000
+const backendURL = "https://urlaubskalender.herokuapp.com"  //"http://127.0.0.1:5000"
 
 function compare (a, b) {
   if (a.day < b.day) {
@@ -141,7 +141,7 @@ export default new Vuex.Store(
         state.cats[state.clickedCat[0].id].name = payload.name
       },
       editCatColor (state, payload) {
-        state.cats[payload.id].style['background-color'] = payload.color['background-color']
+        state.cats[payload.id].style['background-color'] = payload.catColor
       },
       editCatName (state, payload) {
         state.cats[payload.id].name = payload.name
@@ -286,7 +286,7 @@ export default new Vuex.Store(
         commit('editCatColor', payload)
         axios.post(backendURL + '/urlaub/api/v1.0/editCatColor', {
           catId: payload.id,
-          catColor: payload.color['background-color']
+          catColor: payload.catColor
         },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
           .then(function (response) {
 

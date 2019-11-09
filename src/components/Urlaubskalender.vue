@@ -6,6 +6,7 @@
             v-bind:key="cat.id"
             :style="cat.style" @click="click_on_cat(cat.id)">
         {{ cat['name']}} : {{ $store.getters.getCatCount(cat.id)}}
+        <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="selectAll(cat.id)">select_all</i>
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
       <span v-if="!$store.state.border" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
@@ -115,6 +116,7 @@
         if (!event.ctrlKey && !event.metaKey && ! this.$store.state.locked) {
           // clearClicked
           this.$store.dispatch('resetClicked')
+          this.selectedCat = null
         }
         if (!this.containsObject(this.$store.state.element_map[event.target.id], this.$store.state.clicked)) {
           this.$store.dispatch('setClicked', event.target.id)
@@ -136,26 +138,30 @@
             this.$store.commit('setClickedCatName', this.$store.getters.getCats[catID].name)
             this.catName = this.$store.getters.getCats[this.selectedCat].name
             this.catColor = this.$store.getters.getCats[this.selectedCat].style
-            if (!event.ctrlKey && !this.$store.state.locked) {
-              // clearClicked
-              this.$store.dispatch('resetClicked')
-            }
-            for (var i = 0; i < 12; i++) {
-              for (var j = 0; j < this.$store.getters.getInfo[i].length; j++) {
-                var day = this.$store.getters.getInfo[i][j]
-                if (parseInt(day.cat_id) === parseInt(catID)) {
-                  if (this.containsObject(this.$store.state.element_map[day.id], this.$store.state.clicked)) {
 
-                  }
-                  else {
-                    this.$store.dispatch('setClicked', day.id)
-                  }
-                }
+          }
+        }
+
+      },
+      selectAll(catID) {
+        this.selectedCat = null
+        if (!event.ctrlKey && !this.$store.state.locked) {
+          // clearClicked
+          this.$store.dispatch('resetClicked')
+        }
+        for (var i = 0; i < 12; i++) {
+          for (var j = 0; j < this.$store.getters.getInfo[i].length; j++) {
+            var day = this.$store.getters.getInfo[i][j]
+            if (parseInt(day.cat_id) === parseInt(catID)) {
+              if (this.containsObject(this.$store.state.element_map[day.id], this.$store.state.clicked)) {
+
+              }
+              else {
+                this.$store.dispatch('setClicked', day.id)
               }
             }
           }
         }
-
       },
       containsObject (obj, list) {
         var i
