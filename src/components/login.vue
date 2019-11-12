@@ -49,11 +49,11 @@
     methods: {
       authenticate () {
         this.$store.dispatch('login', { email: this.email, password: this.password })
-          .then(() => this.$router.push('/'))
+          .then(() => this.$router.push('/year/2020'))
       },
       register () {
         this.$store.dispatch('register', { email: this.email, password: this.password })
-          .then(() => this.$router.push('/'))
+          .then(() => this.$router.push('/year/2020'))
       }
     },
     mounted () {

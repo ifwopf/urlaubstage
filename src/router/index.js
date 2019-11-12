@@ -16,17 +16,26 @@ export default new Router({
       beforeEnter (to, from, next) {
         console.log("hey")
         next()
-        /*if (!store.getters.isAuthenticated) {
+        if (!store.getters.isAuthenticated) {
           next('/login')
         } else {
-          next()
-        }*/
+          next('year/2020')
+        }
       }
     },
     { path: '/year/:year',
       name: 'Urlaubskalender2',
       component: Urlaubskalender,
-      props: true
+      props: true,
+      beforeEnter (to, from, next) {
+        console.log("hey")
+        next()
+        if (!store.getters.isAuthenticated) {
+          next('/login')
+        } else {
+          next()
+        }
+      }
     },
     {
       path: '/login',

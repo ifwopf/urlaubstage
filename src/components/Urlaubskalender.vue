@@ -1,6 +1,6 @@
 <template>
-  <div v-if="$store.state.dataReady">
-    <h1 class="jahrtitel">{{ year }}</h1>
+  <div style="text-align: center" v-if="$store.state.dataReady">
+    <h1 class="jahrtitel"><span id="logout" @click="logout">log out</span> {{ year }}</h1>
     <div class="counters">
       <span class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
             v-bind:key="cat.id"
@@ -10,9 +10,6 @@
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
       <span v-if="!$store.state.border" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
-      <span v-if="$store.state.border" @click="closeAddCat"> <i id="cancel" class="material-icons">clear</i></span>
-      <input class="inputName" v-if="$store.state.border" id="new_category" v-model="catName" placeholder="cat name">
-      <i id="send" class="material-icons" v-if="$store.state.border" @click="addNewCat">send</i>
     </div>
     <br/>
 
@@ -130,9 +127,7 @@
           this.$store.dispatch('changeCatDropDown', catID)
         }
         else{
-          if(!this.editColor && !this.editName || catID !== this.selectedCat){
-            this.editColor = false
-            this.editName = false
+          if(catID !== this.selectedCat){
             this.selectedCat = catID //to be deleted
             this.$store.commit('setClickedCatCounter', parseInt(catID))
             this.$store.commit('setClickedCatName', this.$store.getters.getCats[catID].name)
@@ -181,6 +176,8 @@
         this.$store.commit('showCatEdit')
       },
       openAddCat () {
+        this.$store.commit('setClickedCatName', '')
+        this.$store.commit('setCatColor', 'rgb(255, 255, 255)')
         this.$store.dispatch('editCatDisplay')
       },
       closeAddCat () {
@@ -198,6 +195,9 @@
           this.catName = ''
         }
       },
+      logout() {
+        this.$store.dispatch('logout')
+      }
     },
     mounted () {
       Selection.create({
@@ -376,12 +376,22 @@
     min-height: 20px;
   }
 
-  .count {
+  .count{
     margin: 5px;
     display: block;
     float: left;
     padding: 3px;
     cursor: pointer;
+  }
+
+  #logout {
+    margin: 5px;
+    display: block;
+    float: left;
+    padding: 3px;
+    cursor: pointer;
+    font-size: 15px;
+    border: 1px solid #000;
   }
 
   .wochentag, .monatstitel, .jahrtitel {

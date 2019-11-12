@@ -6,10 +6,12 @@ import VueInputAutowidth from 'vue-input-autowidth'
 // imports of AJAX functions will go here
 import { authenticate, register } from '@/api'
 import { isValidJwt, EventBus } from '@/utils'
+import router from '@/router'
 
 Vue.use(Vuex)
 Vue.use(VueInputAutowidth)
 
+//const backendURL = "http://127.0.0.1:5000"
 const backendURL = "https://urlaubskalender.herokuapp.com"  //"http://127.0.0.1:5000"
 
 function compare (a, b) {
@@ -26,7 +28,7 @@ export default new Vuex.Store(
   {
     state: {
       user: {},
-      jwt: '',
+      jwt: {'token': localStorage.getItem('token')},
       info: null,
       cats: null,
       cat_count: {},
@@ -36,8 +38,9 @@ export default new Vuex.Store(
       dayBox: false,
       catEditBox: false,
       clicked: [],
-      clickedCatCounter: 1,
-      clickedCatName: "sfasd",
+      catColor: 'rgb(255, 255, 255)',
+      clickedCatCounter: null,
+      clickedCatName: '',
       border: false,
       locked: false,
       weekday: {
@@ -123,6 +126,10 @@ export default new Vuex.Store(
       },
       setClickedCatCounter (state, catID){
         state.clickedCatCounter = catID
+        state.catColor = state.cats[catID].style['background-color']
+      },
+      setCatColor (state, color){
+        state.catColor = color
       },
       setClickedCatName (state, catName) {
         state.clickedCatName = catName
@@ -179,6 +186,7 @@ export default new Vuex.Store(
       },
       hideCatEdit (state) {
         state.catEditBox = false
+        state.border = false
       },
       setBorder (state, border) {
         state.border = border
@@ -209,6 +217,10 @@ export default new Vuex.Store(
             EventBus.$emit('failedAuthentication', error)
           })
       },
+      logout (context) {
+        context.commit('setJwtToken', { jwt: {token: null} })
+        router.go('/')
+      },
       register (context, userData) {
         context.commit('setUserData', { userData })
         return register(userData)
@@ -219,6 +231,10 @@ export default new Vuex.Store(
           })
       },
       ready ({ commit, state, jwt }, year) {
+        console.log(year)
+        if(year === undefined){
+          year = "2020"
+        }
         var yearstring = backendURL + '/urlaub/api/v1.0/days/' + year
         axios.get(yearstring, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
           //.then(response => response.json())
@@ -315,14 +331,15 @@ export default new Vuex.Store(
           commit('removeClicked', payload)
         }
       },
-      addCat ({commit, state}, catName) {
+      addCat ({commit, state}, payload) {
         axios.post(backendURL + '/urlaub/api/v1.0/add_cat', {
-          cat_name: catName,
-          cat_color: '#0959E2',
+          cat_name: payload.catName,
+          cat_color: payload.catColor,
           clicked: state.clicked
         },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
           .then(function (response) {
             commit('addCat', response.data)
+            commit('setBorder', false)
           })
           .catch(function (error) {
             console.log(error)

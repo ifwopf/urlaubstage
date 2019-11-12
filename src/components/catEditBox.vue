@@ -1,21 +1,22 @@
 <template>
-  <div v-if="$store.state.catEditBox" class="centerBox">
-    <span class="nameDisplay" v-if="!editName" :style="{backgroundColor: catColor}">
+  <div v-if="$store.state.catEditBox || $store.state.border" class="centerBox">
+    <span class="nameDisplay" v-if="!editName & !$store.state.border" :style="{backgroundColor: catColor}">
           {{ $store.getters.getCatByID(this.$store.state.clickedCatCounter).name }}
         </span>
     <input class="nameDisplay input" v-model="catNameInit" @change="" @click.stop="" type="text"
-           :style="{backgroundColor: catColor}" v-if="editName"/>
+           :style="{backgroundColor: catColor}" v-if="editName || $store.state.border"/>
     <i class="material-icons" @click="reset" v-if="editName || editColor">arrow_back</i>
     <i class="material-icons" @click="changeName" v-if="editName">save</i>
-    <i class="material-icons catEdits md-48" v-if="!editName && !editColor" @click.stop="deleteCat" id="deleteCat">delete</i>
-    <i class="material-icons catEdits md-48" v-if="!editName && !editColor" @click.stop="showColorEdit" id="editCatColor">color_lens</i>
-    <i class="material-icons catEdits md-48" v-if="!editName && !editColor" @click.stop="showNameEdit" id="editCatName">edit</i>
+    <i class="material-icons catEdits md-48" v-if="!editName && !editColor && !$store.state.border" @click.stop="deleteCat" id="deleteCat">delete</i>
+    <i class="material-icons catEdits md-48" v-if="!editName && !editColor && !$store.state.border" @click.stop="showColorEdit" id="editCatColor">color_lens</i>
+    <i class="material-icons catEdits md-48" v-if="!editName && !editColor && !$store.state.border" @click.stop="showNameEdit" id="editCatName">edit</i>
     <i class="material-icons" v-if="editColor" @click="changeColor">save</i>
+    <i class="material-icons" v-if="$store.state.border" @click="addNewCat">save</i>
     <i class="material-icons md-48" @click.stop="closeCatEditBox">clear</i>
 
 
 
-    <div v-if="editColor" class="gridContainer">
+    <div v-if="editColor || $store.state.border" class="gridContainer">
       <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 255, 255)' }"
            @click="setColor" style="grid-column: 1; grid-row: 1; background-color: rgb(255, 255, 255)"></div>
       <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 255, 153)' }"
@@ -63,13 +64,9 @@
     data () {
       return {
         catName: null,
-        catColor: this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color'],
-        editName: false,
         editColor: false,
+        editName: false,
         edit: false,
-        colors: [{'background-color': '#b4b9cc'}, {'background-color': '#7387b0'}, {'background-color': '#ffca62'},
-          {'background-color': '#ee5f82'}, {'background-color': '#f986a2'}, {'background-color': '#E0B3E6'},
-          {'background-color': 'aquamarine'}]
       }
     },
     computed: {
@@ -79,13 +76,22 @@
         'getCats',
         'getCatCount'
       ]),
+      catColor:
+        {
+          get() {
+              return this.$store.state.catColor;
+          },
+          set(val){
+            this.$store.state.commit('setCatColor', val)
+          },
+      },
       catNameInit:
         {
           get () {
             return this.$store.state.clickedCatName
           },
           set (val) {
-            this.catName = val
+            this.$store.commit('setClickedCatName', val)
           }
         }
     },
@@ -108,14 +114,14 @@
       showColorEdit () {
         this.editColor = true
         this.editName = false
-        this.catColor = this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color']
+        //this.catColor.set(this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color'])
       },
       showNameEdit () {
         this.editName = true
         this.editColor = false
       },
       closeCatEditBox () {
-        this.catColor = this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color']
+        //this.catColor = this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color']
         this.$store.commit('hideCatEdit')
         this.editName = false
         this.editColor = false
@@ -123,11 +129,24 @@
       reset() {
         this.editName = false
         this.editColor = false
-        this.catColor = this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color']
+        this.$store.commit('setCatColor', this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color'])
       },
       setColor(e){
-        this.catColor = e.target.style['background-color']
-      }
+        this.$store.commit('setCatColor', e.target.style['background-color'])
+      },
+      addNewCat () {
+        var doppelt = false
+        for (var i = 0; i < this.$store.state.cats.length; i++) {
+          if (this.catName === this.$store.state.cats[i].name) {
+            doppelt = true
+          }
+        }
+        if (!doppelt) {
+          this.$store.dispatch('addCat', {catName: this.catNameInit, catColor: this.catColor})
+          this.catName = ''
+
+        }
+      },
     }
   }
 </script>
