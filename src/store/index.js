@@ -10,7 +10,6 @@ import router from '@/router'
 
 Vue.use(Vuex)
 Vue.use(VueInputAutowidth)
-
 //const backendURL = "http://127.0.0.1:5000"
 const backendURL = "https://urlaubskalender.herokuapp.com"  //"http://127.0.0.1:5000"
 
