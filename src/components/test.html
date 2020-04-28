@@ -1,0 +1,59 @@
+<div v-for="(parent, index) in $store.getters.getInfo" :key="index">
+    <div @click="setClicked" :id="child.id" v-for="child in parent"
+         :style="[child.clicked ? {'border-color': 'black'} : {'border-color': 'white'}]">
+    </div>
+</div>
+
+
+<div v-for="i in 12">
+  <template v-for="(user, index) in $store.getters.getSharedUsers">
+    <div :id="child.id" v-for="child in $store.getters.getSharedInfo[user[0]][i-1]" :userID="child.userID" @click="setClicked"
+         :style="[child.clicked ? {'border-color': 'black'} : {'border-color': 'white'}]">
+    </div>
+  </template>
+</div>
+
+
+<div class="grid" v-for="i in 12" :key="i">
+
+  <div :style="{'grid-row': 1, 'grid-column': 1}">
+    {{$store.state.sharedUserDays[$store.getters.getSharedUsers[0][0]][i-1][0].month}}.Monat
+  </div>
+  <template v-for="(months, user, index) in $store.getters.getSharedInfo" >
+    <template v-for="(month,j) in months" v-if="i-1==j">
+      <div  class="tagrahmen" v-for="day in month" :id="day.id+''+day.userID"
+            :dayID="day.id" :userID="day.userID" :key="day.id+'u'+day.userID"
+            @click="mouse_on_day" :style="[$store.getters.getElementMapByIDStyle(day.userID, day.id),
+               $store.getters.getCatByID(day.cat_id).style,
+               day.clicked ? {'border-color': 'black'} : {'border-color': 'white'},
+               {'grid-row': day.day+1, 'grid-column': index+2}]">
+        {{day.cat_id}}
+      </div>
+      <div v-if="index==0" v-for="day in months[i-1]" :id="day.id" v-bind:style="{'grid-row': day.day+1, 'grid-column': 0}">{{day.day}}</div>
+    </template>
+  </template>
+</div>
+
+
+<input class="user input" v-model="currentCatName"  type="text"/> <button @click="addCat">add Cat</button>
+<color-select/>
+<div class="cats">
+  <h3>Cats</h3>
+  <span v-for="cat in cats">{{ cat.name }}</span>
+</div>
+
+
+<template v-for="(month, user, j) in monthcals">
+  <div v-if="j==0":style="{'grid-row': 1, 'grid-column': 1}">
+    {{month[0].month}}.Monat
+  </div>
+  <div  class="tagrahmen" v-for="day in month" :id="'s'+day.id+'u'+day.userID"
+        :dayID="day.id" :userID="day.userID" :key="day.id+'u'+day.userID"
+        @click="mouse_on_day" :style="[$store.getters.getElementMapByIDStyle(day.userID, day.id),
+             $store.getters.getCatByID(day.cat_id).style,
+             day.clicked ? {'border-color': 'black'} : {'border-color': 'white'},
+             {'grid-row': day.day+1, 'grid-column': j+2}]">
+    {{day.cat_id}}
+  </div>
+  <div v-if="j==0" v-for="day in month" :id="day.id" v-bind:style="{'grid-row': day.day+1, 'grid-column': 0}">{{day.day}}</div>
+</template>

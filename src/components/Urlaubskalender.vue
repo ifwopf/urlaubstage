@@ -1,6 +1,11 @@
 <template>
   <div style="text-align: center" v-if="$store.state.dataReady">
-    <h1 class="jahrtitel"><span id="logout" @click="logout">log out</span> {{ year }}</h1>
+    <h1 class="jahrtitel">
+      <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
+        home
+      </i>
+      {{calName}} {{ year }}
+    </h1>
     <div class="counters">
       <span class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
             v-bind:key="cat.id"
@@ -23,15 +28,16 @@
         <div class="wochentag" style="grid-row: 1; grid-column: 5">Fr</div>
         <div class="wochentag" style="grid-row: 1; grid-column: 6">Sa</div>
         <div class="wochentag" style="grid-row: 1; grid-column: 7">So</div>
-        <div class="tagrahmen" @click="mouse_on_day" v-bind:id="day.id" v-for="day in month"
-             v-bind:style="[$store.getters.getElementMapByIDStyle(day.id), $store.getters.getCatByID(day.cat_id).style,
-        day.clicked ? {'border-color': 'black'} : {'border-color': 'white'}]" v-bind:key="day.id">
+        <div class="tagrahmen" @click="mouse_on_day" :id="day.id" v-for="day in month"
+             :style="[$store.getters.getElementMapByIDStyle($store.state.currentUser,day.id),
+             $store.getters.getCatByID(day.cat_id).style,
+             day.clicked ? {'border-color': 'black'} : {'border-color': '#f1f1f1'}]">
           <div class="tag" v-if="day['weekday']=== 'Samstag' && day.cat_id === 1" :month_id="day.month-1"
                v-bind:key="day.id" ref="tag"
                v-bind:id="day['id']"
                style="color: darkgrey"
           >
-            {{ day['day'] }}
+            {{ day['day'] }}{{ day['name'] }}
           </div>
           <div class="tag" v-else-if="day['weekday']=== 'Sonntag' && day.cat_id === 1" :month_id="day.month-1"
                v-bind:key="day.id" ref="tag"
@@ -56,6 +62,7 @@
 
 <script>
   import {mapGetters} from 'vuex'
+  import { getCalName } from '@/api'
   import * as Selection from '@simonwep/selection-js'
   import dayBox from '@/components/dayBox'
   import catEditBox from '@/components/catEditBox'
@@ -64,15 +71,18 @@
   export default {
     name: 'Urlaubskalender',
     components: {dayBox, catEditBox},
-    props: ['year'],
+    props: ['year', 'calID'],
     created () {
       // fetch the data when the view is created and the data is
       // already being observed
       //$(".second_div").css({'width': ($(".first_div").width() + 'px')});
-      this.$store.dispatch('ready', this.year)
+      this.$store.commit('setCurrentCal', this.calID)
+      this.$store.dispatch('ready', [this.calID, this.year])
+      this.getCal(this.calID, this.$store.state.jwt.token)
     },
     data () {
       return {
+        calName: '',
         cat_box: false,
         edit_box: false,
         catName: '',
@@ -100,7 +110,6 @@
     computed: {
       ...mapGetters([
         'getCatByID',
-        'getInfo',
         'getCats',
         'getCatCount',
       ])
@@ -109,17 +118,22 @@
       ...mapGetters([
         'getElementMapByIDStyle'
       ]),
+      redirect (link) {
+        window.location.href = link
+      },
       mouse_on_day (event) {
         if (!event.ctrlKey && !event.metaKey && ! this.$store.state.locked) {
           // clearClicked
           this.$store.dispatch('resetClicked')
           this.selectedCat = null
         }
-        if (!this.containsObject(this.$store.state.element_map[event.target.id], this.$store.state.clicked)) {
-          this.$store.dispatch('setClicked', event.target.id)
+        if (!this.containsObject(this.$store.state.element_map[this.$store.state.currentUser][event.target.id], this.$store.state.clicked)) {
+          var payload = {"dayID": event.target.id, "uID": this.$store.state.currentUser}
+          this.$store.dispatch('setClicked', payload)
         }
         else {
-          this.$store.dispatch('removeClicked', event.target.id)
+          var payload = {"dayID": event.target.id, "uID": this.$store.state.currentUser}
+          this.$store.dispatch('removeClicked', payload)
         }
       },
       click_on_cat (catID) {
@@ -136,7 +150,6 @@
 
           }
         }
-
       },
       selectAll(catID) {
         this.selectedCat = null
@@ -148,7 +161,7 @@
           for (var j = 0; j < this.$store.getters.getInfo[i].length; j++) {
             var day = this.$store.getters.getInfo[i][j]
             if (parseInt(day.cat_id) === parseInt(catID)) {
-              if (this.containsObject(this.$store.state.element_map[day.id], this.$store.state.clicked)) {
+              if (this.containsObject(this.$store.state.element_map[this.$store.state.currentUser][day.id], this.$store.state.clicked)) {
 
               }
               else {
@@ -195,9 +208,18 @@
           this.catName = ''
         }
       },
-      logout() {
-        this.$store.dispatch('logout')
+      getCal (calID, token) {
+        return getCalName(calID, token)
+          .then(response => {
+            this.calName = response.data;
+            console.log(response.data)
+          })
+          .catch(error => {
+            console.log('Error Authenticating: ', error)
+            EventBus.$emit('failedAuthentication', error)
+          })
       }
+
     },
     mounted () {
       Selection.create({
@@ -256,13 +278,14 @@
 
       }).on('move', evt => {
         for (const el of evt.selected) {
-          if (this.containsObject(this.$store.state.element_map[el.id], this.$store.state.clicked)) {
+          if (this.containsObject(this.$store.state.element_map[this.$store.state.currentUser][el.id], this.$store.state.clicked)) {
             //this.$store.dispatch('removeClicked', el.id)
           }
           else {
             //console.log(el)
             //console.log(el.id)
-            this.$store.dispatch('setClicked', el.id)
+            var payload = {"dayID": el.id, "uID": this.$store.state.currentUser}
+            this.$store.dispatch('setClicked', payload)
           }
           el.classList.remove('selected')
           evt.inst.removeFromSelection(el)
@@ -327,31 +350,10 @@
     cursor: pointer;
     margin: 1px;
     border-width: 1px;
+
   }
 
-  .cat_box {
-    background-color: beige;
-    display: inline-block;
-    text-align: center;
-    height: 30%;
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    opacity: 1;
-  }
 
-  .edit_box {
-    background-color: beige;
-    display: inline-block;
-    text-align: center;
-    height: 30%;
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    opacity: 1;
-  }
 
   .edit_box_shadow {
     width: 100%;
@@ -384,20 +386,34 @@
     cursor: pointer;
   }
 
-  #logout {
+  #home {
     margin: 5px;
     display: block;
     float: left;
-    padding: 3px;
     cursor: pointer;
-    font-size: 15px;
     border: 1px solid #000;
   }
 
   .wochentag, .monatstitel, .jahrtitel {
     color: #000;
-    background-color: ghostwhite;
+    background-color: #f1f1f1;
     text-align: center;
+  }
+
+  .jahrtitel {
+    background-color: #f1f1f1;
+    display: inline-block;
+    padding: 10px;
+    margin: 10px;
+  }
+
+  .monatstitel {
+    background-color: #f1f1f1;
+    padding: 3px 10px 3px 10px
+  }
+
+  .wochentag {
+    background-color: #f1f1f1;
   }
 
   .counters {
@@ -408,7 +424,7 @@
     box-shadow: 5px 2.5px 2.5px grey;
     border: solid;
     border-width: 1px;
-    font-size: 24px;
+    font-size: inherit;
   }
 
   .catEdits {

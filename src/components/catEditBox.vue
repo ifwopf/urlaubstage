@@ -16,40 +16,8 @@
 
 
 
-    <div v-if="editColor || $store.state.border" class="gridContainer">
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 255, 255)' }"
-           @click="setColor" style="grid-column: 1; grid-row: 1; background-color: rgb(255, 255, 255)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 255, 153)' }"
-           @click="setColor" style="grid-column: 2; grid-row: 1; background-color: rgb(255, 255, 153)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 255, 0)' }"
-           @click="setColor" style="grid-column: 3; grid-row: 1; background-color: rgb(255, 255, 0)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 153, 0)' }"
-           @click="setColor" style="grid-column: 4; grid-row: 1; background-color: rgb(255, 153, 0)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(204, 255, 51)' }"
-           @click="setColor" style="grid-column: 1; grid-row: 2; background-color: rgb(204, 255, 51)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(102, 255, 51)' }"
-           @click="setColor" style="grid-column: 2; grid-row: 2; background-color: rgb(102, 255, 51)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(51, 204, 51)' }"
-           @click="setColor" style="grid-column: 3; grid-row: 2; background-color: rgb(51, 204, 51)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(0, 255, 255)' }"
-           @click="setColor" style="grid-column: 4; grid-row: 2; background-color: rgb(0, 255, 255)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(51, 204, 255)' }"
-           @click="setColor" style="grid-column: 1; grid-row: 3; background-color: rgb(51, 204, 255)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(102, 153, 255)' }"
-           @click="setColor" style="grid-column: 2; grid-row: 3; background-color: rgb(102, 153, 255)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(0, 102, 255)' }"
-           @click="setColor" style="grid-column: 3; grid-row: 3; background-color: rgb(0, 102, 255)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(153, 102, 0)' }"
-           @click="setColor" style="grid-column: 4; grid-row: 3; background-color: rgb(153, 102, 0)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 204, 255)' }"
-           @click="setColor" style="grid-column: 1; grid-row: 4; background-color: rgb(255, 204, 255)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 102, 204)' }"
-           @click="setColor" style="grid-column: 2; grid-row: 4; background-color: rgb(255, 102, 204)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 102, 102)' }"
-           @click="setColor" style="grid-column: 3; grid-row: 4; background-color: rgb(255, 102, 102)"></div>
-      <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 0, 0)' }"
-           @click="setColor" style="grid-column: 4; grid-row: 4; background-color: rgb(255, 0, 0)"></div>
-    </div>
+
+    <color-select v-if="editColor || $store.state.border"/>
   </div>
 </template>
 <script>
@@ -58,9 +26,11 @@
   import axios from 'axios'
   import {mapActions} from 'vuex'
   import {mapGetters} from 'vuex'
+  import ColorSelect from './colorSelect'
 
   export default {
     name: 'catEditBox',
+    components: {ColorSelect},
     data () {
       return {
         catName: null,
@@ -101,8 +71,8 @@
         this.$store.dispatch('deleteCat', this.$store.state.clickedCatCounter)
       },
       changeName () {
-        console.log(this.$store.state.clickedCatCounter)
-        var payload = {'name': this.catName, 'id': this.$store.state.clickedCatCounter}
+        console.log(this.catNameInit)
+        var payload = {'name': this.catNameInit, 'id': this.$store.state.clickedCatCounter}
         this.$store.dispatch('changeCatName', payload)
         this.editName = false
       },

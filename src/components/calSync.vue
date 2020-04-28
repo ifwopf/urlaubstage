@@ -1,0 +1,264 @@
+<template>
+  <div>
+    <div class="header">
+      <h1 class="jahrtitel">
+        <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
+          home
+        </i>
+        Kalender synchronisieren
+      </h1>
+      <div class="infobox">
+        {{ infotext }}
+      </div>
+    </div>
+    <div class="personal" @drop="dropback" @dragover="allowDrop">
+      <div class="titlebox">
+        <h2 class="title">Deine Kalender</h2>
+      </div>
+      <div v-if="!cal.shared" v-for="cal in $store.state.cals">
+        <div  class="calendar" :id="cal.id" v-if="cal.id == clickedPersonalCal || clickedPersonalCal == null"
+              @click="getCats(cal.id, false)">
+          {{cal.name}}
+        </div>
+      </div>
+      <div class="personalCats" >
+        <div class="personalCat" v-for="cat in personalCats" @click="setPersonalClickedCat(cat.id)"
+             :draggable="true" @dragstart="drag" :style="cat.style" :id="cat.id">
+          {{cat.name}}
+        </div>
+      </div>
+    </div>
+    <div class="shared">
+      <div class="titlebox">
+        <h2 class="title">Team-Kalender</h2>
+      </div>
+      <div v-if="cal.shared" v-for="cal in $store.state.cals">
+        <div class="calendar" v-if="cal.id == clickedSharedCal || clickedSharedCal == null"
+              :id="cal.id" @click="getCats(cal.id, true)">
+          {{cal.name}}
+        </div>
+      </div>
+      <div class="sharedCats">
+        <div v-for="cat in $store.getters.getSharedCats" @click="setSharedClickedCat(cat.id)" :id="cat.id"
+             @drop="drop" @dragover="allowDrop" :style="cat.style" class="sharedCat">
+          {{cat.name}}
+          <div v-for="personalCat in sharedCats[cat.id]" class="personalCat" :style="personalCat.style"
+               :draggable="true" @dragstart="dragback" :id="personalCat.id">
+            {{personalCat.name}}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="syncField">
+      <div class="button" @click="saveSyncPair">SAVE</div>
+    </div>
+
+
+  </div>
+</template>
+
+<script>
+
+  export default {
+    name: 'calSync',
+    data () {
+      return {
+        newCalender : "Urlaubskalender",
+        personalCats: {},
+        sharedCats: {},
+        sharedClickedCat: {"name":""},
+        personalClickedCat: {"name":""},
+        clickedPersonalCal: null,
+        clickedSharedCal: null,
+      }
+    },
+    created () {
+      // fetch the data when the view is created and the data is
+      // already being observed
+      //$(".second_div").css({'width': ($(".first_div").width() + 'px')});
+      this.$store.dispatch('calReady')
+    },
+    computed: {
+      // a computed getter
+      infotext: function () {
+        // `this` points to the vm instance
+        var text = ""
+        if (this.clickedSharedCal == null && this.clickedPersonalCal == null) {
+          text = "Wähle einen deiner Kalender und einen Teamkalender aus"
+        }
+        else if (this.clickedSharedCal == null) {
+          text = "Wähle noch einen Teamkalender aus"
+        }
+        else if (this.clickedPersonalCal == null) {
+          text = "Wähle noch einen deiner Kalender aus"
+        }
+        else {
+          text = "Ziehe die Kategorien deines persönlichen Kalenders in die Felder der Kategorien der Team-Kalender oder wieder zurück"
+        }
+        return text
+      }
+    },
+    methods: {
+      getCats (calID, shared) {
+        if(shared){
+          this.clickedSharedCal = calID
+        }
+        else {
+          this.clickedPersonalCal = calID
+        }
+        if (this.clickedPersonalCal != null && this.clickedSharedCal != null){
+          var payload = {"uCalID": this.clickedPersonalCal, "sCalID": this.clickedSharedCal}
+          this.$store.dispatch('getCats', payload).then(() => {
+            this.personalCats = JSON.parse(JSON.stringify(this.$store.getters.getPersonalCats));
+            for (var key of Object.keys(this.$store.getters.getSharedCats)) {
+              this.$set(this.sharedCats, key, [])
+              console.log(this.$store.getters.getSharedCats[key]['syncList'])
+              for ( var index in this.$store.getters.getSharedCats[key]['syncList']) {
+                console.log(index)
+                var data = this.$store.getters.getPersonalCats[this.$store.getters.getSharedCats[key]['syncList'][index]]
+                console.log(data)
+                this.sharedCats[key].push(data)
+                this.$delete(this.personalCats, this.$store.getters.getSharedCats[key]['syncList'][index])
+              }
+            }
+
+          });
+        }
+      },
+      saveSyncPair() {
+        console.log(this.personalCats)
+        var listnosync = []
+        for (var nosync in this.personalCats) {
+          listnosync.push(nosync)
+        }
+        var payload = {"syncDict": this.sharedCats, "nosync": listnosync}
+        this.$store.dispatch('saveSyncPair', payload)
+      },
+      allowDrop(event) {
+        event.preventDefault();
+      },
+      drag(event) {
+        event.dataTransfer.setData("personalCat", event.target.id);
+      },
+      dragback(event) {
+        event.dataTransfer.setData("personalCat", event.target.id);
+        event.dataTransfer.setData("parentID", event.target.closest('.sharedCat').id)
+      },
+      drop(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var data = event.dataTransfer.getData("personalCat");
+        this.sharedCats[event.target.closest('.sharedCat').id].push(this.$store.getters.getPersonalCats[data])
+        this.$delete(this.personalCats, data)
+        if(event.dataTransfer.getData("parentID")){
+          var sharedCatID = event.dataTransfer.getData("parentID")
+          this.sharedCats[sharedCatID].splice(this.sharedCats[sharedCatID].indexOf(this.$store.getters.getPersonalCats[data]), 1)
+        }
+      },
+      dropback(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var data = event.dataTransfer.getData("personalCat");
+        var sharedCatID = event.dataTransfer.getData("parentID");
+        console.log(data)
+        console.log(this.$store.getters.getPersonalCats)
+        this.sharedCats[sharedCatID].splice(this.sharedCats[sharedCatID].indexOf(this.$store.getters.getPersonalCats[data]), 1)
+        this.$set(this.personalCats, data, this.$store.getters.getPersonalCats[data])
+
+      },
+      redirect (link) {
+        window.location.href = link
+      },
+    }
+  }
+</script>
+
+<style scoped>
+  .shared, .personal {
+    border: 1px solid #000;
+    padding: 5px;
+    min-width: 300px;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    display: inline-block;
+    margin: 10px;
+  }
+  .calendar {
+    background-color: #fff;
+    box-shadow: 5px 2.5px 2.5px grey;
+    border: solid;
+    border-width: 1px;
+    font-size: 20px;
+    padding: 10px;
+    text-align: center;
+    margin: 10px;
+    cursor: pointer;
+  }
+  .personal {
+    float: left;
+  }
+  .shared {
+    float: left;
+  }
+  .sharedCats,.personalCats {
+    margin: 5px;
+  }
+  .personalCat {
+    box-shadow: 5px 2.5px 2.5px grey;
+    margin: 5px;
+    cursor: grab;
+    padding: 5px;
+    border: 1px solid #000;
+  }
+  .sharedCat {
+    border: 1px solid #000;
+    margin: 20px 10px;
+    padding: 10px;
+  }
+  .button {
+    border: solid;
+    border-width: 1px;
+    padding: 10px 24px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 10px auto;
+    cursor: pointer;
+    display: inline-block;
+  }
+  .jahrtitel {
+    background-color: #f1f1f1;
+    display: inline-block;
+    padding: 10px;
+    margin: 10px;
+    color: #000;
+    text-align: center;
+  }
+  #home {
+    margin: 5px;
+    display: block;
+    float: left;
+    cursor: pointer;
+    border: 1px solid #000;
+  }
+  .header{
+    text-align: center;
+  }
+  h2 {
+    display:inline-block;
+    background-color: #f1f1f1;
+    padding: 5px;
+  }
+  .infobox {
+    border: 1px solid #000;
+    padding: 5px;
+    min-width: 300px;
+    width: 90%;
+    text-align: center;
+    margin: 10px;
+  }
+</style>
+<style>
+  html,body{margin:0;padding:0}
+</style>
