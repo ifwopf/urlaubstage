@@ -32,7 +32,8 @@
   import ColorSelect from './colorSelect'
   import axios from 'axios'
   import infobox from '@/components/infobox'
-  const backendURL = "http://127.0.0.1:5000"
+  import backendURL from '@/store'
+  //const backendURL = "http://127.0.0.1:5000"
   export default {
     name: 'createSharedCal',
     components: {ColorSelect, infobox},
