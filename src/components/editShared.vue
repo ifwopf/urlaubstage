@@ -5,7 +5,7 @@
         <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
           home
         </i>
-        Kalender synchronisieren
+        Kalender bearbeiten
       </h1>
     </div>
     <div class="box">
@@ -16,13 +16,14 @@
       <h3>Users</h3>
       <input class="user input" v-model="currentUser"  type="text"/> <div  class="miniButton" @click="addUser">add User</div>
       <div class="userbox">
-        <div class="user" v-for="(admin, user) in users" v-bind:key="user">{{ user }}
-          <button :key="admin" @click="toggleAdmin(user)" :class="[admin ? 'admin' : 'nonAdmin']">Admin</button>
+        <div class="user" v-for="(user, id) in users">{{ user.email }}
+          <button  @click="toggleAdmin(id)" :class="[user.admin ? 'admin' : 'nonAdmin']">Admin</button>
+          <button  @click="removeFromUsers(id)">delete</button>
         </div>
       </div>
     </div>
 
-    <div class="button" @click="addSharedCal">Erstelle Kalender</div>
+    <div class="button" @click="saveChanges">Save Changes</div>
     <infobox/>
   </div>
 
@@ -33,9 +34,10 @@
   import axios from 'axios'
   import infobox from '@/components/infobox'
   import {backendURL} from '@/store'
-  //const backendURL = "http://127.0.0.1:5000"
+  import { getSharedInfo, saveSharedChanges } from '@/api'
   export default {
-    name: 'createSharedCal',
+    name: 'editShared',
+    props: ['calID'],
     components: {ColorSelect, infobox},
 
     data () {
@@ -50,6 +52,7 @@
       // fetch the data when the view is created and the data is
       // already being observed
       //$(".second_div").css({'width': ($(".first_div").width() + 'px')});
+      this.getSharedInfos(this.calID, this.$store.state.jwt.token)
       this.getCurrentUser()
     },
     methods: {
@@ -58,18 +61,19 @@
       },
       addUser () {
         if (this.currentUser)
-        axios.get(backendURL + '/urlaub/api/v1.0/checkMail/' +  this.currentUser,
-          { headers: { Authorization: `Bearer: ${this.$store.state.jwt.token}` } })
-          .then(response => {
+          axios.get(backendURL + '/urlaub/api/v1.0/checkMail/' +  this.currentUser,
+            { headers: { Authorization: `Bearer: ${this.$store.state.jwt.token}` } })
+            .then(response => {
 
-            if (response.data){
-              Vue.set(this.users, this.currentUser, false)
-              this.currentUser = ""
-            }
-            else{
-              this.$store.dispatch("setInfoText", "No such Mail")
-            }
-          })
+              if (response.data){
+                console.log(response.data)
+                Vue.set(this.users, this.currentUser, {'admin': false, 'email': this.currentUser})
+                this.currentUser = ""
+              }
+              else{
+                this.$store.dispatch("setInfoText", "No such Mail")
+              }
+            })
       },
       addSharedCal () {
         var stuff = {"name": this.sharedCalName, "addedUsers": this.users}
@@ -78,7 +82,7 @@
       toggleAdmin (user) {
         //event.target.classList.toggle("nonAdmin")
         //event.target.classList.toggle("admin")
-        Vue.set(this.users, user, !this.users[user])
+        Vue.set(this.users[user], 'admin', !this.users[user].admin)
         var tmp = this.currentUser
         this.currentUser = " "
         this.currentUser = tmp
@@ -94,6 +98,29 @@
             console.log(error)
           })
       },
+      getSharedInfos (calID, token) {
+        return getSharedInfo(calID, token)
+          .then(response => {
+            this.users = response.data[0];
+            this.sharedCalName = response.data[1];
+          })
+          .catch(error => {
+            console.log('Error Authenticating: ', error)
+          })
+      },
+      saveChanges () {
+        var payload = {'name': this.sharedCalName, 'users': this.users, 'calID': this.calID}
+        return saveSharedChanges(payload, this.$store.state.jwt.token)
+          .then(response => {
+        })
+          .catch(error => {
+            console.log('Error Authenticating: ', error)
+          })
+      },
+      removeFromUsers (id) {
+        this.$delete(this.users, id)
+      }
+
     }
   }
 </script>

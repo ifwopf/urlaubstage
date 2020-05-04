@@ -10,8 +10,8 @@ import router from '@/router'
 
 Vue.use(Vuex)
 Vue.use(VueInputAutowidth)
-//const backendURL = "http://127.0.0.1:5000"
-const backendURL = "https://urlaubskalender.herokuapp.com"
+export const backendURL = "http://127.0.0.1:5000"
+//const backendURL = "https://urlaubskalender.herokuapp.com"
 
 function compare (a, b) {
   if (a.day < b.day) {
@@ -60,7 +60,8 @@ export default new Vuex.Store(
       sharedCats: {},
       personalCats: {},
       infotext: "",
-      showinfo: false
+      showinfo: false,
+      showFeiertage: false
     },
     mutations: {
       /*
@@ -199,6 +200,11 @@ export default new Vuex.Store(
           state.clicked[i].cat_id = cat.id
         }
       },
+      addNotes (state, note) {
+        for(var i = 0; i < state.clicked.length; i++) {
+          Vue.set(state.clicked[i], 'note', note)
+        }
+      },
       editCat (state, payload) {
         state.cats[state.clickedCat[0].id].style['background-color'] = payload.color
         state.cats[state.clickedCat[0].id].name = payload.name
@@ -281,6 +287,12 @@ export default new Vuex.Store(
       },
       removeInfo (state) {
         state.showinfo = false
+      },
+      showFeiertage(state) {
+        state.showFeiertage = true
+      },
+      removeFeiertage(state) {
+        state.showFeiertage = false
       }
 
 
@@ -349,24 +361,23 @@ export default new Vuex.Store(
       editCatDisplay ({commit, dispatch, state}){
         commit('setBorder', true)
       },
-      changeCat ({commit, state}, index) {
-
-        commit('changeClickedCat', state.cats[state.catMap[index]])
-        axios.post(backendURL + 'urlaub/api/v1.0/change_cat', {
-          cat_id: state.clickedCat[0].id,
+      changeCatDropDown ({commit, state}, catID) {
+        commit('changeClickedCat', state.cats[catID])
+        axios.post(backendURL + '/urlaub/api/v1.0/change_cat',  {
+          cat_id: catID,
           days: state.clicked,
           calID: state.currentCal
-        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+        }, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
           .then(function (response) {
+            commit('replaceUserdayID', response.data)
           })
           .catch(function (error) {
             console.log(error)
           })
       },
-      changeCatDropDown ({commit, state}, catID) {
-        commit('changeClickedCat', state.cats[catID])
-        axios.post(backendURL + '/urlaub/api/v1.0/change_cat',  {
-          cat_id: catID,
+      addNote ({commit, state}, note) {
+        axios.post(backendURL + '/urlaub/api/v1.0/addNote',  {
+          note: note,
           days: state.clicked,
           calID: state.currentCal
         }, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
@@ -525,8 +536,26 @@ export default new Vuex.Store(
       },
       removeInfo ({commit, state}){
         commit('removeInfo')
-      }
-
+      },
+      showFeiertage ({commit}){
+        commit('showFeiertage')
+      },
+      removeFeiertage ({commit}){
+        commit('removeFeiertage')
+      },
+      addFeiertage ({commit, state}, payload) {
+        axios.post(backendURL + '/urlaub/api/v1.0/addFeiertage',  {
+          region: payload.region,
+          catID: payload.catID,
+          calID: state.currentCal
+        }, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
+          .then(function (response) {
+            //commit('replaceUserdayID', response.data)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      },
     },
     getters: {
       isAuthenticated (state) {

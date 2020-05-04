@@ -51,6 +51,7 @@
         }
         else{
           if(catID !== this.selectedCat){
+            this.selectedCat = catID
             this.$store.commit('setClickedCatCounter', parseInt(catID))
             this.$store.commit('setClickedCatName', this.$store.getters.getCats[catID].name)
             this.catName = this.$store.getters.getCats[this.selectedCat].name

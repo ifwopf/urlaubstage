@@ -15,6 +15,7 @@
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
       <span v-if="!$store.state.border" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
+      <span v-if="!$store.state.border" @click="showFeiertage">FEIERTAGE</span>
     </div>
     <br/>
 
@@ -32,24 +33,19 @@
              :style="[$store.getters.getElementMapByIDStyle($store.state.currentUser,day.id),
              $store.getters.getCatByID(day.cat_id).style,
              day.clicked ? {'border-color': 'black'} : {'border-color': '#f1f1f1'}]">
-          <div class="tag" v-if="day['weekday']=== 'Samstag' && day.cat_id === 1" :month_id="day.month-1"
-               v-bind:key="day.id" ref="tag"
-               v-bind:id="day['id']"
-               style="color: darkgrey"
-          >
-            {{ day['day'] }}{{ day['name'] }}
+          <div class="tag" v-if="day['weekday']=== 'Samstag'" :month_id="day.month-1"
+               v-bind:key="day.id" ref="tag" v-bind:id="day['id']" style="color: darkgrey">
+            {{ day['day'] }}<span :id="day['id']" v-if="day.note!=null">*</span>
           </div>
-          <div class="tag" v-else-if="day['weekday']=== 'Sonntag' && day.cat_id === 1" :month_id="day.month-1"
-               v-bind:key="day.id" ref="tag"
-               v-bind:id="day['id']"
-               style="color: darkred"
-          >
-            {{ day['day'] }}
+          <div class="tag" v-else-if="day['weekday'] === 'Sonntag'" :month_id="day.month-1"
+               v-bind:key="day.id" ref="tag" v-bind:id="day['id']" :blub="day['weekday']"
+               style="color: darkred">
+            {{ day['day'] }}<span v-if="day.note!=null" :id="day['id']">*</span>
           </div>
-          <div class="tag" v-else-if="true" :month_id="day.month-1" v-bind:key="day.id" ref="tag" v-bind:id="day['id']"
+          <div class="tag" v-else :month_id="day.month-1" v-bind:key="day.id" ref="tag" v-bind:id="day['id']"
                v-bind:style=""
           >
-            {{ day['day'] }}
+            {{ day['day'] }}<span v-if="day.note!=null" :id="day['id']">*</span>
           </div>
         </div>
       </div>
@@ -57,6 +53,8 @@
     <div class="edit_box_shadow">&nbsp;</div>
     <day-box/>
     <cat-edit-box/>
+    <Feiertage/>
+
   </div>
 </template>
 
@@ -66,12 +64,13 @@
   import * as Selection from '@simonwep/selection-js'
   import dayBox from '@/components/dayBox'
   import catEditBox from '@/components/catEditBox'
+  import Feiertage from '@/components/Feiertage'
 
 
   export default {
     name: 'Urlaubskalender',
-    components: {dayBox, catEditBox},
-    props: ['year', 'calID'],
+    components: {Feiertage, dayBox, catEditBox},
+    props: ['year', 'calID', 'Feiertage'],
     created () {
       // fetch the data when the view is created and the data is
       // already being observed
@@ -188,6 +187,9 @@
       showCatEdit () {
         this.$store.commit('showCatEdit')
       },
+      showFeiertage () {
+        this.$store.commit('showFeiertage')
+      },
       openAddCat () {
         this.$store.commit('setClickedCatName', '')
         this.$store.commit('setCatColor', 'rgb(255, 255, 255)')
@@ -223,7 +225,6 @@
     },
     mounted () {
       Selection.create({
-
         // Class for the selection-area-element
         class: 'selection-area',
 
@@ -245,13 +246,13 @@
         selectables: ['.tagrahmen'],
 
         // Query selectors for elements from where a selection can be start
-        startareas: ['html'],
+        startareas: ['.monat'],
 
         // Query selectors for elements which will be used as boundaries for the selection
         boundaries: ['html'],
 
         // Query selector or dom node to set up container for selection-area-element
-        selectionAreaContainer: 'body',
+        selectionAreaContainer: '.monat',
 
         // On scrollable areas the number on px per frame is devided by this amount.
         // Default is 10 to provide a enjoyable scroll experience.
@@ -304,6 +305,9 @@
     outline: 1px solid rgba(0, 128, 255, 0.6);
     background-color: rgba(0, 128, 255, 0.2);
   }
+  body{
+    margin:0px;
+  }
 </style>
 <style scoped>
   .grid {
@@ -311,12 +315,10 @@
     text-align: center;
     line-height: 1.3;
   }
-
   .monat {
     flex: 1;
     width: 100%;
   }
-
   @media only screen and (min-width: 961px) {
     .monat {
       max-width: 450px;
@@ -325,7 +327,6 @@
       margin-right: 1%;
     }
   }
-
   @media only screen and (min-width: 601px) and (max-width: 960px) {
     .monat {
       width: 49%;
@@ -334,33 +335,24 @@
       margin-right: 1%;
     }
   }
-
   @media only screen and (max-width: 600px) {
     .monat {
       margin: auto;
     }
   }
-
   .tag {
     border: none;
-
   }
-
   .tagrahmen {
     cursor: pointer;
     margin: 1px;
     border-width: 1px;
-
   }
-
-
-
   .edit_box_shadow {
     width: 100%;
     min-height: 10%;
     display: inline-flex;
   }
-
   .cat_button {
     width: 200px;
     margin-bottom: 3px;
@@ -369,7 +361,6 @@
     margin-right: auto;
     min-height: 20px;
   }
-
   .edit_button {
     margin-bottom: 3px;
     margin-top: 2px;
@@ -377,15 +368,15 @@
     margin-right: auto;
     min-height: 20px;
   }
-
   .count{
     margin: 5px;
     display: block;
     float: left;
     padding: 3px;
     cursor: pointer;
+    height: 24px;
+    line-height: 24px;
   }
-
   #home {
     margin: 5px;
     display: block;
@@ -393,29 +384,24 @@
     cursor: pointer;
     border: 1px solid #000;
   }
-
   .wochentag, .monatstitel, .jahrtitel {
     color: #000;
     background-color: #f1f1f1;
     text-align: center;
   }
-
   .jahrtitel {
     background-color: #f1f1f1;
     display: inline-block;
     padding: 10px;
     margin: 10px;
   }
-
   .monatstitel {
     background-color: #f1f1f1;
     padding: 3px 10px 3px 10px
   }
-
   .wochentag {
     background-color: #f1f1f1;
   }
-
   .counters {
     display: flow-root;
     position: sticky;
@@ -425,8 +411,8 @@
     border: solid;
     border-width: 1px;
     font-size: inherit;
+    margin: 0 8px;
   }
-
   .catEdits {
   }
   .input {
@@ -450,6 +436,6 @@
   }
 
   body{
-    margin: 0px;
+    margin: 0;
   }
 </style>

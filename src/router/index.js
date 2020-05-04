@@ -6,6 +6,7 @@ import sharedCal from '@/components/sharedCal'
 import createSharedCal from '@/components/createSharedCal'
 import calOverview from '@/components/calOverview'
 import calSync from '@/components/calSync'
+import editShared from '@/components/editShared'
 import store from '@/store'
 
 Vue.use(Router)
@@ -47,6 +48,19 @@ export default new Router({
       props: true,
       beforeEnter (to, from, next) {
         console.log("hey")
+        next()
+        if (!store.getters.isAuthenticated) {
+          next('/login')
+        } else {
+          next()
+        }
+      }
+    },
+    { path: '/editShared/:calID',
+      name: 'editShared',
+      component: editShared,
+      props: true,
+      beforeEnter (to, from, next) {
         next()
         if (!store.getters.isAuthenticated) {
           next('/login')

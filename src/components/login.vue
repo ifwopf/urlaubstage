@@ -12,13 +12,13 @@
     <section class="section">
       <div class="container">
         <div class="field">
-          <label class="label is-large" for="email">↓Email↓</label>
+          <label class="label is-large" for="email">Email</label>
           <div class="control">
             <input type="email" class="input" id="email" v-model="email">
           </div>
         </div>
         <div class="field">
-          <label class="label is-large" for="password">↓Password↓</label>
+          <label class="label is-large" for="password">Password</label>
           <div class="control">
             <input type="password" class="input" id="password" v-model="password">
           </div>
@@ -104,6 +104,7 @@
     display: inline-block;
     font-size: 16px;
     background-color: #fff;
+    cursor: pointer;
   }
 
   .input {
@@ -111,6 +112,7 @@
     border-width: 1px;
     padding: 10px 24px;
     display: inline-block;
+    width: 90%;
     font-size: 16px;
     background-color: #0bd3d3;
   }

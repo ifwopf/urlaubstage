@@ -28,20 +28,26 @@
                  :style="{'grid-column': weekday[day.weekday], 'grid-row': getRow(weekday[day.weekday], day.day, month.length)+(3)}">
             {{ day.day }}
           </div>
-          <div class="kw"
+          <div class="kw" @click="toggleActiveWeeks(getKW(day.year, day.month, day.day))"
                v-if="activeMonths.includes(index) && (weekday[day.weekday]==2 || day.day == 1)"
                :style="{'grid-column': 1, 'grid-row': getRow(weekday[day.weekday], day.day, month.length)+(3)}">
             KW{{getKW(day.year, day.month, day.day)}}
           </div>
         </template>
-        <div v-for="j in getWeekAmount(month[0])" class="user" v-if="activeMonths.includes(index)"
+        <div v-for="j in getWeekAmount(month[0])" class="user" :uID="$store.getters.getSharedUsers[jindex][0]"
+             v-if="activeMonths.includes(index) &&
+             activeWeeks.includes(getKW(userCal[getFirstIndexOfWeek(j,userCal[0])].year,
+             userCal[getFirstIndexOfWeek(j,userCal[0])].month, userCal[getFirstIndexOfWeek(j,userCal[0])].day))"
+             :class="{ currentUser: $store.getters.getSharedUsers[jindex][0] == user['id'] }"
              v-bind:style="[{'grid-row': 4+jindex+(($store.getters.getSharedUsers.length+1)*(j-1)), 'grid-column': 1}]">
           {{$store.getters.getSharedUsers[jindex][1].split("@")[0]}}
         </div>
         <div  class="tagrahmen"
-              v-for="day in userCal" :id="'d'+day.id+'u'+day.userID" v-if="activeMonths.includes(day.month-1)"
+              v-for="day in userCal" :id="'d'+day.id+'u'+day.userID"
+              v-if="activeMonths.includes(day.month-1) &&
+              activeWeeks.includes(getKW(day.year, day.month, day.day))"
               :dayID="day.id" :userID="day.userID" :key="day.id+'u'+day.userID"
-              @click="mouse_on_day" :style="[$store.getters.getElementMapByIDStyle(day.userID, day.id),
+              @click="mouse_on_day(day.userID, $event)" :style="[$store.getters.getElementMapByIDStyle(day.userID, day.id),
              $store.getters.getCatByID(day.cat_id).style,
              day.clicked ? {'border-color': 'black'} : {'border-color': 'lightgrey'},
              {'grid-column': weekday[day.weekday], 'grid-row': getRow(weekday[day.weekday], day.day, month.length)+4+jindex}]">
@@ -52,6 +58,7 @@
     <div class="edit_box_shadow">&nbsp;</div>
     <day-box/>
     <cat-edit-box/>
+    <infobox/>
   </div>
 </template>
 
@@ -60,7 +67,9 @@
   import dayBox from '@/components/dayBox'
   import catEditBox from '@/components/catEditBox'
   import catBox from '@/components/catBox'
-  import { getCalName } from '@/api'
+  import infobox from '@/components/infobox'
+  import { getCalName, getUserRole } from '@/api'
+  import Infobox from './infobox'
   Date.prototype.getWeek = function() {
     var date = new Date(this.getTime());
     date.setHours(0, 0, 0, 0);
@@ -75,7 +84,7 @@
   export default {
     name: 'sharedCal',
     props: ['calID'],
-    components: {dayBox, catEditBox, catBox},
+    components: {Infobox, dayBox, catEditBox, catBox},
     data() {
       return {
         calName: '',
@@ -103,9 +112,11 @@
           'Sonntag': 8
         },
         activeMonths: [],
+        activeWeeks: [],
         currentMonth: null,
         currentDay: null,
         year: '2020',
+        user: null,
       }
     },
 
@@ -117,8 +128,11 @@
       var currentTime = new Date();
       this.activeMonths.push(currentTime.getMonth())
       this.currentMonth = currentTime.getMonth()
-      this.currentDay = currentTime.getDate()
+      this.currentDay = currentTime.getDate();
+      this.activeWeeks.push(currentTime.getWeek());
       this.getCal(this.calID, this.$store.state.jwt.token)
+      this.getCurrentUserRole(this.calID, this.$store.state.jwt.token)
+      console.log(this.activeWeeks)
     },
     computed: {
       ...mapGetters([
@@ -133,25 +147,29 @@
       redirect (link) {
         window.location.href = link
       },
-      mouse_on_day (event) {
-        if (!event.ctrlKey && !event.metaKey && !this.$store.state.locked) {
-          // clearClicked
-          this.$store.dispatch('resetClicked')
-          this.selectedCat = null
-          this.dummy = "fdsasdfds"
+      mouse_on_day (userID, event) {
+        console.log(event)
+        console.log(userID)
+        if (this.user['id'] == userID || this.user['admin']){
+          if (!event.ctrlKey && !event.metaKey && !this.$store.state.locked) {
+            // clearClicked
+            this.$store.dispatch('resetClicked')
+            this.selectedCat = null
+          }
+          if (!this.containsObject(this.$store.state.element_map[event.target.getAttribute('userid')][event.target.getAttribute('dayid')]
+            , this.$store.state.clicked)) {
+            var payload = {"dayID": event.target.getAttribute('dayid'), "uID": event.target.getAttribute('userid')}
+            this.$store.dispatch('setClicked', payload)
+          }
+          else {
+            var payload = {"dayID": event.target.getAttribute('dayid'), "uID": event.target.getAttribute('userid')}
+            this.$store.dispatch('removeClicked', payload)
+          }
+          this.$forceUpdate();
         }
-        if (!this.containsObject(this.$store.state.element_map[event.target.getAttribute('userid')][event.target.getAttribute('dayid')]
-          , this.$store.state.clicked)) {
-          var payload = {"dayID": event.target.getAttribute('dayid'), "uID": event.target.getAttribute('userid')}
-          this.$store.dispatch('setClicked', payload)
-          this.$store.state.currentUser = "fdsfddass"
+        else{
+          this.$store.commit('setInfoText', "Du kannst nur eigene Tage auswählen!")
         }
-        else {
-          var payload = {"dayID": event.target.getAttribute('dayid'), "uID": event.target.getAttribute('userid')}
-          this.$store.dispatch('removeClicked', payload)
-          this.dummy = "fdsfdasd"
-        }
-        this.$forceUpdate();
       },
       containsObject (obj, list) {
         var i
@@ -171,6 +189,15 @@
           this.activeMonths.push(id)
         }
       },
+      toggleActiveWeeks (kw) {
+        if (this.activeWeeks.includes(kw)){
+          const index = this.activeWeeks.indexOf(kw);
+          this.activeWeeks.splice(index, 1)
+        }
+        else{
+          this.activeWeeks.push(kw)
+        }
+      },
       getRow(weekday, date, userAmount) {
         var row = Math.floor((date) / 7)
         var modulo = (date) % 7
@@ -184,6 +211,15 @@
         row = row * (1 + userAmount)
         return row
       },
+      getFirstIndexOfWeek(j, firstdayMonth){
+        var distanceToMonday = this.weekday[firstdayMonth.weekday] - 2
+        if (j-1 == 0){
+          return 0
+        }
+        else {
+          return (j-1) * 7 - distanceToMonday
+        }
+      },
       getWeekAmount(month) {
         var lastDay = month[month.length - 1]
         var row = Math.ceil((lastDay.day) / 7)
@@ -196,7 +232,7 @@
       },
       getKW (year, month, day) {
         var datum = new Date(year,month-1,day);
-        const kw = datum.getWeek();
+        var kw = datum.getWeek();
         return(kw);
       },
       getCal (calID, token) {
@@ -206,7 +242,16 @@
           })
           .catch(error => {
             console.log('Error Authenticating: ', error)
-            EventBus.$emit('failedAuthentication', error)
+          })
+      },
+      getCurrentUserRole (calID, token) {
+        return getUserRole (calID, token)
+          .then(response => {
+            console.log(response.data)
+            this.user = response.data
+          })
+          .catch(error => {
+            console.log('Error Authenticating: ', error)
           })
       }
     },
@@ -262,7 +307,16 @@
   .user {
     background-color: ghostwhite;
   }
+  .currentUser{
+    background-color: lightskyblue !important;
+  }
   .currentDate{
     background-color: lightgoldenrodyellow !important;
+  }
+  .kw, .datum{
+    margin-top: 10px;
+  }
+  .kw {
+    cursor: pointer;
   }
 </style>

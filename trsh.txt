@@ -33,3 +33,17 @@
 
 
 v-autowidth="{maxWidth: '960px', minWidth: '20px', comfortZone: 20}"
+      changeCat ({commit, state}, index) {
+        commit('changeClickedCat', state.cats[state.catMap[index]])
+        axios.post(backendURL + 'urlaub/api/v1.0/change_cat', {
+          cat_id: state.clickedCat[0].id,
+          days: state.clicked,
+          calID: state.currentCal
+        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+          .then(function (response) {
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      },
+&& activeWeeks.includes(getKW(userCal[(j-1)*7].day, userCal[(j-1)*7].month, userCal[(j-1)*7].year))

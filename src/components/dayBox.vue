@@ -10,6 +10,23 @@
     <span id="selectedDaysText">
     {{ selectedDaysString }}
     </span>
+    <div v-if="$store.state.clicked.length == 1" class="notebox">
+      <div class="note">
+        <div v-if="!editNote">
+          {{ note }}
+          <button class="noteButton" v-if="!editNote" @click="editNoteToggle">
+            <i class="material-icons md-48 noteButton">edit</i>
+          </button>
+        </div>
+        <div v-if="editNote">
+          <button class="noteButton" @click="editNoteToggle">
+            <i class="material-icons md-48">close</i>
+          </button>
+          <input class="inputNote" v-model="note"/>
+          <button class="noteButton" @click="addNote"><i class="material-icons md-48">save</i></button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -27,6 +44,8 @@ export default {
       catEditColor: '',
       edit: false,
       locked: false,
+      editNote: false,
+      tmpNote: '',
       colors: [{'background-color': '#b4b9cc'}, {'background-color': '#7387b0'}, {'background-color': '#ffca62'},
         {'background-color': '#ee5f82'}, {'background-color': '#f986a2'}, {'background-color': '#E0B3E6'},
         {'background-color': 'aquamarine'} ]
@@ -39,6 +58,15 @@ export default {
     ...mapActions([
       'toTheLeft'
     ]),
+    note:  {
+      get: function () {
+        return this.$store.state.clicked[0].note
+      },
+      // setter
+      set: function (newValue) {
+        Vue.set(this.$store.state.clicked[0], 'note', newValue)
+      }
+    },
     selectedDaysString: function() {
       function compare (a, b) {
         if (a.month < b.month)
@@ -99,6 +127,10 @@ export default {
         this.catName = ''
       }
     },
+    addNote() {
+      this.$store.dispatch("addNote", this.note)
+      this.editNote = !this.editNote
+    },
     change_cat (event) {
       var oldCat = this.element_map[this.clicked[0].id].cat_id
       axios.post('http://127.0.0.1:5000/urlaub/api/v1.0/change_cat', {
@@ -130,6 +162,15 @@ export default {
     toggleLock () {
       this.$store.commit('toggleLock')
     },
+    editNoteToggle () {
+      this.editNote = !this.editNote
+      if (this.editNote) {
+        this.tmpNote = this.note
+      }
+      else {
+        this.note = this.tmpNote
+      }
+    },
     catDropChange(event) {
       if(event.target.value !== "new"){
         this.$store.dispatch('changeCatDropDown', event.target.value)
@@ -158,6 +199,8 @@ export default {
     border-width: 0.5px;
     margin: auto;
     font-size: 20px;
+    width: 95%;
+    max-width: 800px;
   }
 
   #buttonBox{
@@ -188,6 +231,7 @@ export default {
     border: none;
     background-color: inherit;
     font-size: 40px !important;
+    cursor: pointer;
   }
   #lock {
     position: absolute;
@@ -206,5 +250,29 @@ export default {
   #selectCat {
     width: 75%;
     font-size: inherit;
+  }
+  .notebox {
+    position: absolute;
+    bottom: 10px;
+    left: 62%;
+  }
+  .note {
+    position: relative;
+    left: -50%;
+    vertical-align: top;
+  }
+  .noteButton {
+    background-color: inherit;
+    border: none;
+    cursor: pointer;
+    vertical-align: top;
+  }
+  .inputNote{
+    background-color: #0bd3d3;
+    border: none;
+    line-height: 24px;
+    height: 24px;
+    font-size: 18px;
+    vertical-align: top;
   }
 </style>
