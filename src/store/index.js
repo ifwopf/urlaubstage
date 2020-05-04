@@ -10,8 +10,8 @@ import router from '@/router'
 
 Vue.use(Vuex)
 Vue.use(VueInputAutowidth)
-export const backendURL = "http://127.0.0.1:5000"
-//const backendURL = "https://urlaubskalender.herokuapp.com"
+//export const backendURL = "http://127.0.0.1:5000"
+export const backendURL = "https://urlaubskalender.herokuapp.com"
 
 function compare (a, b) {
   if (a.day < b.day) {
