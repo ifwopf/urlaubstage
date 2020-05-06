@@ -5,8 +5,10 @@
         home
       </i>
       {{calName}}
+      <span class="year">
       <i v-if="year != borderyears[0]" class="material-icons" @click="changeYear(false)">keyboard_arrow_left</i> {{ year }}
       <i v-if="year != borderyears[1]" class="material-icons" @click="changeYear(true)">keyboard_arrow_right</i>
+        </span>
       <i class="material-icons" id="settings" @click="showCalSettingsBox">
         settings
       </i>
@@ -425,6 +427,9 @@
     padding: 10px;
     margin: 10px;
   }
+  .year{
+    display: inline-block;
+  }
   .monatstitel {
     background-color: #f1f1f1;
     padding: 3px 10px 3px 10px
@@ -433,7 +438,7 @@
     background-color: #f1f1f1;
   }
   .counters {
-    display: flow-root;
+    display: flex;
     position: sticky;
     top: 5px;
     background-color: #fff;

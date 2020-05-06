@@ -112,6 +112,8 @@
         var payload = {'name': this.sharedCalName, 'users': this.users, 'calID': this.calID}
         return saveSharedChanges(payload, this.$store.state.jwt.token)
           .then(response => {
+            this.$router.push({name: 'sharedCal', params: {calID: this.calID, year: '2020'}})
+            location.reload()
         })
           .catch(error => {
             console.log('Error Authenticating: ', error)

@@ -4,15 +4,17 @@
       <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
         home
       </i>
-      <i class="material-icons" id="settings" @click="redirect('/#/editShared/' + calID)">
+      <i v-if="user['admin']" class="material-icons" id="settings" @click="redirect('/#/editShared/' + calID)">
         settings
       </i>
       {{calName}}
-      <i v-if="year != borderyears[0]" class="material-icons arrow" @click="changeYear(false)">keyboard_arrow_left</i>
-      {{ year }}
-      <i v-if="year != borderyears[1]" class="material-icons arrow" @click="changeYear(true)">keyboard_arrow_right</i>
+      <span class="year">
+        <i v-if="year != borderyears[0]" class="material-icons arrow" @click="changeYear(false)">keyboard_arrow_left</i>
+        {{ year }}
+        <i v-if="year != borderyears[1]" class="material-icons arrow" @click="changeYear(true)">keyboard_arrow_right</i>
+      </span>
     </h1>
-    <cat-box/>
+    <cat-box :admin="user['admin']"/>
     <div class="grid" v-for="(month,index) in $store.getters.getSharedInfo">
       <div class="monatstitel" :id="index" v-bind:style="{ 'grid-row': 1, 'grid-column':'1/9'}"
            :class="{ 'currentDate': index == currentMonth}" @click="toggleActive(index)">
@@ -129,6 +131,7 @@
       // fetch the data when the view is created and the data is
       // already being observed
       //$(".second_div").css({'width': ($(".first_div").width() + 'px')});
+      this.getCurrentUserRole(this.calID, this.$store.state.jwt.token)
       this.$store.dispatch('sharedReady', [this.calID, this.year]);
       var currentTime = new Date();
       this.activeMonths.push(currentTime.getMonth())
@@ -136,7 +139,7 @@
       this.currentDay = currentTime.getDate();
       this.activeWeeks.push(currentTime.getWeek());
       this.getCal(this.calID, this.$store.state.jwt.token)
-      this.getCurrentUserRole(this.calID, this.$store.state.jwt.token)
+
     },
     computed: {
       ...mapGetters([
@@ -359,6 +362,9 @@
     max-width: 1200px;
     text-align: center;
     padding: 8px;
+  }
+  .year{
+    display: inline-block;
   }
 
 </style>

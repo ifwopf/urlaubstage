@@ -257,6 +257,7 @@ export default {
     position: absolute;
     bottom: 10px;
     left: 62%;
+    width: fit-content;
   }
   .note {
     position: relative;

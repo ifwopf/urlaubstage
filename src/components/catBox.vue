@@ -6,13 +6,14 @@
         {{ cat['name']}}
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
-    <span v-if="!$store.state.border" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
+    <span v-if="admin" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
   </div>
 </template>
 
 <script>
   export default {
     name: 'catBox',
+    props: ['admin'],
     data () {
       return {
         cat_box: false,
@@ -44,9 +45,9 @@
         }
       },
       click_on_cat (catID) {
+        console.log(this.admin)
         if(this.$store.state.clicked.length > 0){
           this.$store.dispatch('changeCatDropDown', catID)
-          console.log("here")
         }
         else{
           if(catID !== this.selectedCat){
@@ -95,7 +96,7 @@
   }
 
   .counters {
-    display: flow-root;
+    display: flex;
     position: sticky;
     top: 5px;
     background-color: #fff;
