@@ -1,6 +1,6 @@
 <!-- components/Login.vue -->
 <template>
-  <div>
+  <div class="wrapper">
     <section class="hero is-primary">
       <div class="hero-body">
         <div class="titlebox">
@@ -106,6 +106,9 @@
     background-color: #fff;
     cursor: pointer;
   }
+  .button:hover{
+    background-color: lightgrey;
+  }
 
   .input {
     border: solid;
@@ -118,5 +121,8 @@
   }
   .titlebox {
     text-align: center;
+  }
+  .wrapper{
+    max-width: 1200px;
   }
 </style>

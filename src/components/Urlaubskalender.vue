@@ -1,24 +1,28 @@
 <template>
-  <div style="text-align: center" v-if="$store.state.dataReady">
+  <div class="wrapper" v-if="$store.state.dataReady">
     <h1 class="jahrtitel">
       <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
         home
       </i>
-      {{calName}} {{ year }}
+      {{calName}}
+      <i v-if="year != borderyears[0]" class="material-icons" @click="changeYear(false)">keyboard_arrow_left</i> {{ year }}
+      <i v-if="year != borderyears[1]" class="material-icons" @click="changeYear(true)">keyboard_arrow_right</i>
+      <i class="material-icons" id="settings" @click="showCalSettingsBox">
+        settings
+      </i>
     </h1>
     <div class="counters">
       <span class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
             v-bind:key="cat.id"
             :style="cat.style" @click="click_on_cat(cat.id)">
-        {{ cat['name']}} : {{ $store.getters.getCatCount(cat.id)}}
-        <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="selectAll(cat.id)">select_all</i>
+        {{ cat['name']}}: {{ $store.getters.getCatCount(cat.id)}}
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
       <span v-if="!$store.state.border" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
-      <span v-if="!$store.state.border" @click="showFeiertage">FEIERTAGE</span>
     </div>
-    <br/>
 
+
+    <br/>
     <div class="monat" v-for="(month, index) in $store.getters.getInfo" :key="index">
       <h3 class="monatstitel">{{ months_en[index] }}</h3>
       <div class="grid">
@@ -30,16 +34,17 @@
         <div class="wochentag" style="grid-row: 1; grid-column: 6">Sa</div>
         <div class="wochentag" style="grid-row: 1; grid-column: 7">So</div>
         <div class="tagrahmen" @click="mouse_on_day" :id="day.id" v-for="day in month"
+             :class="{ 'currentDay': (day.month == currentMonth && day.day == currentDay)}"
              :style="[$store.getters.getElementMapByIDStyle($store.state.currentUser,day.id),
              $store.getters.getCatByID(day.cat_id).style,
-             day.clicked ? {'border-color': 'black'} : {'border-color': '#f1f1f1'}]">
+             day.clicked ? {'border-color': 'black  !important'} : {'border-color': '#f1f1f1'}]">
           <div class="tag" v-if="day['weekday']=== 'Samstag'" :month_id="day.month-1"
-               v-bind:key="day.id" ref="tag" v-bind:id="day['id']" style="color: darkgrey">
+               v-bind:key="day.id" ref="tag" v-bind:id="day['id']" style="color: 	#800000">
             {{ day['day'] }}<span :id="day['id']" v-if="day.note!=null">*</span>
           </div>
           <div class="tag" v-else-if="day['weekday'] === 'Sonntag'" :month_id="day.month-1"
                v-bind:key="day.id" ref="tag" v-bind:id="day['id']" :blub="day['weekday']"
-               style="color: darkred">
+               style="color: 	#400000">
             {{ day['day'] }}<span v-if="day.note!=null" :id="day['id']">*</span>
           </div>
           <div class="tag" v-else :month_id="day.month-1" v-bind:key="day.id" ref="tag" v-bind:id="day['id']"
@@ -54,6 +59,7 @@
     <day-box/>
     <cat-edit-box/>
     <Feiertage/>
+    <cal-settings-box :calName="calName" v-model="calName" :calID="calID"/>
 
   </div>
 </template>
@@ -65,11 +71,12 @@
   import dayBox from '@/components/dayBox'
   import catEditBox from '@/components/catEditBox'
   import Feiertage from '@/components/Feiertage'
+  import calSettingsBox from '@/components/calSettingsBox'
 
 
   export default {
     name: 'Urlaubskalender',
-    components: {Feiertage, dayBox, catEditBox},
+    components: {Feiertage, dayBox, catEditBox, calSettingsBox},
     props: ['year', 'calID', 'Feiertage'],
     created () {
       // fetch the data when the view is created and the data is
@@ -78,6 +85,9 @@
       this.$store.commit('setCurrentCal', this.calID)
       this.$store.dispatch('ready', [this.calID, this.year])
       this.getCal(this.calID, this.$store.state.jwt.token)
+      var currentTime = new Date();
+      this.currentMonth = currentTime.getMonth() + 1;
+      this.currentDay = currentTime.getDate();
     },
     data () {
       return {
@@ -87,6 +97,9 @@
         catName: '',
         catColor: '',
         selectedCat: null,
+        borderyears: [2020,2022],
+        currentDay: null,
+        currentMonth: null,
         months_en: {
           0: 'Januar',
           1: 'Februar',
@@ -119,6 +132,17 @@
       ]),
       redirect (link) {
         window.location.href = link
+      },
+      changeYear (direction) {
+        if(direction){
+          var yearString = String(parseInt(this.year) + 1)
+          this.$router.push({name: 'Urlaubskalender2', params: {calID: this.calID, year: yearString}})
+        }
+        else {
+          var yearString = String(parseInt(this.year) - 1)
+          this.$router.push({name: 'Urlaubskalender2', params: {calID: this.calID, year: yearString}})
+        }
+        location.reload()
       },
       mouse_on_day (event) {
         if (!event.ctrlKey && !event.metaKey && ! this.$store.state.locked) {
@@ -179,16 +203,14 @@
         }
         return false
       },
-      resizeInput (value) {
-        console.log(value)
-        //$('#hide').text(value)
-        //$(<'#txt').width($('#hide').width())
-      },
       showCatEdit () {
         this.$store.commit('showCatEdit')
       },
       showFeiertage () {
         this.$store.commit('showFeiertage')
+      },
+      showCalSettingsBox () {
+        this.$store.commit('showCalSettingsBox')
       },
       openAddCat () {
         this.$store.commit('setClickedCatName', '')
@@ -214,11 +236,9 @@
         return getCalName(calID, token)
           .then(response => {
             this.calName = response.data;
-            console.log(response.data)
           })
           .catch(error => {
             console.log('Error Authenticating: ', error)
-            EventBus.$emit('failedAuthentication', error)
           })
       }
 
@@ -283,17 +303,14 @@
             //this.$store.dispatch('removeClicked', el.id)
           }
           else {
-            //console.log(el)
-            //console.log(el.id)
+
             var payload = {"dayID": el.id, "uID": this.$store.state.currentUser}
             this.$store.dispatch('setClicked', payload)
           }
           el.classList.remove('selected')
           evt.inst.removeFromSelection(el)
         }
-        //console.log('move', evt);
       }).on('stop', evt => {
-        //console.log('stop', evt);
       })
     }
   }
@@ -306,7 +323,15 @@
     background-color: rgba(0, 128, 255, 0.2);
   }
   body{
-    margin:0px;
+    margin:0;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+
+                                  supported by Chrome, Opera and Firefox */
   }
 </style>
 <style scoped>
@@ -332,7 +357,7 @@
       width: 49%;
       display: inline-block;
       vertical-align: top;
-      margin-right: 1%;
+      margin: 0 0.5%;
     }
   }
   @media only screen and (max-width: 600px) {
@@ -347,6 +372,10 @@
     cursor: pointer;
     margin: 1px;
     border-width: 1px;
+    line-height: 2;
+  }
+  .tagrahmen:hover{
+    background-color: lightgrey !important;
   }
   .edit_box_shadow {
     width: 100%;
@@ -372,12 +401,13 @@
     margin: 5px;
     display: block;
     float: left;
-    padding: 3px;
+    padding: 3px 6px;
     cursor: pointer;
     height: 24px;
     line-height: 24px;
+    font-weight: bold;
   }
-  #home {
+  #home, #settings {
     margin: 5px;
     display: block;
     float: left;
@@ -411,7 +441,8 @@
     border: solid;
     border-width: 1px;
     font-size: inherit;
-    margin: 0 8px;
+    width: 90%;
+    margin: 0 auto;
   }
   .catEdits {
   }
@@ -437,5 +468,13 @@
 
   body{
     margin: 0;
+  }
+  .wrapper {
+    width: 100%;
+    max-width: 2000px;
+    text-align: center;
+  }
+  .currentDay {
+    border-color: red !important;
   }
 </style>

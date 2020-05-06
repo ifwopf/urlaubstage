@@ -61,7 +61,8 @@ export default new Vuex.Store(
       personalCats: {},
       infotext: "",
       showinfo: false,
-      showFeiertage: false
+      showFeiertage: false,
+      showCalSettingsBox: false
     },
     mutations: {
       /*
@@ -293,6 +294,12 @@ export default new Vuex.Store(
       },
       removeFeiertage(state) {
         state.showFeiertage = false
+      },
+      showCalSettingsBox(state) {
+        state.showCalSettingsBox = true
+      },
+      removeCalSettingsBox(state) {
+        state.showCalSettingsBox = false
       }
 
 
@@ -344,12 +351,15 @@ export default new Vuex.Store(
             commit('setCalDataReady', true)
           })
       },
-      sharedReady ({ commit, state, jwt }, sharedID) {
-        var yearstring = backendURL + '/urlaub/api/v1.0/shared/' + sharedID
+      sharedReady ({ commit, state, jwt }, payload) {
+        if(payload[1] === undefined){
+          payload[1] = "2020"
+        }
+        var yearstring = backendURL + '/urlaub/api/v1.0/shared/' + payload[0] + '/' + payload[1]
         axios.get(yearstring, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
         //.then(response => response.json())
           .then((response) => {
-            commit('setCurrentCal', sharedID)
+            commit('setCurrentCal', payload[0])
             commit('setCurrentUser', response.data[4])
             commit('setSharedName', response.data[0] )
             commit('setSharedUsers', response.data[1])
@@ -502,7 +512,6 @@ export default new Vuex.Store(
           addedUsers: sharedValues.addedUsers
         },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
           .then(function (response) {
-            console.log(`created new shared`)
           })
           .catch(function (error) {
             console.log(error)
@@ -525,7 +534,6 @@ export default new Vuex.Store(
         axios.post(backendURL + '/urlaub/api/v1.0/setSyncPair', payload,
           {headers: { Authorization: `Bearer: ${state.jwt.token}` }})
           .then(function (response) {
-            console.log(`created new sync pairs`)
           })
           .catch(function (error) {
             console.log(error)
@@ -555,6 +563,12 @@ export default new Vuex.Store(
           .catch(function (error) {
             console.log(error)
           })
+      },
+      showCalSettingsBox ({commit}){
+        commit('showCalSettingsBox')
+      },
+      removeCalSettingsBox ({commit}){
+        commit('removeCalSettingsBox')
       },
     },
     getters: {

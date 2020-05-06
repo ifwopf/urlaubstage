@@ -10,10 +10,12 @@
     <span id="selectedDaysText">
     {{ selectedDaysString }}
     </span>
-    <div v-if="$store.state.clicked.length == 1" class="notebox">
+    <div class="notebox">
       <div class="note">
         <div v-if="!editNote">
+          <span v-if="$store.state.clicked.length == 1">
           {{ note }}
+            </span>
           <button class="noteButton" v-if="!editNote" @click="editNoteToggle">
             <i class="material-icons md-48 noteButton">edit</i>
           </button>

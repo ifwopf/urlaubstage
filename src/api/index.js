@@ -28,3 +28,7 @@ export function getSharedInfo(calID, token) {
 export function saveSharedChanges(payload, token) {
   return axios.post(backendURL + `/urlaub/api/v1.0/editShared`, payload, {headers: { Authorization: `Bearer: ` + token }})
 }
+
+export function saveCalName(payload, token) {
+  return axios.post(backendURL + `/urlaub/api/v1.0/saveCalName`, payload, {headers: { Authorization: `Bearer: ` + token }})
+}

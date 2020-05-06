@@ -42,7 +42,7 @@ export default new Router({
         }
       }
     },
-    { path: '/shared/:calID',
+    { path: '/shared/:calID/:year',
       name: 'sharedCal',
       component: sharedCal,
       props: true,

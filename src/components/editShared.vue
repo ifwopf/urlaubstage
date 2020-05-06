@@ -53,7 +53,7 @@
       // already being observed
       //$(".second_div").css({'width': ($(".first_div").width() + 'px')});
       this.getSharedInfos(this.calID, this.$store.state.jwt.token)
-      this.getCurrentUser()
+      //this.getCurrentUser()
     },
     methods: {
       redirect (link) {
@@ -91,7 +91,7 @@
       getCurrentUser () {
         axios.get(backendURL + '/urlaub/api/v1.0/getCurrentUser', { headers: { Authorization: `Bearer: ${this.$store.state.jwt.token}` } })
           .then(response => {
-            Vue.set(this.users, response.data, true)
+            //Vue.set(this.users, response.data, true)
             this.currentUser = ""
           })
           .catch(function (error) {

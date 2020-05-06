@@ -1,13 +1,18 @@
 <template>
-  <div style="text-align: center" v-if="$store.state.sharedDataReady">
+  <div class="wrapper" v-if="$store.state.sharedDataReady">
     <h1 class="jahrtitel">
       <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
         home
       </i>
-      {{calName}} {{year}}
+      <i class="material-icons" id="settings" @click="redirect('/#/editShared/' + calID)">
+        settings
+      </i>
+      {{calName}}
+      <i v-if="year != borderyears[0]" class="material-icons arrow" @click="changeYear(false)">keyboard_arrow_left</i>
+      {{ year }}
+      <i v-if="year != borderyears[1]" class="material-icons arrow" @click="changeYear(true)">keyboard_arrow_right</i>
     </h1>
     <cat-box/>
-
     <div class="grid" v-for="(month,index) in $store.getters.getSharedInfo">
       <div class="monatstitel" :id="index" v-bind:style="{ 'grid-row': 1, 'grid-column':'1/9'}"
            :class="{ 'currentDate': index == currentMonth}" @click="toggleActive(index)">
@@ -83,11 +88,12 @@
   }
   export default {
     name: 'sharedCal',
-    props: ['calID'],
+    props: ['calID', 'year'],
     components: {Infobox, dayBox, catEditBox, catBox},
     data() {
       return {
         calName: '',
+        borderyears: [2020,2022],
         months_en: {
           0: 'Januar',
           1: 'Februar',
@@ -115,7 +121,6 @@
         activeWeeks: [],
         currentMonth: null,
         currentDay: null,
-        year: '2020',
         user: null,
       }
     },
@@ -124,7 +129,7 @@
       // fetch the data when the view is created and the data is
       // already being observed
       //$(".second_div").css({'width': ($(".first_div").width() + 'px')});
-      this.$store.dispatch('sharedReady', this.calID);
+      this.$store.dispatch('sharedReady', [this.calID, this.year]);
       var currentTime = new Date();
       this.activeMonths.push(currentTime.getMonth())
       this.currentMonth = currentTime.getMonth()
@@ -132,7 +137,6 @@
       this.activeWeeks.push(currentTime.getWeek());
       this.getCal(this.calID, this.$store.state.jwt.token)
       this.getCurrentUserRole(this.calID, this.$store.state.jwt.token)
-      console.log(this.activeWeeks)
     },
     computed: {
       ...mapGetters([
@@ -147,9 +151,18 @@
       redirect (link) {
         window.location.href = link
       },
+      changeYear (direction) {
+        if(direction){
+          var yearString = String(parseInt(this.year) + 1)
+          this.$router.push({name: 'sharedCal', params: {calID: this.calID, year: yearString}})
+        }
+        else {
+          var yearString = String(parseInt(this.year) - 1)
+          this.$router.push({name: 'sharedCal', params: {calID: this.calID, year: yearString}})
+        }
+        location.reload()
+      },
       mouse_on_day (userID, event) {
-        console.log(event)
-        console.log(userID)
         if (this.user['id'] == userID || this.user['admin']){
           if (!event.ctrlKey && !event.metaKey && !this.$store.state.locked) {
             // clearClicked
@@ -247,7 +260,6 @@
       getCurrentUserRole (calID, token) {
         return getUserRole (calID, token)
           .then(response => {
-            console.log(response.data)
             this.user = response.data
           })
           .catch(error => {
@@ -258,7 +270,18 @@
 
   }
 </script>
+<style>
+  body{
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
 
+                                  supported by Chrome, Opera and Firefox */
+  }
+</style>
 <style scoped>
   .sticky{
     position: sticky;
@@ -268,7 +291,6 @@
     text-align: center;
     line-height: 1.3;
     grid-auto-flow: column;
-    min-width: 800px;
     grid-template-columns: auto;
   }
   .tagrahmen {
@@ -277,7 +299,10 @@
     border-width: 1px;
     border-style: solid;
     border-color: lightgrey;
-    height: 20px
+    line-height: 2;
+  }
+  .tagrahmen:hover{
+    background-color: lightgrey !important;
   }
   .monatstitel {
     background-color: #f1f1f1;
@@ -293,19 +318,21 @@
     padding: 10px;
     margin: 10px;
     color: #000;
-    background-color: #f1f1f1;
     text-align: center;
   }
-  #home {
-    margin: 5px;
-    display: block;
-    float: left;
+  #home, #settings, .arrow {
     cursor: pointer;
+  }
+  #home, #settings {
     border: 1px solid #000;
+    float: left;
+    display: block;
+    margin: 5px;
   }
 
   .user {
     background-color: ghostwhite;
+    line-height: 2;
   }
   .currentUser{
     background-color: lightskyblue !important;
@@ -315,8 +342,23 @@
   }
   .kw, .datum{
     margin-top: 10px;
+    line-height: 2;
+    background-color: aliceblue;
   }
   .kw {
     cursor: pointer;
+    min-width: 100px;
+
+
   }
+  .kw:hover{
+    background-color: lightgrey;
+  }
+  .wrapper {
+    width: 100%;
+    max-width: 1200px;
+    text-align: center;
+    padding: 8px;
+  }
+
 </style>

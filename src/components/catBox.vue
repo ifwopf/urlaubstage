@@ -4,7 +4,6 @@
             v-bind:key="cat.id"
             :style="cat.style" @click="click_on_cat(cat.id)">
         {{ cat['name']}}
-        <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="selectAll(cat.id)">select_all</i>
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
     <span v-if="!$store.state.border" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
@@ -88,8 +87,11 @@
     margin: 5px;
     display: block;
     float: left;
-    padding: 3px;
+    padding: 3px 6px;
     cursor: pointer;
+    height: 24px;
+    line-height: 24px;
+    font-weight: bold;
   }
 
   .counters {

@@ -16,7 +16,7 @@
       <div class="titlebox">
         <h2 class="title">Team-Kalender</h2>
       </div>
-      <div class="kalender" v-if="cal.shared" v-for="cal in $store.state.cals" @click="redirect('#/shared/' + cal.id)">
+      <div class="kalender" v-if="cal.shared" v-for="cal in $store.state.cals" @click="redirect('#/shared/' + cal.id + '/2020')">
         <span >{{cal.name}}</span>
       </div>
       <div class="kalender" @click="redirect('#/createSharedCal')">
@@ -87,14 +87,17 @@
     margin: 5px auto;
     cursor: pointer;
   }
+  .kalender:hover {
+    background-color: lightgrey;
+  }
   .wrapper {
     width: 100%;
     overflow: hidden; /* add this to contain floated children */
+    max-width: 1200px;
   }
   .personal, .shared, .settings {
     margin: 10px 20px;
     min-width: 300px;
-    float:left; /* add this */
     text-align: center;
 
   }
