@@ -96,7 +96,7 @@
   }
 
   .counters {
-    display: flex;
+    display: flow-root;
     position: sticky;
     top: 5px;
     background-color: #fff;

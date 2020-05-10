@@ -14,17 +14,15 @@
       </i>
     </h1>
     <div class="counters">
-      <span class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
+      <div class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
             v-bind:key="cat.id"
             :style="cat.style" @click="click_on_cat(cat.id)">
-        {{ cat['name']}}: {{ $store.getters.getCatCount(cat.id)}}
+        <span>{{ cat['name']}}: {{ $store.getters.getCatCount(cat.id)}}</span>
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
-      </span>
+      </div>
       <span v-if="!$store.state.border" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
     </div>
 
-
-    <br/>
     <div class="monat" v-for="(month, index) in $store.getters.getInfo" :key="index">
       <h3 class="monatstitel">{{ months_en[index] }}</h3>
       <div class="grid">
@@ -166,7 +164,7 @@
           this.$store.dispatch('changeCatDropDown', catID)
         }
         else{
-          if(catID !== this.selectedCat){
+          if(catID !== this.selectedCat && int(catID) !==  0){
             this.selectedCat = catID //to be deleted
             this.$store.commit('setClickedCatCounter', parseInt(catID))
             this.$store.commit('setClickedCatName', this.$store.getters.getCats[catID].name)
@@ -325,6 +323,7 @@
     background-color: rgba(0, 128, 255, 0.2);
   }
   body{
+    width: 100%;
     margin:0;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
@@ -332,6 +331,7 @@
     -moz-user-select: none; /* Old versions of Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
     user-select: none; /* Non-prefixed version, currently
+
 
                                   supported by Chrome, Opera and Firefox */
   }
@@ -408,6 +408,7 @@
     height: 24px;
     line-height: 24px;
     font-weight: bold;
+    vertical-align: middle;
   }
   #home, #settings {
     margin: 5px;
@@ -438,7 +439,7 @@
     background-color: #f1f1f1;
   }
   .counters {
-    display: flex;
+    display: flow-root;
     position: sticky;
     top: 5px;
     background-color: #fff;
@@ -452,13 +453,16 @@
   .catEdits {
   }
   .input {
-    background-color: inherit;
+    background-color: aliceblue;
     border: none;
     font-size: inherit;
     opacity: 0.5;
   }
   .material-icons {
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     vertical-align: middle;
   }
   #plus, #cancel, #send {

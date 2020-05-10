@@ -1,12 +1,10 @@
 <template>
   <div v-show='$store.getters.getDayBox' class="dayBox">
-    <div id="buttonBox">
-      <button id="x" @click="resetDayBox"><i class="material-icons md-48">clear</i></button>
-      <button id="lock" @click="toggleLock">
-        <i v-if="!$store.state.locked" class="material-icons md-48">lock_open</i>
-        <i v-else class="material-icons md-48">lock</i>
-      </button>
-    </div>
+    <button id="x" @click="resetDayBox"><i class="material-icons md-48">clear</i></button>
+    <button id="lock" @click="toggleLock">
+      <i v-if="!$store.state.locked" class="material-icons md-48">lock_open</i>
+      <i v-else class="material-icons md-48">lock</i>
+    </button>
     <span id="selectedDaysText">
     {{ selectedDaysString }}
     </span>
@@ -203,13 +201,9 @@ export default {
     font-size: 20px;
     width: 95%;
     max-width: 800px;
-  }
-
-  #buttonBox{
-    width: 20%;
-    height: 100%;
-    float: left;
-    position: relative;
+    display: grid;
+    grid-template-columns: 15% 85%;
+    grid-template-rows: 60% 40%;
   }
 
   .cat_button {
@@ -234,34 +228,32 @@ export default {
     background-color: inherit;
     font-size: 40px !important;
     cursor: pointer;
+    margin: 1px;
   }
   #lock {
-    position: absolute;
-    bottom: 5px;
-    left: 0;
+    grid-row: 2;
+    grid-column: 1;
   }
   #x {
-    position: absolute;
-    top: 5px;
-    left: 0;
+    grid-row: 1;
+    grid-column: 1;
+    align-self: baseline;
+    margin-top: 10px;
   }
   #selectedDaysText{
     display: block;
     margin-top: 10px;
   }
-  #selectCat {
-    width: 75%;
-    font-size: inherit;
-  }
   .notebox {
-    position: absolute;
-    bottom: 10px;
-    left: 62%;
     width: fit-content;
+    float: right;
+    grid-column: 2;
+    grid-row: 2;
+    text-align: center;
+    margin: auto;
   }
   .note {
     position: relative;
-    left: -50%;
     vertical-align: top;
   }
   .noteButton {
@@ -271,7 +263,7 @@ export default {
     vertical-align: top;
   }
   .inputNote{
-    background-color: #0bd3d3;
+    background-color: aliceblue;
     border: none;
     line-height: 24px;
     height: 24px;

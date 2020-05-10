@@ -22,17 +22,21 @@
 
 <style scoped>
   .infobox {
-    position:absolute;
+    position:fixed;
     top:50%;
     left:50%;
-    width:400px;  /* adjust as per your needs */
-   /* adjust as per your needs */
-    margin-left:-200px;   /* negative half of width above */
+    width:400px;
+    margin-left:-200px;
     margin-top:-200px;
     background-color: white;
     text-align: center;
     box-shadow: 10px 5px 5px grey;
     border: 1px solid #000;
+  }
+  @media only screen and (min-width: 1200px) {
+    .infobox{
+      left: 600px;
+    }
   }
   .button {
     border: solid;

@@ -96,6 +96,7 @@ export default new Vuex.Store(
 
             state.cat_count[state.info[i][day].cat_id] += 1
           }
+          console.log(state.info[4])
         }
       },
       set_cats (state, catsed) {

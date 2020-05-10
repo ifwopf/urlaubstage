@@ -22,9 +22,16 @@
         </div>
       </div>
       <div class="personalCats" >
-        <div class="personalCat" v-for="cat in personalCats" @click="setPersonalClickedCat(cat.id)"
+        <div class="personalCat" v-for="cat in personalCats" @click="showOptions(cat.id)"
              :draggable="true" @dragstart="drag" :style="cat.style" :id="cat.id">
           {{cat.name}}
+          <div v-if="showOption == cat.id">
+            Verschieben nach:
+            <div class="sharedOptions" v-for="catShared in $store.getters.getSharedCats"
+                 :style="catShared.style" @click="moveTo(false, catShared.id)">
+              {{catShared.name}}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -39,12 +46,23 @@
         </div>
       </div>
       <div class="sharedCats">
-        <div v-for="cat in $store.getters.getSharedCats" @click="setSharedClickedCat(cat.id)" :id="cat.id"
+        <div v-for="cat in $store.getters.getSharedCats" :id="cat.id"
              @drop="drop" @dragover="allowDrop" :style="cat.style" class="sharedCat">
           {{cat.name}}
           <div v-for="personalCat in sharedCats[cat.id]" class="personalCat" :style="personalCat.style"
+               @click="showOptions(personalCat.id)"
                :draggable="true" @dragstart="dragback" :id="personalCat.id">
             {{personalCat.name}}
+            <div v-if="showOption == personalCat.id">
+              Verschieben nach:
+              <div class="sharedOptions" v-for="catShared in $store.getters.getSharedCats" v-if="catShared.id != cat.id"
+                   :style="catShared.style" @click="moveTo(cat.id, catShared.id)">
+                {{catShared.name}}
+              </div>
+              <div class="sharedOptions" @click="moveTo(cat.id, false)">
+                No Sync
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -56,7 +74,6 @@
 
   </div>
 </template>
-
 <script>
 
   export default {
@@ -70,6 +87,7 @@
         personalClickedCat: {"name":""},
         clickedPersonalCal: null,
         clickedSharedCal: null,
+        showOption: 0
       }
     },
     created () {
@@ -169,6 +187,32 @@
       redirect (link) {
         window.location.href = link
       },
+      showOptions(catID) {
+        if(this.showOption != catID){
+          this.showOption = catID;
+        }
+        else {
+          this.showOption = 0;
+        }
+
+      },
+      moveTo(origin, sharedCatID) {
+        if(!origin) {
+          this.sharedCats[sharedCatID].push(this.$store.getters.getPersonalCats[this.showOption])
+          this.$delete(this.personalCats, this.showOption)
+        }
+        else {
+          if(!sharedCatID) {
+            this.sharedCats[origin].splice(this.sharedCats[origin].indexOf(this.$store.getters.getPersonalCats[this.showOption]), 1)
+            this.$set(this.personalCats, this.showOption, this.$store.getters.getPersonalCats[this.showOption])
+          }
+          else {
+            this.sharedCats[sharedCatID].push(this.$store.getters.getPersonalCats[this.showOption])
+            this.sharedCats[origin].splice(this.sharedCats[origin].indexOf(this.$store.getters.getPersonalCats[this.showOption]), 1)
+          }
+        }
+
+      }
     }
   }
 </script>
@@ -257,6 +301,10 @@
     width: 90%;
     text-align: center;
     margin: 10px;
+  }
+  .sharedOptions {
+    border: 1px solid #000;
+    margin: 3px;
   }
 </style>
 <style>

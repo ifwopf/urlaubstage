@@ -61,6 +61,7 @@
         </div>
 
       </template>
+
     </div>
     <div class="edit_box_shadow">&nbsp;</div>
     <day-box/>
@@ -294,7 +295,7 @@
     text-align: center;
     line-height: 1.3;
     grid-auto-flow: column;
-    grid-template-columns: auto;
+    grid-template-columns: 30% 10% 10% 10% 10% 10% 10% 10%;
   }
   .tagrahmen {
     cursor: pointer;
@@ -341,7 +342,7 @@
     background-color: lightskyblue !important;
   }
   .currentDate{
-    background-color: lightgoldenrodyellow !important;
+    background-color: mistyrose !important;
   }
   .kw, .datum{
     margin-top: 10px;
