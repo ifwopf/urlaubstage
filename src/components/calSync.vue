@@ -49,7 +49,7 @@
         <div v-for="cat in $store.getters.getSharedCats" :id="cat.id"
              @drop="drop" @dragover="allowDrop" :style="cat.style" class="sharedCat">
           {{cat.name}}
-          <div v-for="personalCat in sharedCats[cat.id]" class="personalCat" :style="personalCat.style"
+          <div v-if="sharedCats[cat.id].length > 0" v-for="personalCat in sharedCats[cat.id]" class="personalCat" :style="personalCat.style"
                @click="showOptions(personalCat.id)"
                :draggable="true" @dragstart="dragback" :id="personalCat.id">
             {{personalCat.name}}
