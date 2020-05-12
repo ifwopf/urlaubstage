@@ -5,7 +5,6 @@
       <div class="hero-body">
         <div class="titlebox">
           <h2 class="title">Login or Register</h2>
-          <p class="subtitle error-msg">{{ errorMsg }}</p>
         </div>
       </div>
     </section>
@@ -31,19 +30,20 @@
 
       </div>
     </section>
-
+    <infobox/>
   </div>
 </template>
 
 <script>
   import { isValidJwt, EventBus } from '@/utils'
+  import infobox from '@/components/infobox'
   export default {
     name: 'login',
+    components: {infobox},
     data () {
       return {
         email: '',
-        password: '',
-        errorMsg: ''
+        password: ''
       }
     },
     methods: {
@@ -58,10 +58,11 @@
     },
     mounted () {
       EventBus.$on('failedRegistering', (msg) => {
-        this.errorMsg = msg
+        this.$store.commit("setInfoText", "Registrierung fehlgeschlagen")
       })
       EventBus.$on('failedAuthentication', (msg) => {
-        this.errorMsg = msg
+        console.log("herwrtret")
+        this.$store.commit("setInfoText", "Falsche Anmeldedaten")
       })
     },
     beforeDestroy () {
@@ -124,5 +125,6 @@
   }
   .wrapper{
     max-width: 1200px;
+    margin: 5px;
   }
 </style>

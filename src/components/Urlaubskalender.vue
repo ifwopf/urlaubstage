@@ -164,7 +164,7 @@
           this.$store.dispatch('changeCatDropDown', catID)
         }
         else{
-          if(catID !== this.selectedCat && int(catID) !==  0){
+          if(catID !== this.selectedCat && parseInt(catID) !==  0){
             this.selectedCat = catID //to be deleted
             this.$store.commit('setClickedCatCounter', parseInt(catID))
             this.$store.commit('setClickedCatName', this.$store.getters.getCats[catID].name)

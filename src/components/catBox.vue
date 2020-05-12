@@ -45,12 +45,11 @@
         }
       },
       click_on_cat (catID) {
-        console.log(this.admin)
         if(this.$store.state.clicked.length > 0){
           this.$store.dispatch('changeCatDropDown', catID)
         }
         else{
-          if(catID !== this.selectedCat){
+          if(catID !== this.selectedCat && this.admin){
             this.selectedCat = catID
             this.$store.commit('setClickedCatCounter', parseInt(catID))
             this.$store.commit('setClickedCatName', this.$store.getters.getCats[catID].name)

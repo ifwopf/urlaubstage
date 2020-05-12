@@ -32,10 +32,17 @@
     text-align: center;
     box-shadow: 10px 5px 5px grey;
     border: 1px solid #000;
+    max-width: 95%;
   }
   @media only screen and (min-width: 1200px) {
     .infobox{
       left: 600px;
+    }
+  }
+  @media only screen and (max-width: 380px) {
+    .infobox{
+      margin-left:-47.5%;
+      margin-top:-10px;
     }
   }
   .button {
