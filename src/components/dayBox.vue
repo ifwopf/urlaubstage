@@ -193,7 +193,7 @@ export default {
     text-align: center;
     height: 15%;
     position: sticky;
-    bottom: 10px;
+    bottom: 20px;
     box-shadow: 5px 2.5px 2.5px grey;
     border: solid;
     border-width: 0.5px;

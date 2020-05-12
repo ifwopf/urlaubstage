@@ -10,6 +10,10 @@
       <div class="infobox">
         {{ infotext }}
       </div>
+
+    </div>
+    <div class="" v-if="clickedPersonalCal != null || clickedSharedCal != null">
+      <div class="button infobox" @click="reset">Reset</div>
     </div>
     <div class="personal" @drop="dropback" @dragover="allowDrop">
       <div class="titlebox">
@@ -49,7 +53,7 @@
         <div v-for="cat in $store.getters.getSharedCats" :id="cat.id"
              @drop="drop" @dragover="allowDrop" :style="cat.style" class="sharedCat">
           {{cat.name}}
-          <div v-if="sharedCats[cat.id].length > 0" v-for="personalCat in sharedCats[cat.id]" class="personalCat" :style="personalCat.style"
+          <div v-for="personalCat in sharedCats[cat.id]" class="personalCat" :style="personalCat.style"
                @click="showOptions(personalCat.id)"
                :draggable="true" @dragstart="dragback" :id="personalCat.id">
             {{personalCat.name}}
@@ -67,8 +71,8 @@
         </div>
       </div>
     </div>
-    <div class="syncField">
-      <div class="button" @click="saveSyncPair">SAVE</div>
+    <div v-if="clickedPersonalCal != null && clickedSharedCal != null">
+      <div class="button save" @click="saveSyncPair">SAVE</div>
     </div>
 
 
@@ -83,8 +87,6 @@
         newCalender : "Urlaubskalender",
         personalCats: {},
         sharedCats: {},
-        sharedClickedCat: {"name":""},
-        personalClickedCat: {"name":""},
         clickedPersonalCal: null,
         clickedSharedCal: null,
         showOption: 0
@@ -130,11 +132,8 @@
             this.personalCats = JSON.parse(JSON.stringify(this.$store.getters.getPersonalCats));
             for (var key of Object.keys(this.$store.getters.getSharedCats)) {
               this.$set(this.sharedCats, key, [])
-              console.log(this.$store.getters.getSharedCats[key]['syncList'])
               for ( var index in this.$store.getters.getSharedCats[key]['syncList']) {
-                console.log(index)
                 var data = this.$store.getters.getPersonalCats[this.$store.getters.getSharedCats[key]['syncList'][index]]
-                console.log(data)
                 this.sharedCats[key].push(data)
                 this.$delete(this.personalCats, this.$store.getters.getSharedCats[key]['syncList'][index])
               }
@@ -144,13 +143,15 @@
         }
       },
       saveSyncPair() {
-        console.log(this.personalCats)
         var listnosync = []
         for (var nosync in this.personalCats) {
           listnosync.push(nosync)
         }
         var payload = {"syncDict": this.sharedCats, "nosync": listnosync}
         this.$store.dispatch('saveSyncPair', payload)
+        this.$router.push({name: 'calOverview'})
+        location.reload()
+
       },
       allowDrop(event) {
         event.preventDefault();
@@ -178,8 +179,6 @@
         event.stopPropagation();
         var data = event.dataTransfer.getData("personalCat");
         var sharedCatID = event.dataTransfer.getData("parentID");
-        console.log(data)
-        console.log(this.$store.getters.getPersonalCats)
         this.sharedCats[sharedCatID].splice(this.sharedCats[sharedCatID].indexOf(this.$store.getters.getPersonalCats[data]), 1)
         this.$set(this.personalCats, data, this.$store.getters.getPersonalCats[data])
 
@@ -211,7 +210,22 @@
             this.sharedCats[origin].splice(this.sharedCats[origin].indexOf(this.$store.getters.getPersonalCats[this.showOption]), 1)
           }
         }
-
+      },
+      reset() {
+        this.$store.commit("setSharedCats", {})
+        for (var key in this.sharedCats){
+          if (this.sharedCats.hasOwnProperty(key)) {
+            Vue.delete(this.sharedCats, key)
+          }
+        }
+        for (var key2 in this.personalCats){
+          if (this.personalCats.hasOwnProperty(key2)) {
+            Vue.delete(this.personalCats, key2)
+          }
+        }
+        this.sharedCats = {}
+        this.clickedPersonalCal = null
+        this.clickedSharedCal = null
       }
     }
   }
@@ -294,7 +308,7 @@
     background-color: #f1f1f1;
     padding: 5px;
   }
-  .infobox {
+  .infobox, .save {
     border: 1px solid #000;
     padding: 5px;
     min-width: 300px;
