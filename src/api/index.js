@@ -9,6 +9,15 @@ export function register (userData) {
   return axios.post(backendURL + `/urlaub/api/v1.0/register/`, userData)
 }
 
+export function addUnreg (calData, token) {
+  return axios.post(backendURL + `/urlaub/api/v1.0/addUnreg/`, calData, { headers: { Authorization: `Bearer: ` + token }})
+}
+
+export function deleteUser (token) {
+  console.log(token)
+  return axios.post(backendURL + '/urlaub/api/v1.0/deleteUser', null, { headers: { Authorization: `Bearer: ` + token }})
+}
+
 export function getCalName (calID, token) {
   return axios.get(backendURL + '/urlaub/api/v1.0/getCalName/' + calID,  { headers: { Authorization: `Bearer: ` + token }})
 }
@@ -31,4 +40,12 @@ export function saveSharedChanges(payload, token) {
 
 export function saveCalName(payload, token) {
   return axios.post(backendURL + `/urlaub/api/v1.0/saveCalName`, payload, {headers: { Authorization: `Bearer: ` + token }})
+}
+
+export function readyUnreg (data, token) {
+  if(data === undefined){
+    data = "2020"
+  }
+  var yearstring = backendURL + '/urlaub/api/v1.0/daysUnreg/' + data
+  return axios.get(yearstring,  { headers: { Authorization: `Bearer: ` + token }})
 }

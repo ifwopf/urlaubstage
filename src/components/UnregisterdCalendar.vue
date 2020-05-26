@@ -1,17 +1,11 @@
 <template>
   <div class="wrapper" v-if="$store.state.dataReady">
     <h1 class="jahrtitel">
-      <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
-        home
-      </i>
-      {{calName}}
+      Kalender
       <span class="year">
       <i v-if="year != borderyears[0]" class="material-icons" @click="changeYear(false)">keyboard_arrow_left</i> {{ year }}
       <i v-if="year != borderyears[1]" class="material-icons" @click="changeYear(true)">keyboard_arrow_right</i>
         </span>
-      <i class="material-icons" id="settings" @click="showCalSettingsBox">
-        settings
-      </i>
     </h1>
     <div class="counters">
       <div class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
@@ -56,33 +50,26 @@
       </div>
     </div>
     <div class="edit_box_shadow">&nbsp;</div>
-    <day-box :unreg="0"/>
-    <cat-edit-box :unreg="0"/>
-    <Feiertage/>
-    <cal-settings-box :calName="calName" v-model="calName" :calID="calID"/>
+    <day-box :unreg="1" :year="year"/>
+    <cat-edit-box :unreg="1" :year="year"/>
 
   </div>
 </template>
 
 <script>
   import {mapGetters} from 'vuex'
-  import { getCalName } from '@/api'
+  import { readyUnreg } from '@/api'
+  import { loadAllRowsFromIndexedDB, loadFromIndexedDB, saveToIndexedDB } from '@/indexedDB'
   import * as Selection from '@simonwep/selection-js'
   import dayBox from '@/components/dayBox'
   import catEditBox from '@/components/catEditBox'
   import Feiertage from '@/components/Feiertage'
-  import calSettingsBox from '@/components/calSettingsBox'
 
 
   export default {
-    name: 'Urlaubskalender',
-    components: {Feiertage, dayBox, catEditBox, calSettingsBox},
-    props: ['year', 'calID', 'Feiertage'],
-    mounted () {
-      // fetch the data when the view is created and the data is
-      // already being observed
-
-    },
+    name: 'calUnreg',
+    components: {Feiertage, dayBox, catEditBox},
+    props: ['year', 'Feiertage'],
     data () {
       return {
         calName: '',
@@ -94,6 +81,8 @@
         borderyears: [2020,2022],
         currentDay: null,
         currentMonth: null,
+        cats: null,
+        days: null,
         months_en: {
           0: 'Januar',
           1: 'Februar',
@@ -130,11 +119,11 @@
       changeYear (direction) {
         if(direction){
           var yearString = String(parseInt(this.year) + 1)
-          this.$router.push({name: 'Urlaubskalender2', params: {calID: this.calID, year: yearString}})
+          this.$router.push({name: 'calUnreg', params: {year: yearString}})
         }
         else {
           var yearString = String(parseInt(this.year) - 1)
-          this.$router.push({name: 'Urlaubskalender2', params: {calID: this.calID, year: yearString}})
+          this.$router.push({name: 'calUnreg', params: {year: yearString}})
         }
         location.reload()
       },
@@ -155,7 +144,13 @@
       },
       click_on_cat (catID) {
         if(this.$store.state.clicked.length > 0){
-          this.$store.dispatch('changeCatDropDown', catID)
+          this.$store.dispatch('changeCat', catID).then(response => {
+            console.log(response)
+            saveToIndexedDB("MeineDatenbank", "months", this.$store.state.info, this.year)
+          })
+            .catch(error => {
+              console.log('Error Authenticating: ', error)
+            })
         }
         else{
           if(catID !== this.selectedCat && parseInt(catID) !==  0){
@@ -179,7 +174,6 @@
             var day = this.$store.getters.getInfo[i][j]
             if (parseInt(day.cat_id) === parseInt(catID)) {
               if (this.containsObject(this.$store.state.element_map[this.$store.state.currentUser][day.id], this.$store.state.clicked)) {
-
               }
               else {
                 this.$store.dispatch('setClicked', day.id)
@@ -226,24 +220,81 @@
           this.catName = ''
         }
       },
-      getCal (calID, token) {
-        return getCalName(calID, token)
+
+    },
+    mounted () {
+
+      var dbconnect = window.indexedDB.open("MeineDatenbank", 1);
+      dbconnect.onupgradeneeded = ev => {
+        console.log('Upgrade DB');
+        const db = ev.target.result;
+        const store = db.createObjectStore('months');
+        const cats = db.createObjectStore('cats');
+        return readyUnreg(this.year, this.$store.state.jwt.token)
           .then(response => {
-            this.calName = response.data;
+
+            this.$store.commit('set_cats', response.data['cats'])
+            this.$store.commit('set_info', response.data['days'])
+            this.$store.commit('set_dataReady', true)
+            var tx = db.transaction('months', 'readwrite');
+            var store = tx.objectStore('months');
+            store.add(this.$store.state.info, this.year);
+            //cats
+            tx = db.transaction('cats', 'readwrite');
+            store = tx.objectStore('cats');
+            const keys = Object.keys(this.$store.state.cats)
+            for (const key of keys) {
+              store.add(this.$store.state.cats[key], parseInt(key));
+            }
           })
           .catch(error => {
             console.log('Error Authenticating: ', error)
           })
       }
+      dbconnect.onsuccess = ev => {
+        const db = ev.target.result;
 
-    },
-    mounted () {
-      this.$store.commit('setCurrentCal', this.calID)
-      this.$store.dispatch('ready', [this.calID, this.year])
-      this.getCal(this.calID, this.$store.state.jwt.token)
+        //cats
+        loadAllRowsFromIndexedDB('MeineDatenbank', 'cats')
+          .then(response => {
+            this.$store.commit('set_cats', response)
+          }).catch(function (error) {
+          console.log(error.message);
+        });
+
+
+        //months
+        loadFromIndexedDB('MeineDatenbank', 'months', this.year)
+          .then(response => {
+
+            this.$store.commit('set_info', response)
+            this.$store.commit('set_dataReady', true)
+
+          }).catch(error => {
+            return readyUnreg(this.year, this.$store.state.jwt.token)
+              .then(response => {
+                this.$store.commit('set_info', response.data['days'])
+                this.$store.commit('set_dataReady', true)
+                var tx = db.transaction('months', 'readwrite');
+                var store = tx.objectStore('months');
+                store.add(this.$store.state.info, this.year);
+              })
+              .catch(error => {
+                console.log('Error Authenticating: ', error)
+              })
+          });
+      }
+
+      this.$store.commit('setCurrentUser', -1)
+
       var currentTime = new Date();
       this.currentMonth = currentTime.getMonth() + 1;
       this.currentDay = currentTime.getDate();
+
+
+
+
+
       Selection.create({
         // Class for the selection-area-element
         class: 'selection-area',
@@ -420,10 +471,10 @@
   }
   .wochentag, .monatstitel, .jahrtitel {
     color: #000;
-    background-color: #fff;
     text-align: center;
   }
   .jahrtitel {
+    background-color: #fff;
     display: inline-block;
     padding: 10px;
     margin: 10px;
@@ -432,9 +483,13 @@
     display: inline-block;
   }
   .monatstitel {
-    padding: 3px 10px 3px 10px
+    background-color: #fff;
+    padding: 3px 10px 3px 10px;
+    margin: 10px auto;
   }
   .wochentag {
+    background-color: #fff;
+    margin-bottom: 2px;
   }
   .counters {
     display: flow-root;

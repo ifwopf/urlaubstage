@@ -18,7 +18,9 @@
       <div class="userbox">
         <div class="user" v-for="(user, id) in users">{{ user.email }}
           <button  @click="toggleAdmin(id)" :class="[user.admin ? 'admin' : 'nonAdmin']">Admin</button>
-          <button  @click="removeFromUsers(id)">delete</button>
+          <span @click="removeFromUsers(id)">
+            <i class="material-icons" id="delete">delete</i>
+          </span>
         </div>
       </div>
     </div>
@@ -196,6 +198,9 @@
     color: #000;
     text-align: center;
   }
+  .nameDisplay {
+    text-align: center;
+  }
   #home {
     margin: 5px;
     display: block;
@@ -214,5 +219,11 @@
   }
   .user{
     margin: 5px;
+  }
+  #delete {
+    float: right;
+    cursor: pointer;
+    border: 1px solid #000;
+    background-color: inherit;
   }
 </style>

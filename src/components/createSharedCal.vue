@@ -5,7 +5,7 @@
         <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
           home
         </i>
-        Kalender synchronisieren
+        Team-Kalender erstellen
       </h1>
     </div>
     <div class="box">
@@ -18,6 +18,9 @@
       <div class="userbox">
         <div class="user" v-for="(admin, user) in users" v-bind:key="user">{{ user }}
           <button :key="admin" @click="toggleAdmin(user)" :class="[admin ? 'admin' : 'nonAdmin']">Admin</button>
+          <span v-if="user != creator" @click="removeUser(user)">
+            <i class="material-icons" id="delete">delete</i>
+          </span>
         </div>
       </div>
     </div>
@@ -40,10 +43,11 @@
 
     data () {
       return {
-        sharedCalName: null,
+        sharedCalName: '',
         users: {},
         currentUser: null,
         currentCatName: null,
+        creator: ''
       }
     },
     created () {
@@ -71,9 +75,25 @@
             }
           })
       },
+      removeUser(user) {
+        if (user != this.getCurrentUser()){
+          Vue.delete(this.users, user)
+        }
+        else {
+          this.$store.dispatch("setInfoText", "Du kannst dich als Ersteller nicht entfernen!")
+        }
+
+      },
       addSharedCal () {
-        var stuff = {"name": this.sharedCalName, "addedUsers": this.users}
-        this.$store.dispatch("createShared", stuff)
+        if (this.sharedCalName != "") {
+          var stuff = {"name": this.sharedCalName, "addedUsers": this.users}
+          this.$store.dispatch("createShared", stuff)
+          this.$router.push({name: 'calOverview'})
+          location.reload()
+        }
+        else {
+          this.$store.dispatch("setInfoText", "Bitte gebe einen Namen ein!")
+        }
       },
       toggleAdmin (user) {
         //event.target.classList.toggle("nonAdmin")
@@ -89,6 +109,7 @@
           .then(response => {
             Vue.set(this.users, response.data, true)
             this.currentUser = ""
+            this.creator = response.data
           })
           .catch(function (error) {
             console.log(error)
@@ -124,6 +145,7 @@
     text-align: center;
     text-decoration: none;
     display: inline-block;
+    cursor: pointer;
   }
   .nonAdmin {
     background-color: lightcoral;
@@ -173,6 +195,12 @@
     float: left;
     cursor: pointer;
     border: 1px solid #000;
+  }
+  #delete {
+    float: right;
+    cursor: pointer;
+    border: 1px solid #000;
+    background-color: inherit;
   }
   .header{
     text-align: center;

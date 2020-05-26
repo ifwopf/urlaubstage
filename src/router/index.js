@@ -6,7 +6,9 @@ import sharedCal from '@/components/sharedCal'
 import createSharedCal from '@/components/createSharedCal'
 import calOverview from '@/components/calOverview'
 import calSync from '@/components/calSync'
+import calUnreg from '@/components/UnregisterdCalendar'
 import editShared from '@/components/editShared'
+import notFound from '@/components/notFound'
 import store from '@/store'
 
 Vue.use(Router)
@@ -19,7 +21,6 @@ export default new Router({
       component: Urlaubskalender,
 
       beforeEnter (to, from, next) {
-        console.log("hey")
         next()
         if (!store.getters.isAuthenticated) {
           next('/login')
@@ -33,7 +34,6 @@ export default new Router({
       component: Urlaubskalender,
       props: true,
       beforeEnter (to, from, next) {
-        console.log("hey")
         next()
         if (!store.getters.isAuthenticated) {
           next('/login')
@@ -72,7 +72,14 @@ export default new Router({
     {
       path: '/login',
       name: 'login',
-      component: login
+      component: login,
+
+    },
+    {
+      path: '/unreg/:year',
+      name: 'calUnreg',
+      component: calUnreg,
+      props: true
     },
     {
       path: '/createSharedCal',
@@ -112,6 +119,7 @@ export default new Router({
         }
       }
     },
-
+    { path: '/404', component: notFound },
+    { path: '*', redirect: '/404' },
   ]
 })

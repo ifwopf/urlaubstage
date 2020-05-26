@@ -47,7 +47,6 @@
         return getFeiertage(token)
           .then(response => {
             this.feiertage = response.data;
-            console.log(this.feiertage)
           })
           .catch(error => {
             console.log('Error Authenticating: ', error)

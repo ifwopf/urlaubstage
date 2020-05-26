@@ -7,66 +7,109 @@
       <i v-if="user['admin']" class="material-icons" id="settings" @click="redirect('/#/editShared/' + calID)">
         settings
       </i>
+      <div id="view" @click="changeView"><span v-if="weekView">M</span><span v-else>W</span></div>
       {{calName}}
       <span class="year">
-        <i v-if="year != borderyears[0]" class="material-icons arrow" @click="changeYear(false)">keyboard_arrow_left</i>
-        {{ year }}
-        <i v-if="year != borderyears[1]" class="material-icons arrow" @click="changeYear(true)">keyboard_arrow_right</i>
-      </span>
+          <i v-if="year != borderyears[0]" class="material-icons arrow" @click="changeYear(false)">keyboard_arrow_left</i>
+          {{ year }}
+          <i v-if="year != borderyears[1]" class="material-icons arrow" @click="changeYear(true)">keyboard_arrow_right</i>
+        </span>
+
     </h1>
     <cat-box :admin="user['admin']"/>
-    <div class="grid" v-for="(month,index) in $store.getters.getSharedInfo">
-      <div class="monatstitel" :id="index" v-bind:style="{ 'grid-row': 1, 'grid-column':'1/9'}"
-           :class="{ 'currentDate': index == currentMonth}" @click="toggleActive(index)">
-        {{months_en[index]}}
-      </div>
 
-      <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 2">Mo</div>
-      <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 3">Di</div>
-      <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 4">Mi</div>
-      <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 5">Do</div>
-      <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 6">Fr</div>
-      <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 7">Sa</div>
-      <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 8">So</div>
-      <template v-for="(userCal, jindex) in month">
-        <template v-if="jindex==0 && activeMonths.includes(index)" v-for="day in userCal">
-          <div  class="datum" :class="{ 'currentDate': (day.day==currentDay && day.month-1 == currentMonth)}"
-                v-if="activeMonths.includes(index)"
-                 :style="{'grid-column': weekday[day.weekday], 'grid-row': getRow(weekday[day.weekday], day.day, month.length)+(3)}">
-            {{ day.day }}
+    <div v-if="weekView">
+
+      <div class="grid" v-for="(month,index) in $store.getters.getSharedInfo">
+        <div class="monatstitel" :id="index" v-bind:style="{ 'grid-row': 1, 'grid-column':'1/9'}"
+             :class="{ 'currentDate': index == currentMonth}" @click="toggleActive(index)">
+          {{months_en[index]}}
+        </div>
+
+        <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 2">Mo</div>
+        <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 3">Di</div>
+        <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 4">Mi</div>
+        <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 5">Do</div>
+        <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 6">Fr</div>
+        <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 7">Sa</div>
+        <div v-if="activeMonths.includes(index)" class="wochentag" style="grid-row: 2; grid-column: 8">So</div>
+        <template v-for="(userCal, jindex) in month">
+          <template v-if="jindex==0 && activeMonths.includes(index)" v-for="day in userCal">
+            <div  class="datum" :class="{ 'currentDate': (day.day==currentDay && day.month-1 == currentMonth)}"
+                  v-if="activeMonths.includes(index)"
+                   :style="{'grid-column': weekday[day.weekday], 'grid-row': getRow(weekday[day.weekday], day.day, month.length)+(3)}">
+              {{ day.day }}
+            </div>
+            <div class="kw" @click="toggleActiveWeeks(getKW(day.year, day.month, day.day))"
+                 v-if="activeMonths.includes(index) && (weekday[day.weekday]==2 || day.day == 1)"
+                 :style="{'grid-column': 1, 'grid-row': getRow(weekday[day.weekday], day.day, month.length)+(3)}">
+              KW{{getKW(day.year, day.month, day.day)}}
+            </div>
+          </template>
+          <div v-for="j in getWeekAmount(month[0])" class="user" :uID="$store.getters.getSharedUsers[jindex][0]"
+               v-if="activeMonths.includes(index) &&
+               activeWeeks.includes(getKW(userCal[getFirstIndexOfWeek(j,userCal[0])].year,
+               userCal[getFirstIndexOfWeek(j,userCal[0])].month, userCal[getFirstIndexOfWeek(j,userCal[0])].day))"
+               :class="{ currentUser: $store.getters.getSharedUsers[jindex][0] == user['id'] }"
+               v-bind:style="[{'grid-row': 4+jindex+(($store.getters.getSharedUsers.length+1)*(j-1)), 'grid-column': 1}]">
+            {{$store.getters.getSharedUsers[jindex][1].split("@")[0]}}
           </div>
-          <div class="kw" @click="toggleActiveWeeks(getKW(day.year, day.month, day.day))"
-               v-if="activeMonths.includes(index) && (weekday[day.weekday]==2 || day.day == 1)"
-               :style="{'grid-column': 1, 'grid-row': getRow(weekday[day.weekday], day.day, month.length)+(3)}">
-            KW{{getKW(day.year, day.month, day.day)}}
+          <div  class="tagrahmen"
+                v-for="day in userCal" :id="'d'+day.id+'u'+day.userID"
+                v-if="activeMonths.includes(day.month-1) &&
+                activeWeeks.includes(getKW(day.year, day.month, day.day))"
+                :dayID="day.id" :userID="day.userID" :key="day.id+'u'+day.userID"
+                @click="mouse_on_day(day.userID, $event)" :style="[$store.getters.getElementMapByIDStyle(day.userID, day.id),
+               $store.getters.getCatByID(day.cat_id).style,
+               day.clicked ? {'border-color': 'black'} : {'border-color': 'lightgrey'},
+               {'grid-column': weekday[day.weekday], 'grid-row': getRow(weekday[day.weekday], day.day, month.length)+4+jindex}]">
           </div>
+
         </template>
-        <div v-for="j in getWeekAmount(month[0])" class="user" :uID="$store.getters.getSharedUsers[jindex][0]"
-             v-if="activeMonths.includes(index) &&
-             activeWeeks.includes(getKW(userCal[getFirstIndexOfWeek(j,userCal[0])].year,
-             userCal[getFirstIndexOfWeek(j,userCal[0])].month, userCal[getFirstIndexOfWeek(j,userCal[0])].day))"
-             :class="{ currentUser: $store.getters.getSharedUsers[jindex][0] == user['id'] }"
-             v-bind:style="[{'grid-row': 4+jindex+(($store.getters.getSharedUsers.length+1)*(j-1)), 'grid-column': 1}]">
-          {{$store.getters.getSharedUsers[jindex][1].split("@")[0]}}
-        </div>
-        <div  class="tagrahmen"
-              v-for="day in userCal" :id="'d'+day.id+'u'+day.userID"
-              v-if="activeMonths.includes(day.month-1) &&
-              activeWeeks.includes(getKW(day.year, day.month, day.day))"
-              :dayID="day.id" :userID="day.userID" :key="day.id+'u'+day.userID"
-              @click="mouse_on_day(day.userID, $event)" :style="[$store.getters.getElementMapByIDStyle(day.userID, day.id),
-             $store.getters.getCatByID(day.cat_id).style,
-             day.clicked ? {'border-color': 'black'} : {'border-color': 'lightgrey'},
-             {'grid-column': weekday[day.weekday], 'grid-row': getRow(weekday[day.weekday], day.day, month.length)+4+jindex}]">
-        </div>
 
-      </template>
+      </div>
+    </div>
+    <div v-if="!weekView">
+      <div class="gridMonth" v-for="(month,index) in $store.getters.getSharedInfo">
+        <div class="monatstitel" :id="index" v-bind:style="{ 'grid-row': 1}"
+             :class="{ 'currentDate': index == currentMonth}" @click="toggleActive(index)">
+          {{months_en[index]}}
+        </div>
+        <template v-for="(userCal, jindex) in month" >
+          <template v-if="jindex==0 && activeMonths.includes(index)" v-for="day in userCal">
+            <div  class="datum" :class="{ 'currentDate': (day.day==currentDay && day.month-1 == currentMonth)}"
+                  :style="{'grid-column': day.day +1, 'grid-row': jindex+1}">
+              {{ day.day }}
+            </div>
+            <div  class="weekday" :class="{ 'currentDate': (day.day==currentDay && day.month-1 == currentMonth)}"
+                  :style="{'grid-column': day.day +1, 'grid-row': jindex+2}">
+              {{ day.weekday.substring(0,1) }}
+            </div>
+          </template>
+          <div class="user" :uID="$store.getters.getSharedUsers[jindex][0]" v-if="activeMonths.includes(index)"
+               :class="{ currentUser: $store.getters.getSharedUsers[jindex][0] == user['id'] }"
+               v-bind:style="[{'grid-row': jindex+3, 'grid-column': 1}]">
+            {{$store.getters.getSharedUsers[jindex][1].split("@")[0]}}
+          </div>
+          <div  class="tagrahmen"
+                v-for="day in userCal" :id="'d'+day.id+'u'+day.userID"
+                v-if="activeMonths.includes(index)"
+                :dayID="day.id" :userID="day.userID" :key="day.id+'u'+day.userID"
+                @click="mouse_on_day(day.userID, $event)" :style="[$store.getters.getElementMapByIDStyle(day.userID, day.id),
+               $store.getters.getCatByID(day.cat_id).style,
+               day.clicked ? {'border-color': 'black'} : {'border-color': 'lightgrey'},
+               {'grid-column': day.day+1, 'grid-row': jindex+3}]">
+          </div>
 
+        </template>
+
+      </div>
     </div>
     <div class="edit_box_shadow">&nbsp;</div>
-    <day-box/>
-    <cat-edit-box/>
+    <day-box :unreg="0"/>
+    <cat-edit-box :unreg="0"/>
     <infobox/>
+
   </div>
 </template>
 
@@ -125,10 +168,11 @@
         currentMonth: null,
         currentDay: null,
         user: null,
+        weekView: true,
       }
     },
 
-    created () {
+    mounted () {
       // fetch the data when the view is created and the data is
       // already being observed
       //$(".second_div").css({'width': ($(".first_div").width() + 'px')});
@@ -269,6 +313,10 @@
           .catch(error => {
             console.log('Error Authenticating: ', error)
           })
+      },
+      changeView() {
+        this.weekView = !this.weekView
+
       }
     },
 
@@ -276,14 +324,13 @@
 </script>
 <style>
   body{
+    background-color: aliceblue;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
     -khtml-user-select: none; /* Konqueror HTML */
     -moz-user-select: none; /* Old versions of Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
-    user-select: none; /* Non-prefixed version, currently
-
-                                  supported by Chrome, Opera and Firefox */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
   }
 </style>
 <style scoped>
@@ -297,6 +344,13 @@
     grid-auto-flow: column;
     grid-template-columns: 30% 10% 10% 10% 10% 10% 10% 10%;
   }
+  .gridMonth {
+    display: grid;
+    text-align: center;
+    line-height: 1.3;
+    grid-auto-flow: column;
+    grid-template-columns: 20% repeat(31, 1fr);
+  }
   .tagrahmen {
     cursor: pointer;
     margin: 1px;
@@ -308,8 +362,12 @@
   .tagrahmen:hover{
     background-color: lightgrey !important;
   }
+  .wochentag {
+    background-color: #fff;
+    margin-top: 5px;
+  }
   .monatstitel {
-    background-color: #f1f1f1;
+    background-color: #fff;
     margin-top: 10px;
     padding: 3px;
     font-size: 18px;
@@ -317,21 +375,26 @@
   }
 
   .jahrtitel {
-    background-color: #f1f1f1;
+    background-color: #fff;
     display: inline-block;
     padding: 10px;
     margin: 10px;
     color: #000;
     text-align: center;
   }
-  #home, #settings, .arrow {
+  #home, #settings, .arrow, #view {
     cursor: pointer;
   }
-  #home, #settings {
+  #home, #settings, #view {
     border: 1px solid #000;
     float: left;
     display: block;
     margin: 5px;
+  }
+
+  #view {
+    line-height: 1;
+    font-size: 24px;
   }
 
   .user {
@@ -347,7 +410,7 @@
   .kw, .datum{
     margin-top: 10px;
     line-height: 2;
-    background-color: aliceblue;
+    background-color: #fff;
   }
   .kw {
     cursor: pointer;

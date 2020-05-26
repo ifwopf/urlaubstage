@@ -33,10 +33,12 @@
 
 
 import axios from 'axios'
+import { saveToIndexedDB } from '@/indexedDB'
 import {mapActions} from 'vuex'
 import {mapGetters} from 'vuex'
 export default {
   name: 'dayBox',
+  props: ["unreg", "year"],
   data () {
     return {
       catName: '',
@@ -115,45 +117,15 @@ export default {
       //this.catEditColor = this.$store.state.clickedCat[0].style['background-color']
       this.edit = true
     },
-    addNewCat () {
-      var doppelt = false
-      for (var i = 0; i < this.$store.state.cats.length; i++) {
-        if (this.catName === this.$store.state.cats[i].name) {
-          doppelt = true
-        }
-      }
-      if (!doppelt) {
-        this.$store.dispatch('addCat', this.catName)
-        this.catName = ''
-      }
-    },
     addNote() {
-      this.$store.dispatch("addNote", this.note)
+      if (this.unreg == "0"){
+        this.$store.dispatch("addNote", this.note)
+      }
       this.editNote = !this.editNote
-    },
-    change_cat (event) {
-      var oldCat = this.element_map[this.clicked[0].id].cat_id
-      axios.post('http://127.0.0.1:5000/urlaub/api/v1.0/change_cat', {
-        cat_id: event.target.id,
-        id: this.clicked[0].id
-      })
-        .then(function (response) {
-          console.log(response.data)
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-      this.element_map[this.clicked[0].id].cat_id = event.target.id
-      this.cat_count[oldCat] -= 1
-      this.cat_count[event.target.id] += 1
-      // console.log(this.element_map[this.clicked.id].style_object['background-color'])
-    },
-    editCat () {
-      var payload = {'color': this.catEditColor['background-color'], 'name': this.catEditName}
-      this.$store.dispatch('editCat', payload)
-      this.edit = !this.edit
+      saveToIndexedDB("MeineDatenbank", "months", this.$store.state.info, this.year)
     },
     resetDayBox () {
+      this.editNote = false
       this.edit = false
       this.$store.commit('setBorder', false)
       this.$store.dispatch('resetClicked')

@@ -26,11 +26,13 @@
   import axios from 'axios'
   import {mapActions} from 'vuex'
   import {mapGetters} from 'vuex'
+  import { saveToIndexedDB, removeFromIndexedDB, loadFromIndexedDB } from '@/indexedDB'
   import ColorSelect from './colorSelect'
 
   export default {
     name: 'catEditBox',
     components: {ColorSelect},
+    props: ["unreg", "year"],
     data () {
       return {
         catName: null,
@@ -68,18 +70,50 @@
     methods: {
       deleteCat () {
         this.$store.commit('hideCatEdit')
-        this.$store.dispatch('deleteCat', this.$store.state.clickedCatCounter)
+        if (this.unreg == "1") {
+          this.$store.dispatch('deleteCatUnreg', this.$store.state.clickedCatCounter)
+          removeFromIndexedDB("MeineDatenbank", "cats", this.$store.state.clickedCatCounter)
+          saveToIndexedDB("MeineDatenbank", "months", this.$store.state.info, this.year)
+        }
+        else {
+          this.$store.dispatch('deleteCat', this.$store.state.clickedCatCounter)
+        }
       },
       changeName () {
-        console.log(this.catNameInit)
-        var payload = {'name': this.catNameInit, 'id': this.$store.state.clickedCatCounter}
-        this.$store.dispatch('changeCatName', payload)
-        this.editName = false
+        if (this.unreg == "1") {
+          const catID = this.$store.state.clickedCatCounter
+          this.$store.commit('editCatName', {'name': this.catNameInit, 'id': catID})
+          loadFromIndexedDB("MeineDatenbank", "cats", catID).then(response => {
+            response["name"] = this.catNameInit
+            saveToIndexedDB("MeineDatenbank", "cats", response, catID)
+          }).catch(error => {
+            console.log(error)
+          })
+          this.editName = false
+        }
+        else {
+          var payload = {'name': this.catNameInit, 'id': this.$store.state.clickedCatCounter}
+          this.$store.dispatch('changeCatName', payload)
+          this.editName = false
+        }
       },
       changeColor () {
-        var payload = {'catColor': this.catColor, 'id': this.$store.state.clickedCatCounter}
-        this.$store.dispatch('changeCatColor', payload)
-        this.editColor = false
+        if (this.unreg == "1") {
+          const catID = this.$store.state.clickedCatCounter
+          this.$store.commit('editCatColor', {'catColor': this.catColor, 'id': catID})
+          loadFromIndexedDB("MeineDatenbank", "cats", catID).then(response => {
+            response["style"]["background-color"] = this.catColor
+            saveToIndexedDB("MeineDatenbank", "cats", response, catID)
+          }).catch(error => {
+            console.log(error)
+          })
+          this.editColor = false
+        }
+        else {
+          var payload = {'catColor': this.catColor, 'id': this.$store.state.clickedCatCounter}
+          this.$store.dispatch('changeCatColor', payload)
+          this.editColor = false
+        }
       },
       showColorEdit () {
         this.editColor = true
@@ -106,15 +140,26 @@
       },
       addNewCat () {
         var doppelt = false
-        for (var i = 0; i < this.$store.state.cats.length; i++) {
-          if (this.catName === this.$store.state.cats[i].name) {
-            doppelt = true
-          }
+        if (this.unreg == "1") {
+          var newCat = {"name": this.catNameInit, "style": {"background-color": this.catColor}}
+          this.$store.dispatch('addCatUnreg', newCat).then(response => {
+            console.log(response)
+            saveToIndexedDB("MeineDatenbank", "cats", response, response.id)
+          })
+            .catch(error => {
+              console.log('Error Authenticating: ', error)
+            })
         }
-        if (!doppelt) {
-          this.$store.dispatch('addCat', {catName: this.catNameInit, catColor: this.catColor})
-          this.catName = ''
-
+        else {
+          for (var i = 0; i < this.$store.state.cats.length; i++) {
+            if (this.catName === this.$store.state.cats[i].name) {
+              doppelt = true
+            }
+          }
+          if (!doppelt) {
+            this.$store.dispatch('addCat', {catName: this.catNameInit, catColor: this.catColor})
+            this.catName = ''
+          }
         }
       },
     }

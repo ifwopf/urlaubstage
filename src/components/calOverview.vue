@@ -4,7 +4,8 @@
       <div class="titlebox">
         <h2 class="title">Deine Kalender</h2>
       </div>
-      <div class="kalender" v-if="!cal.shared" v-for="cal in $store.state.cals" @click="redirect('#/calender/' + cal.id + '/2020')">
+      <div class="kalender" v-if="!cal.shared" v-for="cal in $store.state.cals"
+           @click="redirect('Urlaubskalender2', {calID: cal.id, year: '2020'})">
         <span>{{cal.name}}</span>
       </div>
       <div class="kalender">
@@ -16,10 +17,11 @@
       <div class="titlebox">
         <h2 class="title">Team-Kalender</h2>
       </div>
-      <div class="kalender" v-if="cal.shared" v-for="cal in $store.state.cals" @click="redirect('#/shared/' + cal.id + '/2020')">
+      <div class="kalender" v-if="cal.shared" v-for="cal in $store.state.cals"
+           @click="redirect('sharedCal', {calID: cal.id, year: '2020'})">
         <span >{{cal.name}}</span>
       </div>
-      <div class="kalender" @click="redirect('#/createSharedCal')">
+      <div class="kalender" @click="redirect('createSharedCal', {})">
         <span>Neuer Teamkalender</span> <div class="button">+</div>
       </div>
     </div>
@@ -27,11 +29,14 @@
       <div class="titlebox">
         <h2 class="title">Einstellungen</h2>
       </div>
-      <div class="kalender" @click="redirect('#/calSync')">
+      <div class="kalender" @click="redirect('calSync', {})">
         <span >Kalender synchronisieren</span>
       </div>
       <div class="kalender" @click="logout">
         <span >Passwort ändern</span>
+      </div>
+      <div class="kalender" @click="deleteUser2">
+        <span >Alles löschen</span>
       </div>
       <div class="kalender" @click="logout">
         <span >Logout</span>
@@ -41,6 +46,7 @@
 </template>
 
 <script>
+  import { deleteUser } from '@/api'
   export default {
     name: 'calOverview',
     data () {
@@ -58,11 +64,23 @@
       addCal () {
         this.$store.dispatch('addCal', this.newCalender)
       },
-      redirect (link) {
-        window.location.href = link
+      redirect (comp, parameters) {
+        this.$store.dispatch('resetClicked')
+        this.$router.push({name: comp, params: parameters})
+        location.reload()
       },
       logout() {
         this.$store.dispatch('logout')
+      },
+      deleteUser2() {
+        console.log(this.$store.state.jwt.token)
+        return deleteUser(this.$store.state.jwt.token)
+          .then(response => {
+            this.redirect("login", null)
+          })
+          .catch(error => {
+            console.log('Error Authenticating: ', error)
+          })
       }
 
     }

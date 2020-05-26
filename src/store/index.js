@@ -4,14 +4,15 @@ import axios from 'axios'
 import VueInputAutowidth from 'vue-input-autowidth'
 
 // imports of AJAX functions will go here
-import { authenticate, register } from '@/api'
-import { isValidJwt, EventBus } from '@/utils'
+import {authenticate, register, addUnreg} from '@/api'
+import {isValidJwt, EventBus} from '@/utils'
 import router from '@/router'
 
 Vue.use(Vuex)
 Vue.use(VueInputAutowidth)
-//export const backendURL = "http://127.0.0.1:5000"
-export const backendURL = "https://urlaubskalender.herokuapp.com"
+export const backendURL = 'http://127.0.0.1:5000'
+
+//export const backendURL = "https://urlaubskalender.herokuapp.com"
 
 function compare (a, b) {
   if (a.day < b.day) {
@@ -59,7 +60,7 @@ export default new Vuex.Store(
       //sync
       sharedCats: {},
       personalCats: {},
-      infotext: "",
+      infotext: '',
       showinfo: false,
       showFeiertage: false,
       showCalSettingsBox: false
@@ -96,15 +97,15 @@ export default new Vuex.Store(
 
             state.cat_count[state.info[i][day].cat_id] += 1
           }
-          console.log(state.info[4])
         }
       },
       set_cats (state, catsed) {
         state.cats = catsed
-        state.cats[0] = {"id": 0,
-          "name": "default",
-          "value": 1,
-          "style": {"background-color": '#fff'}
+        state.cats[0] = {
+          'id': 0,
+          'name': 'default',
+          'value': 1,
+          'style': {'background-color': '#fff'}
         }
         var count = 0
         for (var key in state.cats) {
@@ -119,8 +120,8 @@ export default new Vuex.Store(
       setSharedInfo (state, days) {
         state.sharedUserDays = days
         state.sharedUserDays.forEach(function (monat, index) {
-          monat.forEach(function(user, jindex){
-            user.forEach(function(day, kindex){
+          monat.forEach(function (user, jindex) {
+            user.forEach(function (day, kindex) {
               Vue.set(day, 'clicked', false)
               Vue.set(state.element_map[day.userID], day.id, day)
               state.cat_count[day.cat_id] += 1
@@ -134,13 +135,13 @@ export default new Vuex.Store(
       setSharedName (state, sharedName) {
         state.sharedName = sharedName
       },
-      setSharedUsers (state, users){
+      setSharedUsers (state, users) {
         state.sharedUsers = users
-        for (var user in state.sharedUsers){
+        for (var user in state.sharedUsers) {
           state.element_map[state.sharedUsers[user][0]] = {}
         }
       },
-      set_sharedDataReady (state, toggle){
+      set_sharedDataReady (state, toggle) {
         state.sharedDataReady = toggle
       },
       set_dataReady (state, toggle) {
@@ -153,18 +154,18 @@ export default new Vuex.Store(
         state.currentCal = calID
       },
       setClicked (state, payload) {
-        Vue.set(state.element_map[payload.uID][payload.dayID], 'clicked', true);
-        Vue.set(state.element_map[payload.uID][payload.dayID],'id', 0)
-        Vue.set(state.element_map[payload.uID][payload.dayID],'id', parseInt(payload.dayID))
+        Vue.set(state.element_map[payload.uID][payload.dayID], 'clicked', true)
+        Vue.set(state.element_map[payload.uID][payload.dayID], 'id', 0)
+        Vue.set(state.element_map[payload.uID][payload.dayID], 'id', parseInt(payload.dayID))
         state.clicked.push(state.element_map[payload.uID][payload.dayID])
       },
       resetClicked (state) {
         for (var index = 0; index < state.clicked.length; index++) {
-          var id  = state.clicked[index].id
+          var id = state.clicked[index].id
           var userID = state.clicked[index].userID
-          Vue.set(state.element_map[userID][id], 'clicked', false);
-          Vue.set(state.element_map[userID][id],'id', 0)
-          Vue.set(state.element_map[userID][id],'id', id)
+          Vue.set(state.element_map[userID][id], 'clicked', false)
+          Vue.set(state.element_map[userID][id], 'id', 0)
+          Vue.set(state.element_map[userID][id], 'id', id)
         }
         state.clicked = []
         //state.clickedCatCounter = null
@@ -173,29 +174,29 @@ export default new Vuex.Store(
         state.edit = false
         state.dayBox = false
       },
-      removeClicked (state, payload){
-        Vue.set(state.element_map[payload['userID']][payload['id']], 'clicked', false);
+      removeClicked (state, payload) {
+        Vue.set(state.element_map[payload['userID']][payload['id']], 'clicked', false)
         state.clicked.splice(payload['index'], 1)
         state.clickedCat.splice(payload['index'], 1)
-        Vue.set(state.element_map[payload['userID']][payload['id']],'id', 0)
-        Vue.set(state.element_map[payload['userID']][payload['id']],'id', payload['id'])
+        Vue.set(state.element_map[payload['userID']][payload['id']], 'id', 0)
+        Vue.set(state.element_map[payload['userID']][payload['id']], 'id', payload['id'])
       },
       setClickedCat (state, payload) {
         state.clickedCat.push(state.cats[state.element_map[payload.uID][payload.dayID].cat_id])
       },
-      setClickedCatCounter (state, catID){
+      setClickedCatCounter (state, catID) {
         state.clickedCatCounter = catID
         state.catColor = state.cats[catID].style['background-color']
       },
-      setCatColor (state, color){
+      setCatColor (state, color) {
         state.catColor = color
       },
       setClickedCatName (state, catName) {
         state.clickedCatName = catName
       },
       changeClickedCat (state, cat) {
-        var count = state.clickedCat.length;
-        for(var i = 0; i < count; i++) {
+        var count = state.clickedCat.length
+        for (var i = 0; i < count; i++) {
           state.cat_count[state.clickedCat[i].id] -= 1
           Vue.set(state.clickedCat, i, cat)
           state.cat_count[cat.id] += 1
@@ -203,7 +204,7 @@ export default new Vuex.Store(
         }
       },
       addNotes (state, note) {
-        for(var i = 0; i < state.clicked.length; i++) {
+        for (var i = 0; i < state.clicked.length; i++) {
           Vue.set(state.clicked[i], 'note', note)
         }
       },
@@ -217,10 +218,11 @@ export default new Vuex.Store(
       editCatName (state, payload) {
         state.cats[payload.id].name = payload.name
       },
+
       addCat (state, newCat) {
         state.cat_count[newCat.id] = 0
         state.cats[newCat.id] = newCat
-        for(var i = 0; i< state.clicked.length; i++){
+        for (var i = 0; i < state.clicked.length; i++) {
           state.cat_count[state.clicked[i].cat_id] -= 1
           state.cat_count[newCat.id] += 1
           state.clicked[i].cat_id = newCat.id
@@ -232,6 +234,11 @@ export default new Vuex.Store(
       alterCatRefs (state, payload) {
         state.info[payload.month][payload.day]['cat_id'] = 0
         state.cat_count[0] += 1
+      },
+      setToDefaultCat (state, payload) {
+        Vue.set(state.element_map[state.currentUser][payload], 'cat_id', 0)
+        console.log(state.element_map)
+        Vue.set(state.cat_count,0, state.cat_count[0] + 1)
       },
       deleteCat (state, catID) {
         Vue.delete(state.cat_count, catID)
@@ -262,18 +269,18 @@ export default new Vuex.Store(
         localStorage.token = payload.jwt.token
         state.jwt = payload.jwt
       },
-      toggleLock(state) {
-        if(state.locked){
+      toggleLock (state) {
+        if (state.locked) {
           state.locked = false
         }
-        else{
+        else {
           state.locked = true
         }
       },
-      replaceUserdayID(state, payload){
-        Object.keys(payload).forEach(function(key) {
+      replaceUserdayID (state, payload) {
+        Object.keys(payload).forEach(function (key) {
           state.element_map[payload[key].userID][key].userdayID = payload[key].userdayID
-        });
+        })
       },
       //SHARED
       //sync
@@ -290,51 +297,60 @@ export default new Vuex.Store(
       removeInfo (state) {
         state.showinfo = false
       },
-      showFeiertage(state) {
+      showFeiertage (state) {
         state.showFeiertage = true
       },
-      removeFeiertage(state) {
+      removeFeiertage (state) {
         state.showFeiertage = false
       },
-      showCalSettingsBox(state) {
+      showCalSettingsBox (state) {
         state.showCalSettingsBox = true
       },
-      removeCalSettingsBox(state) {
+      removeCalSettingsBox (state) {
         state.showCalSettingsBox = false
       }
-
 
     },
     actions: {
       login (context, userData) {
-        context.commit('setUserData', { userData })
+        context.commit('setUserData', {userData})
         return authenticate(userData)
-          .then(response => context.commit('setJwtToken', { jwt: response.data }))
+          .then(response => context.commit('setJwtToken', {jwt: response.data}))
           .catch(error => {
             console.log('Error Authenticating: ', error)
             EventBus.$emit('failedAuthentication', error)
           })
       },
       logout (context) {
-        context.commit('setJwtToken', { jwt: {token: null} })
+        context.commit('setJwtToken', {jwt: {token: null}})
         router.go('/')
       },
-      register (context, userData) {
-        context.commit('setUserData', { userData })
+      register ({commit, dispatch, state}, data) {
+        var userData = {email: data['email'], password: data['password']}
+        commit('setUserData', userData)
         return register(userData)
-          .then(context.dispatch('login', userData))
+          .then(dispatch('login', userData)
+            .then(res => {
+                if (data['years'] != null) {
+                  addUnreg({years: data['years'], cats: data['cats']}, state.jwt.token)
+                }
+              }
+            ).catch(error => {
+              console.log('Error Login: ', error)
+            })
+          )
           .catch(error => {
             console.log('Error Registering: ', error)
             EventBus.$emit('failedRegistering: ', error)
           })
       },
-      ready ({ commit, state, jwt }, data) {
-        if(data[1] === undefined){
-          data[1] = "2020"
+      ready ({commit, state, jwt}, data) {
+        if (data[1] === undefined) {
+          data[1] = '2020'
         }
         var yearstring = backendURL + '/urlaub/api/v1.0/days/' + data[0] + '/' + data[1]
-        axios.get(yearstring, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
-          //.then(response => response.json())
+        axios.get(yearstring, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
+        //.then(response => response.json())
           .then((response) => {
             commit('setCurrentUser', response.data['user'])
             commit('set_cats', response.data['cats'])
@@ -343,42 +359,57 @@ export default new Vuex.Store(
             commit('setCurrentCal', data[0])
           })
       },
-      calReady ({ commit, state, jwt }) {
+      readyUnreg ({commit, state, jwt}, data) {
+        if (data === undefined) {
+          data = '2020'
+        }
+        var yearstring = backendURL + '/urlaub/api/v1.0/daysUnreg/' + data
+        axios.get(yearstring, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
+        //.then(response => response.json())
+          .then((response) => {
+            //commit('setCurrentUser', response.data['user'])
+            commit('set_cats', response.data['cats'])
+            commit('set_info', response.data['days'])
+            commit('set_dataReady', true)
+            //commit('setCurrentCal', data[0])
+          })
+      },
+      calReady ({commit, state, jwt}) {
         var calstring = backendURL + '/urlaub/api/v1.0/cal'
-        axios.get(calstring, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
+        axios.get(calstring, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
         //.then(response => response.json())
           .then((response) => {
             commit('setCals', response.data)
             commit('setCalDataReady', true)
           })
       },
-      sharedReady ({ commit, state, jwt }, payload) {
-        if(payload[1] === undefined){
-          payload[1] = "2020"
+      sharedReady ({commit, state, jwt}, payload) {
+        if (payload[1] === undefined) {
+          payload[1] = '2020'
         }
         var yearstring = backendURL + '/urlaub/api/v1.0/shared/' + payload[0] + '/' + payload[1]
-        axios.get(yearstring, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
+        axios.get(yearstring, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
         //.then(response => response.json())
           .then((response) => {
             commit('setCurrentCal', payload[0])
             commit('setCurrentUser', response.data[4])
-            commit('setSharedName', response.data[0] )
+            commit('setSharedName', response.data[0])
             commit('setSharedUsers', response.data[1])
             commit('setSharedInfo', response.data[2])
             commit('set_cats', response.data[3])
             commit('set_sharedDataReady', true)
           })
       },
-      editCatDisplay ({commit, dispatch, state}){
+      editCatDisplay ({commit, dispatch, state}) {
         commit('setBorder', true)
       },
       changeCatDropDown ({commit, state}, catID) {
         commit('changeClickedCat', state.cats[catID])
-        axios.post(backendURL + '/urlaub/api/v1.0/change_cat',  {
+        axios.post(backendURL + '/urlaub/api/v1.0/change_cat', {
           cat_id: catID,
           days: state.clicked,
           calID: state.currentCal
-        }, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
             commit('replaceUserdayID', response.data)
           })
@@ -386,12 +417,16 @@ export default new Vuex.Store(
             console.log(error)
           })
       },
+      changeCat ({commit, state}, catID) {
+        commit('changeClickedCat', state.cats[catID])
+        return 'Yeah'
+      },
       addNote ({commit, state}, note) {
-        axios.post(backendURL + '/urlaub/api/v1.0/addNote',  {
+        axios.post(backendURL + '/urlaub/api/v1.0/addNote', {
           note: note,
           days: state.clicked,
           calID: state.currentCal
-        }, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
             commit('replaceUserdayID', response.data)
           })
@@ -405,19 +440,19 @@ export default new Vuex.Store(
           catId: state.clickedCat[0].id,
           catColor: payload.color,
           catName: payload.name
-        },{headers: { Authorization: `Bearer: ${state.jwt.token}` } })
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
           })
           .catch(function (error) {
             console.log(error)
           })
       },
-      changeCatName({commit, state}, payload) {
+      changeCatName ({commit, state}, payload) {
         commit('editCatName', payload)
         axios.post(backendURL + '/urlaub/api/v1.0/editCatName', {
           catId: payload.id,
           catName: payload.name
-        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
 
           })
@@ -425,12 +460,12 @@ export default new Vuex.Store(
             console.log(error)
           })
       },
-      changeCatColor({commit, state}, payload) {
+      changeCatColor ({commit, state}, payload) {
         commit('editCatColor', payload)
         axios.post(backendURL + '/urlaub/api/v1.0/editCatColor', {
           catId: payload.id,
           catColor: payload.catColor
-        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
 
           })
@@ -438,20 +473,20 @@ export default new Vuex.Store(
             console.log(error)
           })
       },
-      setClicked({commit, state}, payload){
+      setClicked ({commit, state}, payload) {
         commit('setClicked', payload)
         commit('setClickedCat', payload)
         commit('setDayBox')
       },
-      resetClicked({commit, state}){
+      resetClicked ({commit, state}) {
         commit('resetClicked')
       },
-      removeClicked({commit, state}, payload){
+      removeClicked ({commit, state}, payload) {
         var index = state.clicked.indexOf(state.element_map[payload.uID][payload.dayID])
-        if(state.clicked.length === 1){
+        if (state.clicked.length === 1) {
           commit('resetClicked')
         }
-        else{
+        else {
           var pay2 = {}
           pay2['index'] = index
           pay2['userID'] = payload.uID
@@ -465,7 +500,7 @@ export default new Vuex.Store(
           cat_color: payload.catColor,
           calID: state.currentCal,
           clicked: state.clicked
-        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
             commit('addCat', response.data[0])
             commit('replaceUserdayID', response.data[1])
@@ -475,29 +510,70 @@ export default new Vuex.Store(
             console.log(error)
           })
       },
+      addCatUnreg ({commit, state}, payload) {
+        console.log(payload)
+        var findID = true
+        var newCatID = Object.keys(state.cats).length
+        console.log(state.cats)
+        while (findID) {
+          if (!(newCatID in state.cats)) {
+            payload.id = newCatID
+            findID = false
+          }
+          else {
+            newCatID++
+          }
+        }
+        commit('addCat', payload)
+        commit('setBorder', false)
+        return payload
+      },
+      deleteCal ({commit, state}, calID) {
+        axios.post(backendURL + '/urlaub/api/v1.0/deleteCal', {
+          calID: calID
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
+          .then(function (response) {
+            router.push({name: 'calOverview'})
+            location.reload()
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      },
       deleteCat ({commit, state}, catID) {
         axios.post(backendURL + '/urlaub/api/v1.0/deleteCat', {
           catID: catID
-        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
-            for (var i = 0; i < 11; i++) {
-              for (var j = 0; j < state.info[i].length; j++) {
-                if (state.info[i][j]['cat_id'] === catID) {
-                  var payload = {'month': i, 'day': j}
-                  commit('alterCatRefs', payload)
-                }
-              }
+            console.log(response.data)
+            console.log(state.currentUser)
+            for (var i = 0; i < response.data.length; i++) {
+                  console.log(response.data[i])
+                  commit('setToDefaultCat', response.data[i])
             }
+            console.log(state.element_map)
             commit('deleteCat', catID)
           })
           .catch(function (error) {
             console.log(error)
           })
       },
-      addCal ({ commit, state}, calName) {
+      deleteCatUnreg ({commit, state}, catID) {
+        for (var i = 0; i < 11; i++) {
+          for (var j = 0; j < state.info[i].length; j++) {
+            if (state.info[i][j]['cat_id'] === catID) {
+              var payload = {'month': i, 'day': j}
+              commit('alterCatRefs', payload)
+            }
+          }
+        }
+        commit('deleteCat', catID)
+        return 'DeletedCat'
+      },
+      addCal ({commit, state}, calName) {
         axios.post(backendURL + '/urlaub/api/v1.0/addCal', {
           calName: calName
-        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
             router.go('/calOverview')
           })
@@ -507,11 +583,11 @@ export default new Vuex.Store(
       },
 
       //SHARED
-      createShared({commit, state, jwt}, sharedValues) {
+      createShared ({commit, state, jwt}, sharedValues) {
         axios.post(backendURL + '/urlaub/api/v1.0/createShared', {
           named: sharedValues.name,
           addedUsers: sharedValues.addedUsers
-        },{headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
           })
           .catch(function (error) {
@@ -519,56 +595,56 @@ export default new Vuex.Store(
           })
       },
       //sync
-      getCats({commit, state, jwt}, payload) {
+      getCats ({commit, state, jwt}, payload) {
         return axios.get(backendURL + '/urlaub/api/v1.0/getCats/' + payload.uCalID + '/' + payload.sCalID,
-          { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
+          {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
-              commit('setSharedCats', response.data[1])
-              commit('setPersonalCats', response.data[0])
+            commit('setSharedCats', response.data[1])
+            commit('setPersonalCats', response.data[0])
 
           })
           .catch(function (error) {
             console.log(error)
           })
       },
-      saveSyncPair({commit, state, jwt}, payload) {
+      saveSyncPair ({commit, state, jwt}, payload) {
         axios.post(backendURL + '/urlaub/api/v1.0/setSyncPair', payload,
-          {headers: { Authorization: `Bearer: ${state.jwt.token}` }})
+          {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
           })
           .catch(function (error) {
             console.log(error)
           })
       },
-      setInfoText ({commit, state}, payload){
+      setInfoText ({commit, state}, payload) {
         commit('setInfoText', payload)
       },
-      removeInfo ({commit, state}){
+      removeInfo ({commit, state}) {
         commit('removeInfo')
       },
-      showFeiertage ({commit}){
+      showFeiertage ({commit}) {
         commit('showFeiertage')
       },
-      removeFeiertage ({commit}){
+      removeFeiertage ({commit}) {
         commit('removeFeiertage')
       },
       addFeiertage ({commit, state}, payload) {
-        axios.post(backendURL + '/urlaub/api/v1.0/addFeiertage',  {
+        axios.post(backendURL + '/urlaub/api/v1.0/addFeiertage', {
           region: payload.region,
           catID: payload.catID,
           calID: state.currentCal
-        }, { headers: { Authorization: `Bearer: ${state.jwt.token}` } })
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
-            //commit('replaceUserdayID', response.data)
+            location.reload()
           })
           .catch(function (error) {
             console.log(error)
           })
       },
-      showCalSettingsBox ({commit}){
+      showCalSettingsBox ({commit}) {
         commit('showCalSettingsBox')
       },
-      removeCalSettingsBox ({commit}){
+      removeCalSettingsBox ({commit}) {
         commit('removeCalSettingsBox')
       },
     },

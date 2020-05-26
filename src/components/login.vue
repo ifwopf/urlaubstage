@@ -4,11 +4,14 @@
     <section class="hero is-primary">
       <div class="hero-body">
         <div class="titlebox">
-          <h2 class="title">Login or Register</h2>
+          <h2 class="title">
+            <button class="button" :class="{active: login}" @click="showLogin">Login</button>
+            <button class="button" :class="{active: !login}" @click="showRegister">Register</button>
+          </h2>
         </div>
       </div>
     </section>
-    <section class="section">
+    <section v-if="login" class="section">
       <div class="container">
         <div class="field">
           <label class="label is-large" for="email">Email</label>
@@ -17,7 +20,7 @@
           </div>
         </div>
         <div class="field">
-          <label class="label is-large" for="password">Password</label>
+          <label class="label is-large" for="password">Passwort</label>
           <div class="control">
             <input type="password" class="input" id="password" v-model="password">
           </div>
@@ -25,6 +28,30 @@
 
         <div class="control">
           <a class="button is-large is-primary" @click="authenticate">Login</a>
+        </div>
+
+      </div>
+    </section>
+    <section v-if="!login" class="section">
+      <div class="container">
+        <div class="field">
+          <label class="label is-large" for="email">Email</label>
+          <div class="control">
+            <input type="email" class="input" id="emailReg" v-model="email">
+          </div>
+        </div>
+        <div class="field">
+          <label class="label is-large" for="password">Passwort</label>
+          <div class="control">
+            <input type="password" class="input" v-model="password">
+          </div>
+          <label class="label is-large" for="password">Passwort bestätigen</label>
+          <div class="control">
+            <input type="password" class="input" v-model="passwordConfirm">
+          </div>
+        </div>
+
+        <div class="control">
           <a class="button is-large is-success" @click="register">Register</a>
         </div>
 
@@ -37,13 +64,17 @@
 <script>
   import { isValidJwt, EventBus } from '@/utils'
   import infobox from '@/components/infobox'
+  import { loadAllRowsFromIndexedDB } from '@/indexedDB'
+
   export default {
     name: 'login',
     components: {infobox},
     data () {
       return {
         email: '',
-        password: ''
+        password: '',
+        passwordConfirm: '',
+        login: true,
       }
     },
     methods: {
@@ -52,8 +83,43 @@
           .then(() => this.$router.push('/calOverview'))
       },
       register () {
-        this.$store.dispatch('register', { email: this.email, password: this.password })
-          .then(() => this.$router.push('/calOverview'))
+        console.log(this.password, this.passwordConfirm)
+        if (this.password === this.passwordConfirm) {
+          var dbconnect = window.indexedDB.open("MeineDatenbank", 1);
+          dbconnect.onupgradeneeded = ev => {
+            console.log('No DB');
+          }
+          dbconnect.onsuccess = ev => {
+            const db = ev.target.result;
+
+            //cats
+            loadAllRowsFromIndexedDB('MeineDatenbank', 'cats')
+              .then(response1 => {
+                //months
+                loadAllRowsFromIndexedDB('MeineDatenbank', 'months')
+                  .then(response2 => {
+                    this.$store.dispatch('register', { email: this.email, password: this.password, years:response2, cats:response1 })
+                      .then(() => this.$router.push('/calOverview'))
+
+                  }).catch(error => {
+                  this.$store.dispatch('register', { email: this.email, password: this.password , years:null, cats:null})
+                    .then(() => this.$router.push('/calOverview'))
+                });
+              }).catch(function (error) {
+              this.$store.dispatch('register', { email: this.email, password: this.password, years:null, cats:null })
+                .then(() => this.$router.push('/calOverview'))
+            });
+          }
+        }
+        else {
+          this.$store.commit("setInfoText", "Password stimmt nicht überein!")
+        }
+      },
+      showLogin () {
+        this.login = true
+      },
+      showRegister () {
+        this.login = false
       }
     },
     mounted () {
@@ -118,6 +184,9 @@
     display: inline-block;
     width: 90%;
     font-size: 16px;
+    background-color: #0bd3d3;
+  }
+  .active{
     background-color: #0bd3d3;
   }
   .titlebox {
