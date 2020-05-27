@@ -27,7 +27,7 @@
         </div>
 
         <div class="control">
-          <a class="button is-large is-primary" @click="authenticate">Login</a>
+          <a class="button reglog is-large is-primary" @click="authenticate">Login</a>
         </div>
 
       </div>
@@ -52,7 +52,7 @@
         </div>
 
         <div class="control">
-          <a class="button is-large is-success" @click="register">Register</a>
+          <a class="button reglog is-large is-success" @click="register">Register</a>
         </div>
 
       </div>
@@ -137,11 +137,23 @@
     }
   }
 </script>
-
+<style>
+  body{
+    background-color: aliceblue;
+    width: 100%;
+    margin:0;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currentlysupported by Chrome, Opera and Firefox */
+  }
+</style>
 <style scoped>
   h2 {
     display:inline-block;
-    background-color: #f1f1f1;
+    background-color: #fff;
     padding: 5px;
   }
   .container {
@@ -149,9 +161,7 @@
     position: sticky;
     top: 5px;
     background-color: #fff;
-    box-shadow: 5px 2.5px 2.5px grey;
-    border: solid;
-    border-width: 1px;
+    box-shadow: 5px 3px 5px grey;
     font-size: 20px;
     padding: 5px;
     width: auto;
@@ -163,8 +173,6 @@
     margin: 10px;
   }
   .button {
-    border: solid;
-    border-width: 1px;
     padding: 10px 24px;
     text-align: center;
     text-decoration: none;
@@ -172,9 +180,10 @@
     font-size: 16px;
     background-color: #fff;
     cursor: pointer;
+    border: none
   }
   .button:hover{
-    background-color: lightgrey;
+    background-color: aliceblue;
   }
 
   .input {
@@ -184,10 +193,10 @@
     display: inline-block;
     width: 90%;
     font-size: 16px;
-    background-color: #0bd3d3;
+    background-color: aliceblue;
   }
   .active{
-    background-color: #0bd3d3;
+    background-color: aliceblue;
   }
   .titlebox {
     text-align: center;
@@ -195,5 +204,8 @@
   .wrapper{
     max-width: 1200px;
     margin: 5px;
+  }
+  .reglog{
+    background-color: aliceblue;
   }
 </style>

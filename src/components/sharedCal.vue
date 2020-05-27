@@ -354,13 +354,11 @@
   .tagrahmen {
     cursor: pointer;
     margin: 1px;
-    border-width: 1px;
-    border-style: solid;
-    border-color: lightgrey;
+    border: 1px solid;
     line-height: 2;
   }
-  .tagrahmen:hover{
-    background-color: lightgrey !important;
+  .tagrahmen:hover, .monatstitel:hover{
+    background-color: aliceblue !important;
   }
   .wochentag {
     background-color: #fff;
@@ -386,7 +384,7 @@
     cursor: pointer;
   }
   #home, #settings, #view {
-    border: 1px solid #000;
+    border: none;
     float: left;
     display: block;
     margin: 5px;
@@ -402,10 +400,10 @@
     line-height: 2;
   }
   .currentUser{
-    background-color: lightskyblue !important;
+    background-color: #b7e1fc !important;
   }
   .currentDate{
-    background-color: mistyrose !important;
+    background-color: #b7e1fc !important;
   }
   .kw, .datum{
     margin-top: 10px;
@@ -415,11 +413,9 @@
   .kw {
     cursor: pointer;
     min-width: 100px;
-
-
   }
   .kw:hover{
-    background-color: lightgrey;
+    background-color: aliceblue;
   }
   .wrapper {
     width: 100%;

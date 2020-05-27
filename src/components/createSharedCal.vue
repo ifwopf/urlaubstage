@@ -118,13 +118,18 @@
     }
   }
 </script>
-
-<style scoped>
-  h2 {
-    display:inline-block;
-    background-color: #f890e7;
-    padding: 5px;
+<style>
+  body{
+    background-color: aliceblue;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
   }
+</style>
+<style scoped>
   .box {
     background-color: #fff;
     box-shadow: 5px 2.5px 2.5px grey;
@@ -159,7 +164,7 @@
     text-align: center;
     text-decoration: none;
     font-size: 16px;
-    background-color: #0bd3d3;
+    background-color: aliceblue;
     margin: 5px auto;
     max-width: 400px;
     cursor: pointer;
@@ -179,10 +184,10 @@
     padding: 7px 18px;
     display: inline-block;
     font-size: 16px;
-    background-color: #0bd3d3;
+    background-color: aliceblue;
   }
   .jahrtitel {
-    background-color: #f1f1f1;
+    background-color: #fff;
     display: inline-block;
     padding: 10px;
     margin: 10px;

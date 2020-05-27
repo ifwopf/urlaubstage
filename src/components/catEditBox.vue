@@ -173,9 +173,7 @@
     top: 50%;
     transform: translate(-50%, -50%);
     background-color: #fff;
-    box-shadow: 5px 2.5px 2.5px grey;
-    border: solid;
-    border-width: 0.5px;
+    box-shadow: 10px 5px 5px grey;
     font-size: 24px;
     padding: 5px;
     text-align: center;
@@ -192,18 +190,8 @@
     font-size: 24px;
   }
 
-  .gridContainer {
-    display: grid;
-  }
-  .colorField {
-    margin: 3px;
-    cursor: pointer;
-    width: 24px;
-    height: 24px;
-    border: 1px solid white;
-  }
-  .bordered{
-    border: 1px solid black !important;
+  input{
+    background-color: aliceblue;
   }
 
 </style>

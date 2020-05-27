@@ -64,7 +64,7 @@
     max-width: 300px;
   }
   .colorField {
-    margin: 3px;
+    margin: 3px auto;
     cursor: pointer;
     width: 24px;
     height: 24px;

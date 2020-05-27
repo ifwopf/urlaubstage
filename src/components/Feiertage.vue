@@ -10,6 +10,7 @@
       Welcher Kategorie sollen die Feiertage hinzugefügt werden?
     </div>
     <select v-model="catID">
+      <option :value="-1">Neue Kategorie</option>
       <option v-for="cat in $store.getters.getCats" :value="cat.id">{{cat.name}}</option>
     </select>
     <br/><br/>
@@ -66,7 +67,7 @@
 
 <style scoped>
   .infobox {
-    position:absolute;
+    position:fixed;
     top:50%;
     left:50%;
     width:400px;  /* adjust as per your needs */
@@ -76,17 +77,16 @@
     background-color: white;
     text-align: center;
     box-shadow: 10px 5px 5px grey;
-    border: 1px solid #000;
+    border: none;
   }
   .button {
-    border: solid;
-    border-width: 1px;
+    border: none;
     padding: 10px 24px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    background-color: #0bd3d3;
+    background-color: aliceblue;
     margin-bottom: 10px;
     cursor: pointer;
   }
@@ -96,4 +96,5 @@
     padding: 10px 24px;
     margin-top: 10px;
   }
+  select{background-color: aliceblue}
 </style>

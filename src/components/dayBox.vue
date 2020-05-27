@@ -1,5 +1,5 @@
 <template>
-  <div v-show='$store.getters.getDayBox' class="dayBox">
+  <div v-show='$store.getters.getDayBox && !multipleUsers' class="dayBox">
     <button id="x" @click="resetDayBox"><i class="material-icons md-48">clear</i></button>
     <button id="lock" @click="toggleLock">
       <i v-if="!$store.state.locked" class="material-icons md-48">lock_open</i>
@@ -47,6 +47,7 @@ export default {
       edit: false,
       locked: false,
       editNote: false,
+      multipleUsers: false,
       tmpNote: '',
       colors: [{'background-color': '#b4b9cc'}, {'background-color': '#7387b0'}, {'background-color': '#ffca62'},
         {'background-color': '#ee5f82'}, {'background-color': '#f986a2'}, {'background-color': '#E0B3E6'},
@@ -85,7 +86,16 @@ export default {
       var selectedDaysString = ""
       var lastKey = -2
       var chain = false;
+      var users = {}
       for(var key in sorted){
+        var userInClicked = sorted[key].userID
+        users[userInClicked] = true
+        if(Object.keys(users).length > 1){
+          this.multipleUsers = true
+        }
+        else {
+          this.multipleUsers = false
+        }
         var currentDay = sorted[key]
         if (lastKey === -2){
           selectedDaysString += currentDay.day + "." + currentDay.month + " "
@@ -121,8 +131,11 @@ export default {
       if (this.unreg == "0"){
         this.$store.dispatch("addNote", this.note)
       }
+      else{
+        saveToIndexedDB("MeineDatenbank", "months", this.$store.state.info, this.year)
+      }
       this.editNote = !this.editNote
-      saveToIndexedDB("MeineDatenbank", "months", this.$store.state.info, this.year)
+
     },
     resetDayBox () {
       this.editNote = false
@@ -167,8 +180,6 @@ export default {
     position: sticky;
     bottom: 20px;
     box-shadow: 5px 2.5px 2.5px grey;
-    border: solid;
-    border-width: 0.5px;
     margin: auto;
     font-size: 20px;
     width: 95%;

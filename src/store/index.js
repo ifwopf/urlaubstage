@@ -10,9 +10,9 @@ import router from '@/router'
 
 Vue.use(Vuex)
 Vue.use(VueInputAutowidth)
-//export const backendURL = 'http://127.0.0.1:5000'
+export const backendURL = 'http://127.0.0.1:5000'
 
-export const backendURL = "https://urlaubskalender.herokuapp.com"
+//export const backendURL = "https://urlaubskalender.herokuapp.com"
 
 function compare (a, b) {
   if (a.day < b.day) {
@@ -204,6 +204,7 @@ export default new Vuex.Store(
         }
       },
       addNotes (state, note) {
+        console.log("note")
         for (var i = 0; i < state.clicked.length; i++) {
           Vue.set(state.clicked[i], 'note', note)
         }
@@ -422,6 +423,7 @@ export default new Vuex.Store(
         return 'Yeah'
       },
       addNote ({commit, state}, note) {
+        commit('addNotes', note)
         axios.post(backendURL + '/urlaub/api/v1.0/addNote', {
           note: note,
           days: state.clicked,

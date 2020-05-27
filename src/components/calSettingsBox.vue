@@ -71,7 +71,6 @@
     }
   }
 </script>
-
 <style scoped>
   .infobox {
     position:fixed;
@@ -83,12 +82,11 @@
     background-color: white;
     text-align: center;
     box-shadow: 10px 5px 5px grey;
-    border: 1px solid #000;
+    border: none;
     max-width: 95%;
   }
   @media only screen and (min-width: 1200px) {
     .infobox{
-      left: 600px;
     }
   }
   @media only screen and (max-width: 380px) {
@@ -97,14 +95,13 @@
     }
   }
   .button {
-    border: solid;
-    border-width: 1px;
+    border: none;
     padding: 10px 24px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    background-color: #0bd3d3;
+    background-color: aliceblue;
     margin-bottom: 10px;
     cursor: pointer;
   }
@@ -115,7 +112,7 @@
     vertical-align: top;
   }
   .inputName{
-    background-color: #0bd3d3;
+    background-color: aliceblue;
     border: none;
     line-height: 24px;
     height: 24px;

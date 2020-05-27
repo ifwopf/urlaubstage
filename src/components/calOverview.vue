@@ -86,37 +86,51 @@
     }
   }
 </script>
+<style>
+  body{
+    background-color: aliceblue;
+    width: 100%;
+    margin:0;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currentlysupported by Chrome, Opera and Firefox */
+  }
+</style>
 
 <style scoped>
   h2 {
     display:inline-block;
-    background-color: #f1f1f1;
+    background-color: #fff;
     padding: 5px;
   }
   .kalender {
     background-color: #fff;
-    box-shadow: 5px 2.5px 2.5px grey;
-    border: solid;
-    border-width: 1px;
+    box-shadow: 5px 3px 3px grey;
     font-size: 20px;
     padding: 10px;
     width: 300px;
     text-align: center;
-    margin: 5px auto;
+    margin: 8px auto;
     cursor: pointer;
   }
   .kalender:hover {
-    background-color: lightgrey;
+    background-color: aliceblue;
   }
   .wrapper {
     width: 100%;
     overflow: hidden; /* add this to contain floated children */
     max-width: 1200px;
+    text-align: center;
   }
   .personal, .shared, .settings {
     margin: 10px 20px;
     min-width: 300px;
     text-align: center;
+    vertical-align: top;
+    display: inline-block;
 
   }
 
@@ -128,7 +142,7 @@
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    background-color: #0bd3d3;
+    background-color: aliceblue;
   }
   .input {
     border: solid;
@@ -136,6 +150,6 @@
     padding: 7px 18px;
     display: inline-block;
     font-size: 16px;
-    background-color: #0bd3d3;
+    background-color: aliceblue;
   }
 </style>

@@ -416,7 +416,7 @@
     display: block;
     float: left;
     cursor: pointer;
-    border: 1px solid #000;
+    background-color: aliceblue;
   }
   .wochentag, .monatstitel, .jahrtitel {
     color: #000;
@@ -432,9 +432,11 @@
     display: inline-block;
   }
   .monatstitel {
-    padding: 3px 10px 3px 10px
+    padding: 3px 10px 3px 10px;
+    margin-bottom: 5px
   }
   .wochentag {
+    margin-bottom: 3px
   }
   .counters {
     display: flow-root;
@@ -442,8 +444,6 @@
     top: 5px;
     background-color: #fff;
     box-shadow: 5px 2.5px 2.5px grey;
-    border: solid;
-    border-width: 1px;
     font-size: inherit;
     width: 90%;
     margin: 0 auto;
