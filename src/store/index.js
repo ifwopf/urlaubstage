@@ -4,7 +4,7 @@ import axios from 'axios'
 import VueInputAutowidth from 'vue-input-autowidth'
 
 // imports of AJAX functions will go here
-import {authenticate, register, addUnreg} from '@/api'
+import {authenticate, register, addUnreg, deleteUser, removeUserFromShared} from '@/api'
 import {isValidJwt, EventBus} from '@/utils'
 import router from '@/router'
 
@@ -12,8 +12,8 @@ Vue.use(Vuex)
 Vue.use(VueInputAutowidth)
 
 //export const backendURL = 'http://127.0.0.1:5000'
-export const backendURL = "https://urlaubskalender.herokuapp.com"
 
+export const backendURL = "https://urlaubskalender.herokuapp.com"
 
 function compare (a, b) {
   if (a.day < b.day) {
@@ -64,7 +64,9 @@ export default new Vuex.Store(
       infotext: '',
       showinfo: false,
       showFeiertage: false,
-      showCalSettingsBox: false
+      showCalSettingsBox: false,
+      showDeleteBox: false,
+      deleteText: "",
     },
     mutations: {
       /*
@@ -205,7 +207,6 @@ export default new Vuex.Store(
         }
       },
       addNotes (state, note) {
-        console.log("note")
         for (var i = 0; i < state.clicked.length; i++) {
           Vue.set(state.clicked[i], 'note', note)
         }
@@ -239,8 +240,7 @@ export default new Vuex.Store(
       },
       setToDefaultCat (state, payload) {
         Vue.set(state.element_map[state.currentUser][payload], 'cat_id', 0)
-        console.log(state.element_map)
-        Vue.set(state.cat_count,0, state.cat_count[0] + 1)
+        Vue.set(state.cat_count, 0, state.cat_count[0] + 1)
       },
       deleteCat (state, catID) {
         Vue.delete(state.cat_count, catID)
@@ -299,6 +299,14 @@ export default new Vuex.Store(
       removeInfo (state) {
         state.showinfo = false
       },
+      setDeleteBox (state, text) {
+        state.deleteText = text
+        state.showDeleteBox = true
+      },
+      removeDeleteBox (state) {
+        state.deleteText = ""
+        state.showDeleteBox = false
+      },
       showFeiertage (state) {
         state.showFeiertage = true
       },
@@ -331,19 +339,26 @@ export default new Vuex.Store(
         var userData = {email: data['email'], password: data['password']}
         commit('setUserData', userData)
         return register(userData)
-          .then(dispatch('login', userData)
-            .then(res => {
-                if (data['years'] != null) {
-                  addUnreg({years: data['years'], cats: data['cats']}, state.jwt.token)
-                }
-              }
-            ).catch(error => {
-              console.log('Error Login: ', error)
-            })
-          )
-          .catch(error => {
-            console.log('Error Registering: ', error)
-            EventBus.$emit('failedRegistering: ', error)
+          .then(res => {
+            if (res.data === 999) {
+              commit('setInfoText', 'Email bereits vorhanden')
+            }
+            else {
+              dispatch('login', userData)
+                .then(res => {
+                    if (data['years'] != null) {
+                      addUnreg({years: data['years'], cats: data['cats']}, state.jwt.token)
+                    }
+                    return "ok"
+                  }
+                ).catch(error => {
+                console.log('Error Login: ', error)
+              })
+                .catch(error => {
+                  console.log('Error Registering: ', error)
+                  EventBus.$emit('failedRegistering: ', error)
+                })
+            }
           })
       },
       ready ({commit, state, jwt}, data) {
@@ -514,10 +529,8 @@ export default new Vuex.Store(
           })
       },
       addCatUnreg ({commit, state}, payload) {
-        console.log(payload)
         var findID = true
         var newCatID = Object.keys(state.cats).length
-        console.log(state.cats)
         while (findID) {
           if (!(newCatID in state.cats)) {
             payload.id = newCatID
@@ -548,13 +561,9 @@ export default new Vuex.Store(
           catID: catID
         }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
-            console.log(response.data)
-            console.log(state.currentUser)
             for (var i = 0; i < response.data.length; i++) {
-                  console.log(response.data[i])
-                  commit('setToDefaultCat', response.data[i])
+              commit('setToDefaultCat', response.data[i])
             }
-            console.log(state.element_map)
             commit('deleteCat', catID)
           })
           .catch(function (error) {
@@ -595,6 +604,17 @@ export default new Vuex.Store(
           })
           .catch(function (error) {
             console.log(error)
+          })
+      },
+      removeUserFromShared ({state}, calID) {
+        console.log(calID)
+        return removeUserFromShared({"calID": calID}, state.jwt.token)
+          .then(response => {
+            router.push({name: 'calOverview'})
+            location.reload()
+          })
+          .catch(error => {
+            console.log('Error Authenticating: ', error)
           })
       },
       //sync
@@ -649,6 +669,15 @@ export default new Vuex.Store(
       },
       removeCalSettingsBox ({commit}) {
         commit('removeCalSettingsBox')
+      },
+      deleteUser({state, dispatch}) {
+        return deleteUser(state.jwt.token)
+          .then(response => {
+            dispatch('logout')
+          })
+          .catch(error => {
+            console.log('Error Authenticating: ', error)
+          })
       },
     },
     getters: {

@@ -7,6 +7,9 @@
       <i v-if="user['admin']" class="material-icons" id="settings" @click="redirect('/#/editShared/' + calID)">
         settings
       </i>
+      <i v-if="!user['admin']" class="material-icons" id="leave" @click="showDeleteBox">
+        person_remove
+      </i>
       <div id="view" @click="changeView"><span v-if="weekView">M</span><span v-else>W</span></div>
       {{calName}}
       <span class="year">
@@ -46,10 +49,9 @@
               KW{{getKW(day.year, day.month, day.day)}}
             </div>
           </template>
-          <div v-for="j in getWeekAmount(month[0])" class="user" :uID="$store.getters.getSharedUsers[jindex][0]"
+          <div v-for="j in getWeekAmount(userCal)" class="user" :uID="$store.getters.getSharedUsers[jindex][0]"
                v-if="activeMonths.includes(index) &&
-               activeWeeks.includes(getKW(userCal[getFirstIndexOfWeek(j,userCal[0])].year,
-               userCal[getFirstIndexOfWeek(j,userCal[0])].month, userCal[getFirstIndexOfWeek(j,userCal[0])].day))"
+               activeWeeks.includes(getWeekNr(j, userCal))"
                :class="{ currentUser: $store.getters.getSharedUsers[jindex][0] == user['id'] }"
                v-bind:style="[{'grid-row': 4+jindex+(($store.getters.getSharedUsers.length+1)*(j-1)), 'grid-column': 1}]">
             {{$store.getters.getSharedUsers[jindex][1].split("@")[0]}}
@@ -109,6 +111,7 @@
     <day-box :unreg="0"/>
     <cat-edit-box :unreg="0"/>
     <infobox/>
+    <delete-box :actionName="'removeUserFromShared'" :ID="calID"/>
 
   </div>
 </template>
@@ -119,8 +122,8 @@
   import catEditBox from '@/components/catEditBox'
   import catBox from '@/components/catBox'
   import infobox from '@/components/infobox'
-  import { getCalName, getUserRole } from '@/api'
-  import Infobox from './infobox'
+  import deleteBox from '@/components/deleteBox'
+  import { getCalName, getUserRole} from '@/api'
   Date.prototype.getWeek = function() {
     var date = new Date(this.getTime());
     date.setHours(0, 0, 0, 0);
@@ -135,7 +138,7 @@
   export default {
     name: 'sharedCal',
     props: ['calID', 'year'],
-    components: {Infobox, dayBox, catEditBox, catBox},
+    components: {infobox, dayBox, catEditBox, catBox, deleteBox},
     data() {
       return {
         calName: '',
@@ -272,6 +275,14 @@
         row = row * (1 + userAmount)
         return row
       },
+      getWeekNr(j, month) {
+        //getKW(userCal[getFirstIndexOfWeek(j,userCal[0])].year,userCal[getFirstIndexOfWeek(j,userCal[0])].month,
+        // userCal[getFirstIndexOfWeek(j,userCal[0])].day))"
+        const firstDayOfMonth = month.reduce((prev, current) => (+prev.day < +current.day) ? prev : current)
+        const firstDayOfWeek = this.getFirstIndexOfWeek(j, firstDayOfMonth)
+        const day = month.find(x => x.day === firstDayOfWeek+1)
+        return this.getKW(day.year, day.month, day.day)
+      },
       getFirstIndexOfWeek(j, firstdayMonth){
         var distanceToMonday = this.weekday[firstdayMonth.weekday] - 2
         if (j-1 == 0){
@@ -282,7 +293,7 @@
         }
       },
       getWeekAmount(month) {
-        var lastDay = month[month.length - 1]
+        var lastDay = month.reduce((prev, current) => (+prev.day > +current.day) ? prev : current)
         var row = Math.ceil((lastDay.day) / 7)
         var modulo = (lastDay.day-1) % 7
         var tag = (this.weekday[lastDay.weekday]- 1)
@@ -316,7 +327,10 @@
       },
       changeView() {
         this.weekView = !this.weekView
-
+      },
+      showDeleteBox() {
+        console.log(this.calID)
+        this.$store.commit('setDeleteBox', "Willst du wirklich aus diesem Team-Kalender austreten?")
       }
     },
 
@@ -380,10 +394,10 @@
     color: #000;
     text-align: center;
   }
-  #home, #settings, .arrow, #view {
+  #home, #settings, .arrow, #view, #leave{
     cursor: pointer;
   }
-  #home, #settings, #view {
+  #home, #settings, #view, #leave {
     border: none;
     float: left;
     display: block;

@@ -12,17 +12,17 @@
       </div>
     </section>
     <section v-if="login" class="section">
-      <div class="container">
+      <form class="container">
         <div class="field">
           <label class="label is-large" for="email">Email</label>
           <div class="control">
-            <input type="email" class="input" id="email" v-model="email">
+            <input type="email" class="input" id="email" v-model="email" autocomplete="on">
           </div>
         </div>
         <div class="field">
           <label class="label is-large" for="password">Passwort</label>
           <div class="control">
-            <input type="password" class="input" id="password" v-model="password">
+            <input type="password" class="input" id="password" v-model="password" autocomplete="on">
           </div>
         </div>
 
@@ -30,10 +30,10 @@
           <a class="button reglog is-large is-primary" @click="authenticate">Login</a>
         </div>
 
-      </div>
+      </form>
     </section>
     <section v-if="!login" class="section">
-      <div class="container">
+      <form class="container">
         <div class="field">
           <label class="label is-large" for="email">Email</label>
           <div class="control">
@@ -55,7 +55,7 @@
           <a class="button reglog is-large is-success" @click="register">Register</a>
         </div>
 
-      </div>
+      </form>
     </section>
     <infobox/>
   </div>
@@ -83,7 +83,6 @@
           .then(() => this.$router.push('/calOverview'))
       },
       register () {
-        console.log(this.password, this.passwordConfirm)
         if (this.password === this.passwordConfirm) {
           var dbconnect = window.indexedDB.open("MeineDatenbank", 1);
           dbconnect.onupgradeneeded = ev => {

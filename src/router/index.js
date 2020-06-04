@@ -47,7 +47,6 @@ export default new Router({
       component: sharedCal,
       props: true,
       beforeEnter (to, from, next) {
-        console.log("hey")
         next()
         if (!store.getters.isAuthenticated) {
           next('/login')

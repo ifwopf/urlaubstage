@@ -13,7 +13,7 @@
     <h3 class="text">
       Kalender löschen
     </h3>
-    <div class="button" @click="deleteCal">
+    <div class="button" @click="showDeleteBox">
       <i class="material-icons" id="delete">
         delete
       </i>
@@ -28,13 +28,16 @@
     <div class="button" @click="removeCalSettingsBox">
       Fertig
     </div>
+    <delete-box :actionName="'deleteCal'" :calID="calID"/>
   </div>
 </template>
 
 <script>
   import { saveCalName } from '@/api'
+  import deleteBox from '@/components/deleteBox'
   export default {
     name: 'calSettingsBox',
+    components: {deleteBox},
     props: ['calName', 'calID'],
     data() {
       return {
@@ -65,9 +68,9 @@
       updateName(e) {
         this.newName = e.target.value
       },
-      deleteCal(){
-        this.$store.dispatch('deleteCal', this.calID)
-      },
+      showDeleteBox() {
+        this.$store.commit('setDeleteBox', "Wollen Sie diesen Kalender wirklich löschen? Alle zugehörigen Daten gehen verloren")
+      }
     }
   }
 </script>

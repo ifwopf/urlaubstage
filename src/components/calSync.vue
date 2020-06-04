@@ -13,7 +13,7 @@
 
     </div>
     <div class="" v-if="clickedPersonalCal != null || clickedSharedCal != null">
-      <div class="button infobox" @click="reset">Reset</div>
+      <div class="button save" @click="reset">Reset</div>
     </div>
     <div class="personal" @drop="dropback" @dragover="allowDrop">
       <div class="titlebox">
@@ -230,7 +230,20 @@
     }
   }
 </script>
-
+<style>
+  body {
+    background-color: aliceblue;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
+    max-width: 1000px;
+    text-align: center;
+  }
+  html,body{margin:0;padding:0}
+</style>
 <style scoped>
   .shared, .personal {
     border: 1px solid #000;
@@ -241,6 +254,8 @@
     text-align: center;
     display: inline-block;
     margin: 10px;
+    background-color: #fff;
+    vertical-align: top;
   }
   .calendar {
     background-color: #fff;
@@ -252,12 +267,6 @@
     text-align: center;
     margin: 10px;
     cursor: pointer;
-  }
-  .personal {
-    float: left;
-  }
-  .shared {
-    float: left;
   }
   .sharedCats,.personalCats {
     margin: 5px;
@@ -286,7 +295,7 @@
     display: inline-block;
   }
   .jahrtitel {
-    background-color: #f1f1f1;
+    background-color: #fff;
     display: inline-block;
     padding: 10px;
     margin: 10px;
@@ -305,22 +314,27 @@
   }
   h2 {
     display:inline-block;
-    background-color: #f1f1f1;
+    background-color: #fff;
     padding: 5px;
   }
   .infobox, .save {
-    border: 1px solid #000;
-    padding: 5px;
-    min-width: 300px;
+    padding: 10px 5px;
     width: 90%;
     text-align: center;
     margin: 10px;
+    background-color: #fff;
+    max-width: 930px;
+  }
+  .save:hover {
+    background-color: aliceblue;
+  }
+  .save{
+    box-shadow: 5px 2.5px 2.5px grey;
+
   }
   .sharedOptions {
     border: 1px solid #000;
     margin: 3px;
   }
 </style>
-<style>
-  html,body{margin:0;padding:0}
-</style>
+

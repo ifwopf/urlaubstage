@@ -35,20 +35,23 @@
       <div class="kalender" @click="logout">
         <span >Passwort ändern</span>
       </div>
-      <div class="kalender" @click="deleteUser2">
+      <div class="kalender" @click="showDeleteBox">
         <span >Alles löschen</span>
       </div>
       <div class="kalender" @click="logout">
         <span >Logout</span>
       </div>
     </div>
+    <delete-box :actionName="'deleteUser'" :calID="0"/>
   </div>
 </template>
 
 <script>
   import { deleteUser } from '@/api'
+  import deleteBox from '@/components/deleteBox'
   export default {
     name: 'calOverview',
+    components: {deleteBox},
     data () {
       return {
         newCalender: 'Urlaubskalender'
@@ -72,15 +75,8 @@
       logout() {
         this.$store.dispatch('logout')
       },
-      deleteUser2() {
-        console.log(this.$store.state.jwt.token)
-        return deleteUser(this.$store.state.jwt.token)
-          .then(response => {
-            this.redirect("login", null)
-          })
-          .catch(error => {
-            console.log('Error Authenticating: ', error)
-          })
+      showDeleteBox() {
+        this.$store.commit('setDeleteBox', "Wollen Sie Ihren Account wirklich löschen?")
       }
 
     }

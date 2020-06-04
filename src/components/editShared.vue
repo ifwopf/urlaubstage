@@ -24,9 +24,17 @@
         </div>
       </div>
     </div>
-
+    <div class="box">
+      <h3>Kalender löschen</h3>
+      <div class="button" @click="showDeleteBox">
+        <i class="material-icons">
+          delete
+        </i>
+      </div>
+    </div>
     <div class="button" @click="saveChanges">Save Changes</div>
     <infobox/>
+    <delete-box :actionName="'deleteCal'" :ID="calID"/>
   </div>
 
 </template>
@@ -35,12 +43,13 @@
   import ColorSelect from './colorSelect'
   import axios from 'axios'
   import infobox from '@/components/infobox'
+  import deleteBox from '@/components/deleteBox'
   import {backendURL} from '@/store'
   import { getSharedInfo, saveSharedChanges } from '@/api'
   export default {
     name: 'editShared',
     props: ['calID'],
-    components: {ColorSelect, infobox},
+    components: {ColorSelect, infobox, deleteBox},
 
     data () {
       return {
@@ -123,6 +132,9 @@
       },
       removeFromUsers (id) {
         this.$delete(this.users, id)
+      },
+      showDeleteBox() {
+        this.$store.commit('setDeleteBox', "Wollen Sie diesen Kalender wirklich löschen? Alle zugehörigen Daten gehen verloren")
       }
 
     }
