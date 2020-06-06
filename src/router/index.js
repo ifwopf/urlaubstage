@@ -23,7 +23,7 @@ export default new Router({
       beforeEnter (to, from, next) {
         next()
         if (!store.getters.isAuthenticated) {
-          next('/login')
+          next('/unreg/2020')
         } else {
           next('/calOverview')
         }

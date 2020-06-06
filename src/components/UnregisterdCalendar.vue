@@ -7,6 +7,7 @@
       <i v-if="year != borderyears[1]" class="material-icons" @click="changeYear(true)">keyboard_arrow_right</i>
         </span>
     </h1>
+    <h2 class="login" @click="redirect('login')">Register/Login</h2>
     <div class="counters">
       <div class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
             v-bind:key="cat.id"
@@ -114,7 +115,8 @@
         'getElementMapByIDStyle'
       ]),
       redirect (link) {
-        window.location.href = link
+        this.$router.push({name: link})
+        location.reload()
       },
       changeYear (direction) {
         if(direction){
@@ -473,11 +475,17 @@
     color: #000;
     text-align: center;
   }
-  .jahrtitel {
+  .jahrtitel, .login {
     background-color: #fff;
     display: inline-block;
     padding: 10px;
     margin: 10px;
+  }
+  .login {
+    cursor: pointer;
+  }
+  .login:hover{
+    background-color: aliceblue;
   }
   .year{
     display: inline-block;
@@ -502,14 +510,6 @@
     font-size: inherit;
     width: 90%;
     margin: 0 auto;
-  }
-  .catEdits {
-  }
-  .input {
-    background-color: aliceblue;
-    border: none;
-    font-size: inherit;
-    opacity: 0.5;
   }
   .material-icons {
     cursor: pointer;
