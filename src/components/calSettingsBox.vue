@@ -28,7 +28,7 @@
     <div class="button" @click="removeCalSettingsBox">
       Fertig
     </div>
-    <delete-box :actionName="'deleteCal'" :calID="calID"/>
+    <delete-box :actionName="'deleteCal'" :ID="calID"/>
   </div>
 </template>
 
