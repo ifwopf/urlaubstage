@@ -347,9 +347,19 @@ export default new Vuex.Store(
               dispatch('login', userData)
                 .then(res => {
                     if (data['years'] != null) {
-                      addUnreg({years: data['years'], cats: data['cats']}, state.jwt.token)
+                      return addUnreg({years: data['years'], cats: data['cats']}, state.jwt.token)
+                        .then(res => {
+                          console.log("222hererewdsfdsf")
+                          return "ok"
+                          })
+                        .catch(error => {
+                          console.log('Error Login: ', error)
+                        })
                     }
-                    return "ok"
+                    else{
+                      console.log("hererew")
+                      return "ok"
+                    }
                   }
                 ).catch(error => {
                 console.log('Error Login: ', error)
