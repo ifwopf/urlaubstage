@@ -349,8 +349,7 @@ export default new Vuex.Store(
                     if (data['years'] != null) {
                       return addUnreg({years: data['years'], cats: data['cats']}, state.jwt.token)
                         .then(res => {
-                          this.$router.push('/calOverview')
-                          location.reload()
+                          router.go('/calOverview')
                           return "ok"
                           })
                         .catch(error => {
@@ -358,8 +357,7 @@ export default new Vuex.Store(
                         })
                     }
                     else{
-                      this.$router.push('/calOverview')
-                      location.reload()
+                      router.go('/calOverview')
                       return "ok"
                     }
                   }
