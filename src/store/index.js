@@ -338,7 +338,7 @@ export default new Vuex.Store(
       register ({commit, dispatch, state}, data) {
         var userData = {email: data['email'], password: data['password']}
         commit('setUserData', userData)
-        register(userData)
+        return register(userData)
           .then(res => {
             if (res.data === 999) {
               commit('setInfoText', 'Email bereits vorhanden')
@@ -347,9 +347,10 @@ export default new Vuex.Store(
               dispatch('login', userData)
                 .then(res => {
                     if (data['years'] != null) {
-                      addUnreg({years: data['years'], cats: data['cats']}, state.jwt.token)
+                      return addUnreg({years: data['years'], cats: data['cats']}, state.jwt.token)
                         .then(res => {
-                          console.log("222hererewdsfdsf")
+                          this.$router.push('/calOverview')
+                          location.reload()
                           return "ok"
                           })
                         .catch(error => {
@@ -357,7 +358,8 @@ export default new Vuex.Store(
                         })
                     }
                     else{
-                      console.log("hererew")
+                      this.$router.push('/calOverview')
+                      location.reload()
                       return "ok"
                     }
                   }

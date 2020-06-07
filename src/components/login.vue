@@ -100,22 +100,15 @@
                     this.$store.dispatch('register', { email: this.email, password: this.password, years:response2, cats:response1 })
                       .then(() => {
                         this.$router.push('/calOverview')
-                        location.reload()
                       })
 
                   }).catch(error => {
                   this.$store.dispatch('register', { email: this.email, password: this.password , years:null, cats:null})
-                    .then(() => {
-                      this.$router.push('/calOverview')
-                      location.reload()
-                    })
+                    .then(() => this.$router.push('/calOverview'))
                 });
               }).catch(function (error) {
               this.$store.dispatch('register', { email: this.email, password: this.password, years:null, cats:null })
-                .then(() => {
-                  this.$router.push('/calOverview')
-                  location.reload()
-                })
+                .then(() => this.$router.push('/calOverview'))
             });
           }
         }
