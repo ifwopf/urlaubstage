@@ -88,8 +88,6 @@
         if (this.sharedCalName != "") {
           var stuff = {"name": this.sharedCalName, "addedUsers": this.users}
           this.$store.dispatch("createShared", stuff)
-          this.$router.push({name: 'calOverview'})
-          location.reload()
         }
         else {
           this.$store.dispatch("setInfoText", "Bitte gebe einen Namen ein!")

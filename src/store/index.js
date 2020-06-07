@@ -611,6 +611,8 @@ export default new Vuex.Store(
           addedUsers: sharedValues.addedUsers
         }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
+            router.push({name: 'calOverview'})
+            location.reload()
           })
           .catch(function (error) {
             console.log(error)
