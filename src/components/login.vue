@@ -98,17 +98,12 @@
                 loadAllRowsFromIndexedDB('MeineDatenbank', 'months')
                   .then(response2 => {
                     this.$store.dispatch('register', { email: this.email, password: this.password, years:response2, cats:response1 })
-                      .then(() => {
-                        this.$router.push('/calOverview')
-                      })
 
                   }).catch(error => {
-                  this.$store.dispatch('register', { email: this.email, password: this.password , years:null, cats:null})
-                    .then(() => this.$router.push('/calOverview'))
+                    this.$store.dispatch('register', { email: this.email, password: this.password , years:null, cats:null})
                 });
               }).catch(function (error) {
-              this.$store.dispatch('register', { email: this.email, password: this.password, years:null, cats:null })
-                .then(() => this.$router.push('/calOverview'))
+                this.$store.dispatch('register', { email: this.email, password: this.password, years:null, cats:null })
             });
           }
         }

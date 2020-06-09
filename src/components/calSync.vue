@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="wrapper">
     <div class="header">
       <h1 class="jahrtitel">
         <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
@@ -244,8 +244,8 @@
   html,body{margin:0;padding:0}
 </style>
 <style scoped>
-  body{
-    max-width: 1000px;
+  .wrapper{
+    max-width: 1200px;
   }
   .shared, .personal {
     border: 1px solid #000;
@@ -323,7 +323,7 @@
     padding: 10px 5px;
     width: 90%;
     text-align: center;
-    margin: 10px;
+    margin: 10px auto;
     background-color: #fff;
     max-width: 930px;
   }

@@ -140,11 +140,18 @@
       },
       addNewCat () {
         var doppelt = false
-        if (this.unreg == "1") {
+        if (this.unreg === 1) {
           var newCat = {"name": this.catNameInit, "style": {"background-color": this.catColor}}
           this.$store.dispatch('addCatUnreg', newCat).then(response => {
-            console.log(response)
             saveToIndexedDB("MeineDatenbank", "cats", response, response.id)
+            if(this.$store.state.clicked.length > 0){
+              this.$store.dispatch('changeCat', response.id).then(res => {
+                saveToIndexedDB("MeineDatenbank", "months", this.$store.state.info, this.year)
+              })
+                .catch(error => {
+                  console.log('Error Authenticating: ', error)
+                })
+            }
           })
             .catch(error => {
               console.log('Error Authenticating: ', error)
@@ -177,12 +184,18 @@
     font-size: 24px;
     padding: 5px;
     text-align: center;
+    min-width: 220px;
   }
 
   .material-icons {
     cursor: pointer;
+    background-color: aliceblue;
+    margin: 10px;
   }
 
+  .material-icons:hover{
+    background-color: #fff;
+  }
   .nameDisplay {
     display: block;
     width: 100%;

@@ -147,7 +147,6 @@
       click_on_cat (catID) {
         if(this.$store.state.clicked.length > 0){
           this.$store.dispatch('changeCat', catID).then(response => {
-            console.log(response)
             saveToIndexedDB("MeineDatenbank", "months", this.$store.state.info, this.year)
           })
             .catch(error => {
@@ -161,7 +160,6 @@
             this.$store.commit('setClickedCatName', this.$store.getters.getCats[catID].name)
             this.catName = this.$store.getters.getCats[this.selectedCat].name
             this.catColor = this.$store.getters.getCats[this.selectedCat].style
-
           }
         }
       },

@@ -224,7 +224,7 @@ export default new Vuex.Store(
 
       addCat (state, newCat) {
         state.cat_count[newCat.id] = 0
-        state.cats[newCat.id] = newCat
+        Vue.set(state.cats, newCat.id, newCat)
         for (var i = 0; i < state.clicked.length; i++) {
           state.cat_count[state.clicked[i].cat_id] -= 1
           state.cat_count[newCat.id] += 1
@@ -281,6 +281,7 @@ export default new Vuex.Store(
       },
       replaceUserdayID (state, payload) {
         Object.keys(payload).forEach(function (key) {
+          console.log(payload[key], key)
           state.element_map[payload[key].userID][key].userdayID = payload[key].userdayID
         })
       },
@@ -349,7 +350,9 @@ export default new Vuex.Store(
                     if (data['years'] != null) {
                       return addUnreg({years: data['years'], cats: data['cats']}, state.jwt.token)
                         .then(res => {
-                          router.go('/calOverview')
+                          router.push('/calOverview')
+                          location.reload()
+                          console.log("hier")
                           return "ok"
                           })
                         .catch(error => {
@@ -357,7 +360,8 @@ export default new Vuex.Store(
                         })
                     }
                     else{
-                      router.go('/calOverview')
+                      router.push('/calOverview')
+                      location.reload()
                       return "ok"
                     }
                   }
