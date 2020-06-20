@@ -12,6 +12,9 @@
       <i class="material-icons" id="settings" @click="showCalSettingsBox">
         settings
       </i>
+      <i v-if="changed!=null" class="material-icons" id="reset" @click="resetCats">
+        restore
+      </i>
     </h1>
     <div class="counters">
       <div class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
@@ -60,23 +63,26 @@
     <cat-edit-box :unreg="0"/>
     <Feiertage/>
     <cal-settings-box :calName="calName" v-model="calName" :calID="calID"/>
+    <infobox/>
 
   </div>
 </template>
 
 <script>
   import {mapGetters} from 'vuex'
-  import { getCalName } from '@/api'
+  import { getCalName, resetCats } from '@/api'
   import * as Selection from '@simonwep/selection-js'
   import dayBox from '@/components/dayBox'
   import catEditBox from '@/components/catEditBox'
   import Feiertage from '@/components/Feiertage'
   import calSettingsBox from '@/components/calSettingsBox'
+  import infobox from '@/components/infobox'
+  import Infobox from './infobox'
 
 
   export default {
     name: 'Urlaubskalender',
-    components: {Feiertage, dayBox, catEditBox, calSettingsBox},
+    components: {Infobox, Feiertage, dayBox, catEditBox, calSettingsBox},
     props: ['year', 'calID', 'Feiertage'],
     mounted () {
       // fetch the data when the view is created and the data is
@@ -94,6 +100,7 @@
         borderyears: [2020,2022],
         currentDay: null,
         currentMonth: null,
+        changed: null,
         months_en: {
           0: 'Januar',
           1: 'Februar',
@@ -155,6 +162,7 @@
       },
       click_on_cat (catID) {
         if(this.$store.state.clicked.length > 0){
+          this.changed = JSON.parse(JSON.stringify(this.$store.state.clicked))
           this.$store.dispatch('changeCatDropDown', catID)
         }
         else{
@@ -167,6 +175,19 @@
 
           }
         }
+      },
+      resetCats(){
+        var payload = {
+          days: this.changed,
+          calID: this.calID
+        }
+        console.log(this.changed)
+        this.$store.commit('resetClickedCat', this.changed)
+        return resetCats(payload, this.$store.state.jwt.token)
+          .then(response => {
+            this.$store.commit('replaceUserdayID', response.data)
+            this.changed = null
+        })
       },
       selectAll(catID) {
         this.selectedCat = null
@@ -411,7 +432,7 @@
     font-weight: bold;
     vertical-align: middle;
   }
-  #home, #settings {
+  #home, #settings, #reset {
     margin: 5px;
     display: block;
     float: left;

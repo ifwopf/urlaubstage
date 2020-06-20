@@ -18,7 +18,7 @@
       <span v-if="!$store.state.border" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
     </div>
 
-    <div class="monat" v-for="(month, index) in $store.getters.getInfo" :key="index">
+    <div class="monat" :id="months_en[index]" v-for="(month, index) in $store.getters.getInfo" :key="index">
       <h3 class="monatstitel">{{ months_en[index] }}</h3>
       <div class="grid">
         <div class="wochentag" style="grid-row: 1; grid-column: 1">Mo</div>
@@ -233,9 +233,9 @@
         return readyUnreg(this.year, this.$store.state.jwt.token)
           .then(response => {
 
-            this.$store.commit('set_cats', response.data['cats'])
-            this.$store.commit('set_info', response.data['days'])
-            this.$store.commit('set_dataReady', true)
+            //this.$store.commit('set_cats', response.data['cats'])
+            //this.$store.commit('set_info', response.data['days'])
+            //this.$store.commit('set_dataReady', true)
             var tx = db.transaction('months', 'readwrite');
             var store = tx.objectStore('months');
             store.add(this.$store.state.info, this.year);
@@ -290,7 +290,6 @@
       var currentTime = new Date();
       this.currentMonth = currentTime.getMonth() + 1;
       this.currentDay = currentTime.getDate();
-
 
 
 
@@ -363,6 +362,7 @@
         }
       }).on('stop', evt => {
       })
+
     }
   }
 </script>

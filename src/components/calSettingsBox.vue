@@ -24,6 +24,17 @@
     <div class="button" @click="showFeiertage">
       Feiertage hinzufügen
     </div>
+    <h3 class="text">
+      Besitzer verwalten
+    </h3>
+    <input class="user input" v-model="currentUser"  type="text"/> <div  class="miniButton" @click="addUser">add User</div>
+    <div class="userbox">
+      <div class="user" v-for="(user, id) in users">{{ user.email }}
+        <span @click="deleteOwner(id)">
+            <i class="material-icons" id="deleteUser">delete</i>
+          </span>
+      </div>
+    </div>
     <br/><br/>
     <div class="button" @click="removeCalSettingsBox">
       Fertig
@@ -33,7 +44,7 @@
 </template>
 
 <script>
-  import { saveCalName } from '@/api'
+  import { saveCalName, getOwners, addOwner, deleteOwner, checkMail } from '@/api'
   import deleteBox from '@/components/deleteBox'
   export default {
     name: 'calSettingsBox',
@@ -41,10 +52,19 @@
     props: ['calName', 'calID'],
     data() {
       return {
+        users: {},
+        currentUser: "",
       }
     },
     created () {
-
+      return getOwners(this.calID, this.$store.state.jwt.token)
+        .then(response => {
+          this.users = response.data;
+          console.log(this.users)
+        })
+        .catch(error => {
+          console.log('Error Authenticating: ', error)
+        })
     },
     methods: {
       removeCalSettingsBox () {
@@ -70,6 +90,35 @@
       },
       showDeleteBox() {
         this.$store.commit('setDeleteBox', "Wollen Sie diesen Kalender wirklich löschen? Alle zugehörigen Daten gehen verloren")
+      },
+      addUser () {
+        if (this.currentUser)
+          return checkMail(this.currentUser, this.$store.state.jwt.token)
+            .then(response => {
+              console.log(response.data)
+              if (response.data){
+                return addOwner({"email": this.currentUser, "calID": this.calID}, this.$store.state.jwt.token)
+                  .then(response => {
+                    console.log(response.data)
+                    Vue.set(this.users, response.data["id"], response.data)
+                  })
+              }
+              else{
+                this.$store.dispatch("setInfoText", "No such Mail")
+              }
+            })
+      },
+      deleteOwner(id) {
+        return deleteOwner({"userID": id, "calID": this.calID}, this.$store.state.jwt.token)
+          .then(response => {
+            console.log(response.data)
+            if (response.data){
+              this.$delete(this.users, id)
+            }
+            else{
+              this.$store.dispatch("setInfoText", "Konnte nicht gelöscht werden")
+            }
+          })
       }
     }
   }
@@ -81,7 +130,7 @@
     left:50%;
     width:400px;
     margin-left:-200px;
-    margin-top:-200px;
+    margin-top:-300px;
     background-color: white;
     text-align: center;
     box-shadow: 10px 5px 5px grey;
@@ -130,5 +179,29 @@
     font-size: 16px;
     padding: 10px 24px;
     margin-top: 10px;
+  }
+  .miniButton{
+    border: none;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    background-color: aliceblue;
+    margin: 5px auto;
+    max-width: 400px;
+    cursor: pointer;
+    display: inline-block;
+    padding: 7px 18px;
+  }
+  .input {
+    border: none;
+    padding: 7px 18px;
+    display: inline-block;
+    font-size: 16px;
+    background-color: aliceblue;
+  }
+  .userbox{
+    margin: 5px 32px;
+    line-height: 24px;
+    vertical-align: middle;
   }
 </style>

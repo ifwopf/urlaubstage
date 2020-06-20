@@ -104,6 +104,7 @@ export default new Vuex.Store(
       },
       set_cats (state, catsed) {
         state.cats = catsed
+        console.log(catsed)
         state.cats[0] = {
           'id': 0,
           'name': 'default',
@@ -204,6 +205,16 @@ export default new Vuex.Store(
           Vue.set(state.clickedCat, i, cat)
           state.cat_count[cat.id] += 1
           state.clicked[i].cat_id = cat.id
+        }
+      },
+      resetClickedCat (state, days) {
+        var count = days.length
+        for (var i = 0; i < count; i++) {
+          console.log(days[i])
+          console.log(state.element_map)
+          state.cat_count[state.element_map[state.currentUser][days[i]['id']].cat_id] -= 1
+          state.cat_count[days[i]['cat_id']] += 1
+          Vue.set(state.element_map[state.currentUser][days[i]['id']], 'cat_id', days[i]['cat_id'])
         }
       },
       addNotes (state, note) {

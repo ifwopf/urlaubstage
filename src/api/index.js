@@ -53,3 +53,23 @@ export function removeUserFromShared (calID, token) {
   console.log(calID);
   return axios.post(backendURL + `/urlaub/api/v1.0/removeUserFromShared`, calID, {headers: { Authorization: `Bearer: ` + token }})
 }
+
+export function getOwners(calID, token) {
+  return axios.get(backendURL + '/urlaub/api/v1.0/getOwners/' + calID,  { headers: { Authorization: `Bearer: ` + token }})
+}
+
+export function addOwner(payload, token) {
+  return axios.post(backendURL + `/urlaub/api/v1.0/addOwner`, payload, {headers: { Authorization: `Bearer: ` + token }})
+}
+
+export function deleteOwner(payload, token) {
+  return axios.post(backendURL + `/urlaub/api/v1.0/deleteOwner`, payload, {headers: { Authorization: `Bearer: ` + token }})
+}
+
+export function checkMail(mail, token) {
+  return axios.get(backendURL + '/urlaub/api/v1.0/checkMail/' +  mail, { headers: { Authorization: `Bearer: ` + token } })
+}
+
+export function resetCats(days, token) {
+  return axios.post(backendURL + '/urlaub/api/v1.0/resetCats', days, { headers: { Authorization: `Bearer: ` + token } })
+}
