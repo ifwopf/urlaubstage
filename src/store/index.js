@@ -11,9 +11,9 @@ import router from '@/router'
 Vue.use(Vuex)
 Vue.use(VueInputAutowidth)
 
-//export const backendURL = 'http://127.0.0.1:5000'
+export const backendURL = 'http://127.0.0.1:5000'
 
-export const backendURL = "https://urlaubskalender.herokuapp.com"
+//export const backendURL = "https://urlaubskalender.herokuapp.com"
 
 function compare (a, b) {
   if (a.day < b.day) {
@@ -30,12 +30,12 @@ export default new Vuex.Store(
     state: {
       currentUser: {},
       jwt: {'token': localStorage.getItem('token')},
-      info: null,
-      cats: null,
+      info: {},
+      cats: {},
+      mergeCats: {},
       cals: null,
       currentCal: null,
       cat_count: {},
-      catMap: [],
       element_map: {},
       dataReady: false,
       calDataReady: false,
@@ -45,8 +45,10 @@ export default new Vuex.Store(
       clicked: [],
       catColor: 'rgb(255, 255, 255)',
       clickedCatCounter: null,
+      clickedCatCal: null,
       clickedCatName: '',
       clickedCat: [],
+      checkedCalenders: [],
       border: false,
       locked: false,
       weekday: {
@@ -60,6 +62,7 @@ export default new Vuex.Store(
       },
       //sync
       sharedCats: {},
+      sharedUsers: [],
       personalCats: {},
       infotext: '',
       showinfo: false,
@@ -67,6 +70,9 @@ export default new Vuex.Store(
       showCalSettingsBox: false,
       showDeleteBox: false,
       deleteText: "",
+      mergeReady: false,
+      mergedCals: {},
+      activeCal: -1
     },
     mutations: {
       /*
@@ -74,75 +80,104 @@ export default new Vuex.Store(
 
         state.element_map[payload.id] = state.info[payload.month][payload.day]
       },*/
-      set_info (state, infoed) {
-
-        state.info = infoed
-        state.element_map[state.currentUser] = {}
+      set_info (state, payload) {
+        var calID = payload.calID
+        Vue.set(state.info, calID, payload.days)
+        Vue.set(state.element_map,calID, {})
         for (var i = 0; i < 12; i++) {
           var row = 2
           var count = 1
-          state.info[i].sort(compare)
-          for (var day in state.info[i]) {
-            if (state.info[i][day].day === 1) {
-              count = state.weekday[state.info[i][day].weekday]
+          state.info[calID][i].sort(compare)
+          for (var day in state.info[calID][i]) {
+            if (state.info[calID][i][day].day === 1) {
+              count = state.weekday[state.info[calID][i][day].weekday]
             }
-            state.info[i][day].clicked = false
-            state.info[i][day].style = {
-              'grid-column-start': state.weekday[state.info[i][day].weekday],
+            Vue.set(state.info[calID][i][day], 'clicked', false)
+            Vue.set(state.info[calID][i][day], 'style',  {
+              'grid-column-start': state.weekday[state.info[calID][i][day].weekday],
               'grid-row-start': row,
               'border-style': 'solid',
-            }
+            })
             if (count % 7 === 0) {
               row += 1
             }
             count += 1
-            state.element_map[state.currentUser][state.info[i][day].id] = state.info[i][day]
-
-            state.cat_count[state.info[i][day].cat_id] += 1
+            Vue.set(state.element_map[calID],state.info[calID][i][day].id,  state.info[calID][i][day])
+            state.cat_count[calID][state.info[calID][i][day].cat_id] += 1
           }
         }
       },
-      set_cats (state, catsed) {
-        state.cats = catsed
-        console.log(catsed)
-        state.cats[0] = {
+      set_cats (state, payload) {
+        var calID = payload.calID
+        Vue.set(state.cats, calID, payload.cats)
+        Vue.set(state.cats[calID],[0], {
           'id': 0,
           'name': 'default',
           'value': 1,
           'style': {'background-color': '#fff'}
+        })
+        state.cat_count[calID] = {}
+        for (var key in state.cats[calID]) {
+          state.cat_count[calID][key] = 0
         }
-        var count = 0
-        for (var key in state.cats) {
-          state.cat_count[key] = 0
-          state.catMap[count] = parseInt(key)
-          count += 1
+      },
+      set_mergeCats (state, data) {
+        for (var cal of data) {
+          Vue.set(state.cats, cal["cal"], cal["cats"])
+          Vue.set(state.cats[cal["cal"]], 0 , {
+            'id': 0,
+            'name': 'default',
+            'value': 1,
+            'style': {'background-color': '#fff'},
+            'calID': cal["cal"]
+          })
+          state.cat_count[cal["cal"]] = {}
+          for (var key in state.cats[cal["cal"]]) {
+            state.cat_count[cal["cal"]][key] = 0
+          }
         }
       },
       setCals (state, cals) {
         state.cals = cals
       },
-      setSharedInfo (state, days) {
-        state.sharedUserDays = days
-        state.sharedUserDays.forEach(function (monat, index) {
+      setSharedInfo (state, payload) {
+        Vue.set(state.info, payload.calID, payload.calData)
+        state.info[payload.calID].forEach(function (monat, index) {
           monat.forEach(function (user, jindex) {
             user.forEach(function (day, kindex) {
               Vue.set(day, 'clicked', false)
-              Vue.set(state.element_map[day.userID], day.id, day)
-              state.cat_count[day.cat_id] += 1
+              Vue.set(state.element_map[payload.calID][day.userID], day.id, day)
+              state.cat_count[payload.calID][day.cat_id] += 1
             })
           })
         })
       },
+      set_mergeData (state, data) {
+        for (var cal of data) {
+          Vue.set(state.element_map, cal["cal"], {})
+          Vue.set(state.info, cal['cal'],cal["days"])
+          for (var monat of cal["days"]) {
+            for (var day of monat) {
+              Vue.set(day, 'clicked', false)
+              Vue.set(state.element_map[cal["cal"]],[day.id] , day)
+              state.cat_count[cal['cal']][day.cat_id] += 1
+            }
+          }
+        }
+      },
+
       setCurrentUser (state, userID) {
         state.currentUser = userID
       },
       setSharedName (state, sharedName) {
         state.sharedName = sharedName
       },
-      setSharedUsers (state, users) {
-        state.sharedUsers = users
-        for (var user in state.sharedUsers) {
-          state.element_map[state.sharedUsers[user][0]] = {}
+      setSharedUsers (state, payload) {
+        state.sharedUsers = []
+        Vue.set(state.element_map, payload.calID, {})
+        for (var user in payload.users) {
+          Vue.set(state.sharedUsers, user, payload.users[user])
+          Vue.set(state.element_map[payload.calID], state.sharedUsers[user][0] , {})
         }
       },
       set_sharedDataReady (state, toggle) {
@@ -151,6 +186,9 @@ export default new Vuex.Store(
       set_dataReady (state, toggle) {
         state.dataReady = toggle
       },
+      set_mergeReady( state, toggle){
+        state.mergeReady = toggle
+      },
       setCalDataReady (state, toggle) {
         state.calDataReady = toggle
       },
@@ -158,39 +196,55 @@ export default new Vuex.Store(
         state.currentCal = calID
       },
       setClicked (state, payload) {
-        Vue.set(state.element_map[payload.uID][payload.dayID], 'clicked', true)
-        Vue.set(state.element_map[payload.uID][payload.dayID], 'id', 0)
-        Vue.set(state.element_map[payload.uID][payload.dayID], 'id', parseInt(payload.dayID))
-        state.clicked.push(state.element_map[payload.uID][payload.dayID])
+        Vue.set(state.element_map[payload.calID][payload.dayID], 'clicked', true)
+        state.clicked.push(state.element_map[payload.calID][payload.dayID])
+      },
+      setSharedClicked(state, payload) {
+        Vue.set(state.element_map[payload.calID][payload.userID][payload.dayID], 'clicked', true)
+        state.clicked.push(state.element_map[payload.calID][payload.userID][payload.dayID])
+      },
+      setActiveCal (state, payload) {
+        state.activeCal = parseInt(payload)
       },
       resetClicked (state) {
-        for (var index = 0; index < state.clicked.length; index++) {
-          var id = state.clicked[index].id
-          var userID = state.clicked[index].userID
-          Vue.set(state.element_map[userID][id], 'clicked', false)
-          Vue.set(state.element_map[userID][id], 'id', 0)
-          Vue.set(state.element_map[userID][id], 'id', id)
-        }
-        state.clicked = []
-        //state.clickedCatCounter = null
         state.clickedCat = []
         state.border = false
         state.edit = false
         state.dayBox = false
+        for (var index = 0; index < state.clicked.length; index++) {
+          state.clicked[index].clicked = false
+        }
+        state.clicked = []
+      },
+      removeAllClicked (state) {
+        state.clickedCat = []
+        for (var index = 0; index < state.clicked.length; index++) {
+          state.clicked[index].clicked = false
+        }
+        state.clicked = []
       },
       removeClicked (state, payload) {
-        Vue.set(state.element_map[payload['userID']][payload['id']], 'clicked', false)
+        state.clicked[payload['index']].clicked = false
         state.clicked.splice(payload['index'], 1)
         state.clickedCat.splice(payload['index'], 1)
-        Vue.set(state.element_map[payload['userID']][payload['id']], 'id', 0)
-        Vue.set(state.element_map[payload['userID']][payload['id']], 'id', payload['id'])
+      },
+      removeMergedClicked (state, payload) {
+        Vue.set(state.element_map[payload['cID']][payload['id']], 'clicked', false)
+        state.clicked.splice(payload['index'], 1)
+        state.clickedCat.splice(payload['index'], 1)
+        Vue.set(state.element_map[payload['cID']][payload['id']], 'id', 0)
+        Vue.set(state.element_map[payload['cID']][payload['id']], 'id', payload['id'])
       },
       setClickedCat (state, payload) {
-        state.clickedCat.push(state.cats[state.element_map[payload.uID][payload.dayID].cat_id])
+        state.clickedCat.push(state.cats[payload.calID][state.element_map[payload.calID][payload.dayID].cat_id])
       },
-      setClickedCatCounter (state, catID) {
-        state.clickedCatCounter = catID
-        state.catColor = state.cats[catID].style['background-color']
+      setSharedClickedCat (state, payload) {
+        state.clickedCat.push(state.cats[payload.calID][state.element_map[payload.calID][payload.userID][payload.dayID].cat_id])
+      },
+      setClickedCatCounter (state, data) {
+        state.clickedCatCounter = data.catID
+        state.clickedCatCal = data.calID
+        state.catColor = state.cats[data.calID][data.catID].style['background-color']
       },
       setCatColor (state, color) {
         state.catColor = color
@@ -198,20 +252,20 @@ export default new Vuex.Store(
       setClickedCatName (state, catName) {
         state.clickedCatName = catName
       },
-      changeClickedCat (state, cat) {
+      changeClickedCat (state, payload) {
+        var calID = payload.calID
+        var cat = payload.cat
         var count = state.clickedCat.length
         for (var i = 0; i < count; i++) {
-          state.cat_count[state.clickedCat[i].id] -= 1
+          state.cat_count[calID][state.clickedCat[i].id] -= 1
           Vue.set(state.clickedCat, i, cat)
-          state.cat_count[cat.id] += 1
+          state.cat_count[calID][cat.id] += 1
           state.clicked[i].cat_id = cat.id
         }
       },
       resetClickedCat (state, days) {
         var count = days.length
         for (var i = 0; i < count; i++) {
-          console.log(days[i])
-          console.log(state.element_map)
           state.cat_count[state.element_map[state.currentUser][days[i]['id']].cat_id] -= 1
           state.cat_count[days[i]['cat_id']] += 1
           Vue.set(state.element_map[state.currentUser][days[i]['id']], 'cat_id', days[i]['cat_id'])
@@ -227,22 +281,23 @@ export default new Vuex.Store(
         state.cats[state.clickedCat[0].id].name = payload.name
       },
       editCatColor (state, payload) {
-        state.cats[payload.id].style['background-color'] = payload.catColor
+        state.cats[payload.calID][payload.id].style['background-color'] = payload.catColor
       },
       editCatName (state, payload) {
-        state.cats[payload.id].name = payload.name
+        state.cats[payload.calID][payload.id]['name'] = payload.name
       },
 
-      addCat (state, newCat) {
-        state.cat_count[newCat.id] = 0
-        Vue.set(state.cats, newCat.id, newCat)
+      addCat (state, payload) {
+        const newCat = payload.cat
+        const calID = payload.calID
+        state.cat_count[calID][newCat.id] = 0
+        Vue.set(state.cats[calID], newCat.id, newCat)
         for (var i = 0; i < state.clicked.length; i++) {
-          state.cat_count[state.clicked[i].cat_id] -= 1
-          state.cat_count[newCat.id] += 1
+          state.cat_count[calID][state.clicked[i].cat_id] -= 1
+          state.cat_count[calID][newCat.id] += 1
           state.clicked[i].cat_id = newCat.id
           state.clickedCat[i] = newCat
         }
-        state.catMap[state.catMap.length] = newCat.id
         state.border = false
       },
       alterCatRefs (state, payload) {
@@ -250,17 +305,21 @@ export default new Vuex.Store(
         state.cat_count[0] += 1
       },
       setToDefaultCat (state, payload) {
-        Vue.set(state.element_map[state.currentUser][payload], 'cat_id', 0)
-        Vue.set(state.cat_count, 0, state.cat_count[0] + 1)
+        var calID = payload.calID
+        Vue.set(state.element_map[calID][payload.dayID], 'cat_id', 0)
+        Vue.set(state.cat_count[calID], 0, state.cat_count[calID][0] + 1)
       },
-      deleteCat (state, catID) {
-        Vue.delete(state.cat_count, catID)
-        Vue.delete(state.cats, catID)
-        var index = state.catMap.indexOf(catID)
-        if (index > -1) {
-          state.catMap.splice(index, 1)
-        }
-        state.clickedCat[0] = state.cats[1]
+      setSharedDaysToDefaultCat (state, payload){
+        var calID = payload.calID
+        Vue.set(state.element_map[calID][payload.userID][payload.dayID], 'cat_id', 0)
+        Vue.set(state.cat_count[calID], 0, state.cat_count[calID][0] + 1)
+      },
+      deleteCat (state, payload) {
+        var calID = payload.calID
+        var catID = payload.catID
+        Vue.delete(state.cat_count[calID], catID)
+        Vue.delete(state.cats[calID], catID)
+        state.clickedCat[0] = state.cats[calID][1]
       },
       setDayBox (state) {
         state.dayBox = true
@@ -292,8 +351,12 @@ export default new Vuex.Store(
       },
       replaceUserdayID (state, payload) {
         Object.keys(payload).forEach(function (key) {
-          console.log(payload[key], key)
-          state.element_map[payload[key].userID][key].userdayID = payload[key].userdayID
+          state.element_map[payload[key].calID][key].userdayID = payload[key].userdayID
+        })
+      },
+      replaceSharedUserdayID (state, payload) {
+        Object.keys(payload).forEach(function (key) {
+          state.element_map[payload[key].calID][payload[key].userID][key].userdayID = payload[key].userdayID
         })
       },
       //SHARED
@@ -330,6 +393,27 @@ export default new Vuex.Store(
       },
       removeCalSettingsBox (state) {
         state.showCalSettingsBox = false
+      },
+      reorderShared (state, payload) {
+        for (var m = 0; m<12 ; m++){
+          var newOrder = []
+          for(var entry of payload.order){
+            newOrder.push(state.info[payload.calID][m][entry[0]])
+          }
+          var i = 0
+          for (var en of newOrder){
+            Vue.set(state.info[payload.calID][m], i, en)
+            i++
+          }
+        }
+      },
+      reorderUsers (state, order) {
+        var jindex = 0
+        const temp = Array.from(state.sharedUsers)
+        for(var i=0; i<order.length;i++){
+          Vue.set(state.sharedUsers, jindex, temp[parseInt(order[i][0])])
+          jindex++
+        }
       }
 
     },
@@ -363,7 +447,6 @@ export default new Vuex.Store(
                         .then(res => {
                           router.push('/calOverview')
                           location.reload()
-                          console.log("hier")
                           return "ok"
                           })
                         .catch(error => {
@@ -395,12 +478,33 @@ export default new Vuex.Store(
         //.then(response => response.json())
           .then((response) => {
             commit('setCurrentUser', response.data['user'])
-            commit('set_cats', response.data['cats'])
-            commit('set_info', response.data['days'])
+            var payloadCats = {cats: response.data['cats'], calID: data[0]}
+            commit('set_cats', payloadCats)
+            var payloadDays = {days: response.data['days'], calID: data[0]}
+            commit('set_info', payloadDays)
             commit('set_dataReady', true)
             commit('setCurrentCal', data[0])
           })
       },
+      mergeReady ({commit, state, jwt}, data) {
+        if (data === undefined) {
+          data = '2020'
+        }
+        var yearstring = backendURL + '/urlaub/api/v1.0/mergeDays/' + data
+        axios.post(yearstring,{
+            cals: state.checkedCalenders
+            },
+          {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
+        //.then(response => response.json())
+          .then((response) => {
+            commit('setCurrentUser', response.data[0]['user'])
+            commit('set_mergeCats', response.data)
+            commit('set_mergeData', response.data)
+            commit('set_mergeReady', true)
+            //commit('setCurrentCal', data[0])
+          })
+      },
+
       readyUnreg ({commit, state, jwt}, data) {
         if (data === undefined) {
           data = '2020'
@@ -419,7 +523,6 @@ export default new Vuex.Store(
       calReady ({commit, state, jwt}) {
         var calstring = backendURL + '/urlaub/api/v1.0/cal'
         axios.get(calstring, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
-        //.then(response => response.json())
           .then((response) => {
             commit('setCals', response.data)
             commit('setCalDataReady', true)
@@ -433,27 +536,44 @@ export default new Vuex.Store(
         axios.get(yearstring, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
         //.then(response => response.json())
           .then((response) => {
+            commit('setSharedUsers', {calID: payload[0], users: response.data[1]})
             commit('setCurrentCal', payload[0])
             commit('setCurrentUser', response.data[4])
             commit('setSharedName', response.data[0])
-            commit('setSharedUsers', response.data[1])
-            commit('setSharedInfo', response.data[2])
-            commit('set_cats', response.data[3])
+            commit('set_cats', {calID: payload[0], cats: response.data[3]})
+
+            commit('setSharedInfo', {calID: payload[0], calData: response.data[2]})
             commit('set_sharedDataReady', true)
           })
       },
       editCatDisplay ({commit, dispatch, state}) {
         commit('setBorder', true)
       },
-      changeCatDropDown ({commit, state}, catID) {
-        commit('changeClickedCat', state.cats[catID])
+      changeCatDropDown ({commit, state}, data) {
+        var payload = {cat: state.cats[data.calID][data.catID], calID: data.calID}
+        commit('changeClickedCat', payload)
         axios.post(backendURL + '/urlaub/api/v1.0/change_cat', {
-          cat_id: catID,
+          cat_id: data.catID,
           days: state.clicked,
-          calID: state.currentCal
+          calID: data.calID
         }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
             commit('replaceUserdayID', response.data)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      },
+      changeCatShared ({commit, state}, data) {
+        var payload = {cat: state.cats[data.calID][data.catID], calID: data.calID}
+        commit('changeClickedCat', payload)
+        axios.post(backendURL + '/urlaub/api/v1.0/change_cat', {
+          cat_id: data.catID,
+          days: state.clicked,
+          calID: data.calID
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
+          .then(function (response) {
+            commit('replaceSharedUserdayID', response.data)
           })
           .catch(function (error) {
             console.log(error)
@@ -468,10 +588,24 @@ export default new Vuex.Store(
         axios.post(backendURL + '/urlaub/api/v1.0/addNote', {
           note: note,
           days: state.clicked,
-          calID: state.currentCal
+          calID: state.clicked[0].calID
         }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
             commit('replaceUserdayID', response.data)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      },
+      addSharedNote({commit, state}, note) {
+        commit('addNotes', note)
+        axios.post(backendURL + '/urlaub/api/v1.0/addNote', {
+          note: note,
+          days: state.clicked,
+          calID: state.clicked[0].calID
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
+          .then(function (response) {
+            commit('replaceSharedUserdayID', response.data)
           })
           .catch(function (error) {
             console.log(error)
@@ -516,24 +650,41 @@ export default new Vuex.Store(
             console.log(error)
           })
       },
+
       setClicked ({commit, state}, payload) {
         commit('setClicked', payload)
         commit('setClickedCat', payload)
         commit('setDayBox')
       },
+      setSharedClicked ({commit, state}, payload) {
+        commit('setSharedClicked', payload)
+        commit('setSharedClickedCat', payload)
+        commit('setDayBox')
+      },
       resetClicked ({commit, state}) {
         commit('resetClicked')
       },
+      resetMergedClicked ({commit, state}) {
+        commit('resetMergedClicked')
+        commit('setActiveCal', -1)
+      },
       removeClicked ({commit, state}, payload) {
-        var index = state.clicked.indexOf(state.element_map[payload.uID][payload.dayID])
         if (state.clicked.length === 1) {
           commit('resetClicked')
         }
         else {
           var pay2 = {}
-          pay2['index'] = index
-          pay2['userID'] = payload.uID
-          pay2['id'] = payload.dayID
+          pay2['index'] = state.clicked.indexOf(state.element_map[payload.calID][payload.dayID])
+          commit('removeClicked', pay2)
+        }
+      },
+      removeSharedClicked ({commit, state}, payload) {
+        if (state.clicked.length === 1) {
+          commit('resetClicked')
+        }
+        else {
+          var pay2 = {}
+          pay2['index'] = state.clicked.indexOf(state.element_map[payload.cID][payload.uID][payload.dayID])
           commit('removeClicked', pay2)
         }
       },
@@ -541,12 +692,30 @@ export default new Vuex.Store(
         axios.post(backendURL + '/urlaub/api/v1.0/add_cat', {
           cat_name: payload.catName,
           cat_color: payload.catColor,
-          calID: state.currentCal,
+          calID: payload.calID,
           clicked: state.clicked
         }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
-            commit('addCat', response.data[0])
+            var payload2 = {cat: response.data[0], calID: state.currentCal}
+            commit('addCat', payload2)
             commit('replaceUserdayID', response.data[1])
+            commit('setBorder', false)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      },
+      addSharedCat ({commit, state}, payload) {
+        axios.post(backendURL + '/urlaub/api/v1.0/add_cat', {
+          cat_name: payload.catName,
+          cat_color: payload.catColor,
+          calID: payload.calID,
+          clicked: state.clicked
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
+          .then(function (response) {
+            var payload2 = {cat: response.data[0], calID: state.currentCal}
+            commit('addCat', payload2)
+            commit('replaceSharedUserdayID', response.data[1])
             commit('setBorder', false)
           })
           .catch(function (error) {
@@ -589,7 +758,23 @@ export default new Vuex.Store(
             for (var i = 0; i < response.data.length; i++) {
               commit('setToDefaultCat', response.data[i])
             }
-            commit('deleteCat', catID)
+            var payload2 = {catID: catID, calID: state.currentCal}
+            commit('deleteCat', payload2)
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      },
+      deleteSharedCat ({commit, state}, catID) {
+        axios.post(backendURL + '/urlaub/api/v1.0/deleteCat', {
+          catID: catID
+        }, {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
+          .then(function (response) {
+            for (var i = 0; i < response.data.length; i++) {
+              commit('setSharedDaysToDefaultCat', response.data[i])
+            }
+            var payload2 = {catID: catID, calID: state.currentCal}
+            commit('deleteCat', payload2)
           })
           .catch(function (error) {
             console.log(error)
@@ -634,7 +819,6 @@ export default new Vuex.Store(
           })
       },
       removeUserFromShared ({state}, calID) {
-        console.log(calID)
         return removeUserFromShared({"calID": calID}, state.jwt.token)
           .then(response => {
             router.push({name: 'calOverview'})
@@ -649,9 +833,8 @@ export default new Vuex.Store(
         return axios.get(backendURL + '/urlaub/api/v1.0/getCats/' + payload.uCalID + '/' + payload.sCalID,
           {headers: {Authorization: `Bearer: ${state.jwt.token}`}})
           .then(function (response) {
-            commit('setSharedCats', response.data[1])
             commit('setPersonalCats', response.data[0])
-
+            commit('setSharedCats', response.data[1])
           })
           .catch(function (error) {
             console.log(error)
@@ -711,26 +894,41 @@ export default new Vuex.Store(
       isAuthenticated (state) {
         return isValidJwt(state.jwt.token)
       },
-      getCatByID: (state) => (id) => {
-        return state.cats[id]
+      getCalByID: (state) => (id) => {
+        return state.cals[id]
       },
-      getCats: (state) => {
-        return state.cats
+      getCatByID: (state) => (id, calID) => {
+        return state.cats[calID][id]
       },
-      getCatCount: (state) => (id) => {
-        return state.cat_count[id]
+      getCats: (state) => (calID) =>  {
+        return state.cats[calID]
       },
-      getInfo: (state) => {
-        return state.info
+      getMergedCats: (state) => {
+        return state.mergeCats
       },
-      getSharedInfo: (state) => {
-        return state.sharedUserDays
+      getMergedCals: (state) => {
+        return state.checkedCalenders
+      },
+      getCatCount: (state) => (id, calID) => {
+        return state.cat_count[calID][id]
+      },
+      getInfo: (state) => (calID) => {
+        return state.info[calID]
+      },
+      getSharedInfo: (state, calID) => {
+        return state.info[calID]
+      },
+      getMergedData: (state) => {
+        return state.mergedUserDays
       },
       getSharedUsers: (state) => {
         return state.sharedUsers
       },
-      getElementMapByIDStyle: (state) => (uID, id) => {
-        return state.element_map[uID][id].style
+      getElementMapByIDStyle: (state) => (id, calID) => {
+        return state.element_map[calID][id].style
+      },
+      getSharedElement: (state) => (id, userID, calID) => {
+        return state.element_map[calID][userID][id].style
       },
       getDayBox: (state) => {
         return state.dayBox

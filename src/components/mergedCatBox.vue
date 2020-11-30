@@ -1,19 +1,22 @@
 <template>
   <div class="counters">
-      <span class="count" v-for="cat in $store.getters.getCats(calID)" v-bind:id="cat['id']"
-            v-bind:key="cat.id"
-            :style="cat.style" @click="click_on_cat(cat.id)">
-        {{ cat['name']}}
+    <div v-for="calender in $store.getters.getMergedCals" class="calCats"
+         v-if="$store.state.activeCal === -1 || $store.state.activeCal === calender.id" :id="calender.id">
+      <span class="calTitle">{{calender.name}}</span>
+      <span class="count" v-for="cat in $store.getters.getCats(calender.id)" :id="cat['id']"
+            :key="cat.id"
+            :style="cat.style" @click="click_on_cat(cat.id, calender.id)">
+        {{ cat.name }}
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
-    <span v-if="admin" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
+    </div>
   </div>
 </template>
 
 <script>
   export default {
-    name: 'catBox',
-    props: ['admin', 'calID'],
+    name: 'mergedCatBox',
+    props: ['admin'],
     data () {
       return {
         cat_box: false,
@@ -44,20 +47,18 @@
           }
         }
       },
-      click_on_cat (catID) {
-        var payload
+      click_on_cat (catID, calID) {
         if(this.$store.state.clicked.length > 0){
-          payload = {"catID": catID, "calID": this.calID}
-          this.$store.dispatch('changeCatShared', payload)
+          var payload = {"calID" : calID, "catID": catID }
+          this.$store.dispatch('changeCatDropDown', payload)
         }
         else{
           if(catID !== this.selectedCat && this.admin){
             this.selectedCat = catID
-            payload= {"catID": catID, "calID": this.calID}
-            this.$store.commit('setClickedCatCounter', payload)
-            this.$store.commit('setClickedCatName', this.$store.getters.getCats(this.calID)[catID].name)
-            this.catName = this.$store.getters.getCats(this.calID)[catID].name
-            this.catColor = this.$store.getters.getCats(this.calID)[catID].style
+            this.$store.commit('setClickedCatCounter', {catID: parseInt(catID), calID: calID})
+            this.$store.commit('setClickedCatName', this.$store.getters.getCats(calID)[catID].name)
+            this.catName = this.$store.getters.getCats(calID)[this.selectedCat].name
+            this.catColor = this.$store.getters.getCats(calID)[this.selectedCat].style
           }
         }
       },
@@ -85,6 +86,7 @@
     right: 0;
     width: 100%;
     opacity: 1;
+
   }
   .count{
     margin: 5px;
@@ -106,6 +108,7 @@
     border: solid;
     border-width: 1px;
     font-size: inherit;
+    min-height: 10%;
   }
 
   .material-icons {
@@ -116,6 +119,10 @@
     padding: 3px;
     margin: 5px;
     float: left;
+  }
+
+  .calCats{
+    display: flex;
   }
 
 </style>

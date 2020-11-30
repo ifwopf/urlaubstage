@@ -7,10 +7,16 @@
       <div class="kalender" v-if="!cal.shared" v-for="cal in $store.state.cals"
            @click="redirect('Urlaubskalender2', {calID: cal.id, year: '2020'})">
         <span>{{cal.name}}</span>
+        <input :label="cal.id" :value="cal" class="merge" v-model="$store.state.checkedCalenders" onclick="event.stopPropagation()" type="checkbox"/>
       </div>
       <div class="kalender">
         <input class="input" v-model="newCalender">
         <div class="button" @click="addCal">+</div>
+      </div>
+      <div class="kalender">
+        <span>Kombinierte Ansicht</span>
+        <div v-for="calender in $store.state.checkedCalenders">{{calender.name}}</div>
+        <div class="button" @click="redirect('mergeCal', {year: '2020'})">Ansehen</div>
       </div>
     </div>
     <div class="shared">
@@ -19,10 +25,11 @@
       </div>
       <div class="kalender" v-if="cal.shared" v-for="cal in $store.state.cals"
            @click="redirect('sharedCal', {calID: cal.id, year: '2020'})">
-        <span >{{cal.name}}</span>
+        <span>{{cal.name}}</span>
       </div>
       <div class="kalender" @click="redirect('createSharedCal', {})">
-        <span>Neuer Teamkalender</span> <div class="button">+</div>
+        <span>Neuer Teamkalender</span>
+        <div class="button">+</div>
       </div>
     </div>
     <div class="settings">
@@ -30,16 +37,16 @@
         <h2 class="title">Einstellungen</h2>
       </div>
       <div class="kalender" @click="redirect('calSync', {})">
-        <span >Kalender synchronisieren</span>
+        <span>Kalender synchronisieren</span>
       </div>
       <div class="kalender" @click="logout">
-        <span >Passwort ändern</span>
+        <span>Passwort ändern</span>
       </div>
       <div class="kalender" @click="showDeleteBox">
-        <span >Alles löschen</span>
+        <span>Alles löschen</span>
       </div>
       <div class="kalender" @click="logout">
-        <span >Logout</span>
+        <span>Logout</span>
       </div>
     </div>
     <delete-box :actionName="'deleteUser'" :calID="0"/>
@@ -47,21 +54,26 @@
 </template>
 
 <script>
-  import { deleteUser } from '@/api'
+  import {deleteUser} from '@/api'
   import deleteBox from '@/components/deleteBox'
+
   export default {
     name: 'calOverview',
     components: {deleteBox},
     data () {
       return {
-        newCalender: 'Urlaubskalender'
+        newCalender: 'Urlaubskalender',
       }
     },
     created () {
       // fetch the data when the view is created and the data is
       // already being observed
       //$(".second_div").css({'width': ($(".first_div").width() + 'px')});
-      this.$store.dispatch('calReady')
+      if (this.$store.state.cals === null) {
+        this.$store.dispatch('calReady')
+      }
+
+
     },
     methods: {
       addCal () {
@@ -70,23 +82,23 @@
       redirect (comp, parameters) {
         this.$store.dispatch('resetClicked')
         this.$router.push({name: comp, params: parameters})
-        location.reload()
+        //location.reload()
       },
-      logout() {
+      logout () {
         this.$store.dispatch('logout')
       },
-      showDeleteBox() {
-        this.$store.commit('setDeleteBox', "Wollen Sie Ihren Account wirklich löschen?")
+      showDeleteBox () {
+        this.$store.commit('setDeleteBox', 'Wollen Sie Ihren Account wirklich löschen?')
       }
 
     }
   }
 </script>
 <style>
-  body{
+  body {
     background-color: aliceblue;
     width: 100%;
-    margin:0;
+    margin: 0;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
     -khtml-user-select: none; /* Konqueror HTML */
@@ -98,10 +110,11 @@
 
 <style scoped>
   h2 {
-    display:inline-block;
+    display: inline-block;
     background-color: #fff;
     padding: 5px;
   }
+
   .kalender {
     background-color: #fff;
     box-shadow: 5px 3px 3px grey;
@@ -112,15 +125,18 @@
     margin: 8px auto;
     cursor: pointer;
   }
+
   .kalender:hover {
     background-color: aliceblue;
   }
+
   .wrapper {
     width: 100%;
     overflow: hidden; /* add this to contain floated children */
     max-width: 1200px;
     text-align: center;
   }
+
   .personal, .shared, .settings {
     margin: 10px 20px;
     min-width: 300px;
@@ -140,6 +156,7 @@
     font-size: 16px;
     background-color: aliceblue;
   }
+
   .input {
     border: solid;
     border-width: 1px;
@@ -147,5 +164,10 @@
     display: inline-block;
     font-size: 16px;
     background-color: aliceblue;
+  }
+
+  .merge {
+    float: right;
+    font-size: 15px;
   }
 </style>

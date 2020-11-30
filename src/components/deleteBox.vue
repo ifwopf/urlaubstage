@@ -21,7 +21,6 @@
         this.$store.commit('removeDeleteBox')
       },
       deleteCal(){
-        console.log(this.ID)
         this.$store.dispatch(this.actionName, this.ID)
       },
     }

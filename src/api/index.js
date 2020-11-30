@@ -50,7 +50,6 @@ export function readyUnreg (data, token) {
 }
 
 export function removeUserFromShared (calID, token) {
-  console.log(calID);
   return axios.post(backendURL + `/urlaub/api/v1.0/removeUserFromShared`, calID, {headers: { Authorization: `Bearer: ` + token }})
 }
 

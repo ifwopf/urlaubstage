@@ -93,9 +93,6 @@
       }
     },
     created () {
-      // fetch the data when the view is created and the data is
-      // already being observed
-      //$(".second_div").css({'width': ($(".first_div").width() + 'px')});
       this.$store.dispatch('calReady')
     },
     computed: {
@@ -177,11 +174,12 @@
       dropback(event) {
         event.preventDefault();
         event.stopPropagation();
-        var data = event.dataTransfer.getData("personalCat");
-        var sharedCatID = event.dataTransfer.getData("parentID");
-        this.sharedCats[sharedCatID].splice(this.sharedCats[sharedCatID].indexOf(this.$store.getters.getPersonalCats[data]), 1)
-        this.$set(this.personalCats, data, this.$store.getters.getPersonalCats[data])
-
+        var personalCatID = parseInt(event.dataTransfer.getData("personalCat"));
+        var sharedCatID = parseInt(event.dataTransfer.getData("parentID"));
+        if (this.sharedCats[sharedCatID] !== undefined) {
+          this.sharedCats[sharedCatID].splice(this.sharedCats[sharedCatID].indexOf(this.$store.getters.getPersonalCats[personalCatID]), 1)
+          this.$set(this.personalCats, personalCatID, this.$store.getters.getPersonalCats[personalCatID])
+        }
       },
       redirect (link) {
         window.location.href = link

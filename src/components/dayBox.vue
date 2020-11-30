@@ -38,7 +38,7 @@ import {mapActions} from 'vuex'
 import {mapGetters} from 'vuex'
 export default {
   name: 'dayBox',
-  props: ["unreg", "year"],
+  props: ["unreg", "year", "shared"],
   data () {
     return {
       catName: '',
@@ -128,8 +128,13 @@ export default {
       this.edit = true
     },
     addNote() {
-      if (this.unreg == "0"){
-        this.$store.dispatch("addNote", this.note)
+      if (this.unreg === 0){
+        if (this.shared) {
+          this.$store.dispatch("addSharedNote", this.note)
+        }
+        else {
+          this.$store.dispatch("addNote", this.note)
+        }
       }
       else{
         saveToIndexedDB("MeineDatenbank", "months", this.$store.state.info, this.year)
@@ -142,6 +147,7 @@ export default {
       this.edit = false
       this.$store.commit('setBorder', false)
       this.$store.dispatch('resetClicked')
+      this.$store.commit('setActiveCal', -1)
       //this.$store.dispatch('resetCatClicked')
     },
     toggleLock () {

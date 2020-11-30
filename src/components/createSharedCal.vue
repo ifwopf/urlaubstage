@@ -100,7 +100,6 @@
         var tmp = this.currentUser
         this.currentUser = " "
         this.currentUser = tmp
-        console.log(this.users[user])
       },
       getCurrentUser () {
         axios.get(backendURL + '/urlaub/api/v1.0/getCurrentUser', { headers: { Authorization: `Bearer: ${this.$store.state.jwt.token}` } })

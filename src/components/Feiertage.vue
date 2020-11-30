@@ -54,11 +54,9 @@
           })
       },
       addFeiertage() {
-        console.log(this.catID)
         if (this.catID != null && this.region != ''){
           var payload = {'region': this.region, 'catID': this.catID}
           this.$store.dispatch('addFeiertage', payload)
-          console.log(payload)
         }
       }
     }

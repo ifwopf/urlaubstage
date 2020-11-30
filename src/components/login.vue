@@ -123,7 +123,6 @@
         this.$store.commit("setInfoText", "Registrierung fehlgeschlagen")
       })
       EventBus.$on('failedAuthentication', (msg) => {
-        console.log("herwrtret")
         this.$store.commit("setInfoText", "Falsche Anmeldedaten")
       })
     },

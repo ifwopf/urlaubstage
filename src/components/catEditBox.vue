@@ -1,7 +1,7 @@
 <template>
   <div v-if="$store.state.catEditBox || $store.state.border" class="centerBox">
     <span class="nameDisplay" v-if="!editName & !$store.state.border" :style="{backgroundColor: catColor}">
-          {{ $store.getters.getCatByID(this.$store.state.clickedCatCounter).name }}
+          {{ $store.getters.getCatByID(this.$store.state.clickedCatCounter, calID).name }}
         </span>
     <input class="nameDisplay input" v-model="catNameInit" @change="" @click.stop="" type="text"
            :style="{backgroundColor: catColor}" v-if="editName || $store.state.border"/>
@@ -32,7 +32,7 @@
   export default {
     name: 'catEditBox',
     components: {ColorSelect},
-    props: ["unreg", "year"],
+    props: ["unreg", "year", "calID", "shared"],
     data () {
       return {
         catName: null,
@@ -75,6 +75,9 @@
           removeFromIndexedDB("MeineDatenbank", "cats", this.$store.state.clickedCatCounter)
           saveToIndexedDB("MeineDatenbank", "months", this.$store.state.info, this.year)
         }
+        if (this.shared){
+          this.$store.dispatch('deleteSharedCat', this.$store.state.clickedCatCounter)
+        }
         else {
           this.$store.dispatch('deleteCat', this.$store.state.clickedCatCounter)
         }
@@ -92,7 +95,7 @@
           this.editName = false
         }
         else {
-          var payload = {'name': this.catNameInit, 'id': this.$store.state.clickedCatCounter}
+          var payload = {'name': this.catNameInit, 'id': this.$store.state.clickedCatCounter, 'calID': this.calID}
           this.$store.dispatch('changeCatName', payload)
           this.editName = false
         }
@@ -110,7 +113,7 @@
           this.editColor = false
         }
         else {
-          var payload = {'catColor': this.catColor, 'id': this.$store.state.clickedCatCounter}
+          var payload = {'catColor': this.catColor, 'id': this.$store.state.clickedCatCounter, 'calID': this.calID}
           this.$store.dispatch('changeCatColor', payload)
           this.editColor = false
         }
@@ -133,7 +136,7 @@
       reset() {
         this.editName = false
         this.editColor = false
-        this.$store.commit('setCatColor', this.$store.state.cats[this.$store.state.clickedCatCounter].style['background-color'])
+        this.$store.commit('setCatColor', this.$store.state.cats[this.calID][this.$store.state.clickedCatCounter].style['background-color'])
       },
       setColor(e){
         this.$store.commit('setCatColor', e.target.style['background-color'])
@@ -159,12 +162,17 @@
         }
         else {
           for (var i = 0; i < this.$store.state.cats.length; i++) {
-            if (this.catName === this.$store.state.cats[i].name) {
+            if (this.catName === this.$store.state.cats[this.catID][i].name) {
               doppelt = true
             }
           }
           if (!doppelt) {
-            this.$store.dispatch('addCat', {catName: this.catNameInit, catColor: this.catColor})
+            if (this.shared){
+              this.$store.dispatch('addSharedCat', {catName: this.catNameInit, catColor: this.catColor, calID: this.calID})
+            }
+            else {
+              this.$store.dispatch('addCat', {catName: this.catNameInit, catColor: this.catColor, calID: this.calID})
+            }
             this.catName = ''
           }
         }

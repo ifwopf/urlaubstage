@@ -9,6 +9,7 @@ import calSync from '@/components/calSync'
 import calUnreg from '@/components/UnregisterdCalendar'
 import editShared from '@/components/editShared'
 import notFound from '@/components/notFound'
+import mergeCal from '@/components/mergeCal'
 import store from '@/store'
 
 Vue.use(Router)
@@ -39,6 +40,26 @@ export default new Router({
           next('/login')
         } else {
           next()
+        }
+      }
+    },
+    { path: '/mergeCal/:year',
+      name: 'mergeCal',
+      component: mergeCal,
+      props: true,
+      beforeEnter (to, from, next) {
+        next()
+        if (!store.getters.isAuthenticated) {
+          next('/login')
+        } else {
+          if (store.state.checkedCalenders.length > 0){
+            next()
+          }
+          else {
+            next('/calOverview')
+
+          }
+
         }
       }
     },

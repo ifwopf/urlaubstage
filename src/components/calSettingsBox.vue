@@ -60,7 +60,6 @@
       return getOwners(this.calID, this.$store.state.jwt.token)
         .then(response => {
           this.users = response.data;
-          console.log(this.users)
         })
         .catch(error => {
           console.log('Error Authenticating: ', error)
@@ -95,11 +94,9 @@
         if (this.currentUser)
           return checkMail(this.currentUser, this.$store.state.jwt.token)
             .then(response => {
-              console.log(response.data)
               if (response.data){
                 return addOwner({"email": this.currentUser, "calID": this.calID}, this.$store.state.jwt.token)
                   .then(response => {
-                    console.log(response.data)
                     Vue.set(this.users, response.data["id"], response.data)
                   })
               }
@@ -111,7 +108,6 @@
       deleteOwner(id) {
         return deleteOwner({"userID": id, "calID": this.calID}, this.$store.state.jwt.token)
           .then(response => {
-            console.log(response.data)
             if (response.data){
               this.$delete(this.users, id)
             }

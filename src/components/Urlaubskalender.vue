@@ -17,16 +17,16 @@
       </i>
     </h1>
     <div class="counters">
-      <div class="count" v-for="cat in $store.getters.getCats" v-bind:id="cat['id']"
+      <div class="count" v-for="cat in $store.state.cats[calID]" v-bind:id="cat['id']"
             v-bind:key="cat.id"
             :style="cat.style" @click="click_on_cat(cat.id)">
-        <span>{{ cat['name']}}: {{ $store.getters.getCatCount(cat.id)}}</span>
+        <span>{{ cat['name']}}: {{ $store.getters.getCatCount(cat.id, calID)}}</span>
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </div>
       <span v-if="!$store.state.border" @click="openAddCat"> <i id="plus" class="material-icons">add</i></span>
     </div>
 
-    <div class="monat" v-for="(month, index) in $store.getters.getInfo" :key="index">
+    <div class="monat" v-for="(month, index) in $store.getters.getInfo(calID)" :key="index">
       <h3 class="monatstitel">{{ months_en[index] }}</h3>
       <div class="grid">
         <div class="wochentag" style="grid-row: 1; grid-column: 1">Mo</div>
@@ -37,9 +37,9 @@
         <div class="wochentag" style="grid-row: 1; grid-column: 6">Sa</div>
         <div class="wochentag" style="grid-row: 1; grid-column: 7">So</div>
         <div class="tagrahmen" @click="mouse_on_day" :id="day.id" v-for="day in month"
-             :class="{ 'currentDay': (day.month == currentMonth && day.day == currentDay)}"
-             :style="[$store.getters.getElementMapByIDStyle($store.state.currentUser,day.id),
-             $store.getters.getCatByID(day.cat_id).style,
+             :class="{ 'currentDay': (day.month == currentMonth && day.day == currentDay && year == currentYear)}"
+             :style="[$store.getters.getElementMapByIDStyle(day.id, calID),
+             $store.getters.getCatByID(day.cat_id, calID).style,
              day.clicked ? {'border-color': 'black  !important'} : {'border-color': '#f1f1f1'}]">
           <div class="tag" v-if="day['weekday']=== 'Samstag'" :month_id="day.month-1"
                v-bind:key="day.id" ref="tag" v-bind:id="day['id']" style="color: 	#800000">
@@ -60,7 +60,7 @@
     </div>
     <div class="edit_box_shadow">&nbsp;</div>
     <day-box :unreg="0"/>
-    <cat-edit-box :unreg="0"/>
+    <cat-edit-box :unreg="0" :calID="calID"/>
     <Feiertage/>
     <cal-settings-box :calName="calName" v-model="calName" :calID="calID"/>
     <infobox/>
@@ -84,11 +84,6 @@
     name: 'Urlaubskalender',
     components: {Infobox, Feiertage, dayBox, catEditBox, calSettingsBox},
     props: ['year', 'calID', 'Feiertage'],
-    mounted () {
-      // fetch the data when the view is created and the data is
-      // already being observed
-
-    },
     data () {
       return {
         calName: '',
@@ -147,32 +142,29 @@
       },
       mouse_on_day (event) {
         if (!event.ctrlKey && !event.metaKey && ! this.$store.state.locked) {
-          // clearClicked
-          this.$store.dispatch('resetClicked')
+          this.$store.commit('removeAllClicked')
           this.selectedCat = null
+          this.$store.dispatch('setClicked', {"dayID": event.target.id, "calID": this.calID})
         }
-        if (!this.containsObject(this.$store.state.element_map[this.$store.state.currentUser][event.target.id], this.$store.state.clicked)) {
-          var payload = {"dayID": event.target.id, "uID": this.$store.state.currentUser}
-          this.$store.dispatch('setClicked', payload)
+        else if (!this.containsObject(this.$store.state.element_map[this.calID][event.target.id], this.$store.state.clicked)) {
+          this.$store.dispatch('setClicked', {"dayID": event.target.id, "calID": this.calID})
         }
         else {
-          var payload = {"dayID": event.target.id, "uID": this.$store.state.currentUser}
-          this.$store.dispatch('removeClicked', payload)
+          this.$store.dispatch('removeClicked', {"dayID": event.target.id, "calID": this.calID})
         }
       },
       click_on_cat (catID) {
         if(this.$store.state.clicked.length > 0){
-          this.changed = JSON.parse(JSON.stringify(this.$store.state.clicked))
-          this.$store.dispatch('changeCatDropDown', catID)
+          //this.changed = JSON.parse(JSON.stringify(this.$store.state.clicked))
+          this.$store.dispatch('changeCatDropDown', {catID: catID, calID: this.calID})
         }
         else{
           if(catID !== this.selectedCat && parseInt(catID) !==  0){
             this.selectedCat = catID //to be deleted
-            this.$store.commit('setClickedCatCounter', parseInt(catID))
-            this.$store.commit('setClickedCatName', this.$store.getters.getCats[catID].name)
-            this.catName = this.$store.getters.getCats[this.selectedCat].name
-            this.catColor = this.$store.getters.getCats[this.selectedCat].style
-
+            this.$store.commit('setClickedCatCounter', {catID: catID, calID: this.calID})
+            this.$store.commit('setClickedCatName', this.$store.getters.getCats(this.calID)[catID].name)
+            this.catName = this.$store.getters.getCats(this.calID)[this.selectedCat].name
+            this.catColor = this.$store.getters.getCats(this.calID)[this.selectedCat].style
           }
         }
       },
@@ -181,7 +173,6 @@
           days: this.changed,
           calID: this.calID
         }
-        console.log(this.changed)
         this.$store.commit('resetClickedCat', this.changed)
         return resetCats(payload, this.$store.state.jwt.token)
           .then(response => {
@@ -265,6 +256,7 @@
       var currentTime = new Date();
       this.currentMonth = currentTime.getMonth() + 1;
       this.currentDay = currentTime.getDate();
+      this.currentYear = currentTime.getFullYear()
       Selection.create({
         // Class for the selection-area-element
         class: 'selection-area',
@@ -319,17 +311,17 @@
         }
 
       }).on('move', evt => {
-        for (const el of evt.selected) {
-          if (this.containsObject(this.$store.state.element_map[this.$store.state.currentUser][el.id], this.$store.state.clicked)) {
+        for (const el of evt.changed.added) {
+          if (this.containsObject(this.$store.state.element_map[this.calID][el.id], this.$store.state.clicked)) {
             //this.$store.dispatch('removeClicked', el.id)
           }
           else {
-
-            var payload = {"dayID": el.id, "uID": this.$store.state.currentUser}
-            this.$store.dispatch('setClicked', payload)
+            this.$store.dispatch('setClicked', {"dayID": el.id, "calID": this.calID})
           }
-          el.classList.remove('selected')
-          evt.inst.removeFromSelection(el)
+        }
+        for (const el of evt.changed.removed) {
+          var payload = {"dayID": el.id, "calID": this.calID}
+          this.$store.dispatch('removeClicked', payload)
         }
       }).on('stop', evt => {
       })
