@@ -11,7 +11,7 @@ export function register (userData) {
 
 export function changePassword (userData, token) {
   return axios.post(backendURL + `/urlaub/api/v1.0/changePassword/`, userData, { headers: { Authorization: `Bearer: ` + token }})
-
+}
 
 export function addUnreg (calData, token) {
   return axios.post(backendURL + `/urlaub/api/v1.0/addUnreg/`, calData, { headers: { Authorization: `Bearer: ` + token }})
