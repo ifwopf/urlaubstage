@@ -10,6 +10,7 @@ import calUnreg from '@/components/UnregisterdCalendar'
 import editShared from '@/components/editShared'
 import notFound from '@/components/notFound'
 import mergeCal from '@/components/mergeCal'
+import changePassword from '@/components/changePassword'
 import store from '@/store'
 
 Vue.use(Router)
@@ -23,11 +24,10 @@ export default new Router({
 
       beforeEnter (to, from, next) {
         next()
-        if (!store.getters.isAuthenticated) {
+        /*if (!store.getters.isAuthenticated) {
           next('/unreg/2020')
-        } else {
-          next('/calOverview')
-        }
+        } else {*/
+        next('/calOverview')
       }
     },
     { path: '/calender/:calID/:year',
@@ -118,6 +118,18 @@ export default new Router({
     { path: '/calOverview',
       name: 'calOverview',
       component: calOverview,
+      beforeEnter (to, from, next) {
+        next()
+        if (!store.getters.isAuthenticated) {
+          next('/login')
+        } else {
+          next()
+        }
+      }
+    },
+    { path: '/changePassword',
+      name: 'changePassword',
+      component: changePassword,
       beforeEnter (to, from, next) {
         next()
         if (!store.getters.isAuthenticated) {

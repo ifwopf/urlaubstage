@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper" v-if="$store.state.mergeReady">
     <h1 class="jahrtitel">
-      <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
+      <i class="material-icons" id="home" @click="redirect2('/#/calOverview')">
         home
       </i>
       <div id="view" @click="changeView"><span v-if="weekView">M</span><span v-else>W</span></div>
@@ -83,8 +83,8 @@
               {{ day.weekday.substring(0,1) }}
             </div>
           </template>
-          <div class="user"  v-if="activeMonths.includes(index)"
-               :class="calender"
+          <div  v-if="activeMonths.includes(index)"
+               class="calender"
                v-bind:style="[{'grid-row': jindex+3, 'grid-column': 1}]">
             {{calender.name}}
           </div>
@@ -226,7 +226,7 @@
         // Remove class if user don't press the control key or ⌘ key
         if (!evt.oe.ctrlKey && !evt.oe.metaKey && !this.$store.state.locked) {
           // clearClicked
-          this.$store.dispatch('resetMergedClicked')
+          this.$store.dispatch('resetClicked')
           // Unselect all elements
           for (const el of evt.selected) {
             el.classList.remove('selected')
@@ -272,19 +272,24 @@
       ])
     },
     methods: {
-      redirect (link) {
+      redirect (comp, parameters) {
+        this.$store.dispatch('resetClicked')
+        this.$router.push({name: comp, params: parameters})
+        this.$store.dispatch('mergeReady', parameters.year)
+        //location.reload()
+      },
+      redirect2 (link) {
         window.location.href = link
       },
-      changeYear (direction) {
+      changeYear (direction) {np
         if (direction) {
           var yearString = String(parseInt(this.year) + 1)
-          this.$router.push({name: 'sharedCal', params: {calID: this.calID, year: yearString}})
+          this.redirect('mergeCal', {year: yearString})
         }
         else {
           var yearString = String(parseInt(this.year) - 1)
-          this.$router.push({name: 'sharedCal', params: {calID: this.calID, year: yearString}})
+          this.redirect('mergeCal', {year: yearString})
         }
-        location.reload()
       },
       mouse_on_day (event) {
         if (!event.ctrlKey && !event.metaKey && !this.$store.state.locked) {
@@ -414,7 +419,7 @@
 </script>
 <style>
   body {
-    background-color: aliceblue;
+    background-color: #fff;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
     -khtml-user-select: none; /* Konqueror HTML */
@@ -440,7 +445,8 @@
     grid-auto-flow: column;
     grid-template-columns: 30% 10% 10% 10% 10% 10% 10% 10%;
     margin-top: 10px;
-    border: 3px solid #AED4E6;
+    border: 1px solid aliceblue;
+    background: aliceblue;
   }
 
   .gridMonth {
@@ -449,8 +455,8 @@
     line-height: 1.3;
     grid-auto-flow: column;
     grid-template-columns: 20% repeat(31, 1fr);
-    border: 3px solid #AED4E6;
-    margin-top: 10px;
+    margin-top: 20px;
+    background: #f0f8ff;
   }
 
   .tagrahmen {
@@ -465,19 +471,20 @@
   }
 
   .wochentag {
-    background-color: #fff;
+
     margin-top: 5px;
+    margin-bottom: 5px;
   }
 
+
   .monatstitel {
-    background-color: #fff;
+    background-color: #d9f0ff;
     padding: 3px;
     font-size: 18px;
     cursor: pointer;
   }
 
   .jahrtitel {
-    background-color: #fff;
     display: inline-block;
     padding: 10px;
     margin: 10px;
@@ -501,14 +508,11 @@
     font-size: 24px;
   }
 
-  .user {
-    background-color: #AED4E6;
+  .calender {
     line-height: 2;
+    font-weight: bold;
   }
 
-  .currentUser {
-    background-color: #b7e1fc !important;
-  }
 
   .currentDate {
     background-color: #b7e1fc !important;
@@ -516,7 +520,7 @@
 
   .kw, .datum {
     line-height: 2;
-    background-color: #AED4E6;
+    background-color: #d9f0ff;
   }
 
   .kw {
@@ -530,10 +534,10 @@
   }
 
   .wrapper {
-    width: 100%;
     max-width: 1200px;
     text-align: center;
     padding: 8px;
+    margin: auto;
   }
 
   .year {

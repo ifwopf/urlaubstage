@@ -230,7 +230,6 @@
 </script>
 <style>
   body {
-    background-color: aliceblue;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
     -khtml-user-select: none; /* Konqueror HTML */
@@ -254,7 +253,7 @@
     text-align: center;
     display: inline-block;
     margin: 10px;
-    background-color: #fff;
+    background-color: #d9f0ff;
     vertical-align: top;
   }
   .calendar {
@@ -295,7 +294,6 @@
     display: inline-block;
   }
   .jahrtitel {
-    background-color: #fff;
     display: inline-block;
     padding: 10px;
     margin: 10px;
@@ -314,7 +312,6 @@
   }
   h2 {
     display:inline-block;
-    background-color: #fff;
     padding: 5px;
   }
   .infobox, .save {

@@ -13,8 +13,8 @@
         <input class="input" v-model="newCalender">
         <div class="button" @click="addCal">+</div>
       </div>
-      <div class="kalender">
-        <span>Kombinierte Ansicht</span>
+      <div v-if="$store.state.checkedCalenders.length > 1" class="kalender">
+        <h4>Mixed View</h4>
         <div v-for="calender in $store.state.checkedCalenders">{{calender.name}}</div>
         <div class="button" @click="redirect('mergeCal', {year: '2020'})">Ansehen</div>
       </div>
@@ -39,11 +39,11 @@
       <div class="kalender" @click="redirect('calSync', {})">
         <span>Kalender synchronisieren</span>
       </div>
-      <div class="kalender" @click="logout">
+      <div class="kalender" @click="redirect('changePassword', {})">
         <span>Passwort ändern</span>
       </div>
       <div class="kalender" @click="showDeleteBox">
-        <span>Alles löschen</span>
+        <span>Account löschen</span>
       </div>
       <div class="kalender" @click="logout">
         <span>Logout</span>
@@ -96,7 +96,7 @@
 </script>
 <style>
   body {
-    background-color: aliceblue;
+    background-color: #fff;
     width: 100%;
     margin: 0;
     -webkit-touch-callout: none; /* iOS Safari */
@@ -111,12 +111,11 @@
 <style scoped>
   h2 {
     display: inline-block;
-    background-color: #fff;
     padding: 5px;
   }
 
   .kalender {
-    background-color: #fff;
+    background-color: #d9f0ff;
     box-shadow: 5px 3px 3px grey;
     font-size: 20px;
     padding: 10px;
@@ -134,7 +133,7 @@
     width: 100%;
     overflow: hidden; /* add this to contain floated children */
     max-width: 1200px;
-    text-align: center;
+    margin: auto;
   }
 
   .personal, .shared, .settings {

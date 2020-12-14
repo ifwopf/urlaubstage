@@ -241,20 +241,21 @@
 
       }).on('move', evt => {
         for (const el of evt.changed.added) {
-          if (this.containsObject(this.$store.state.element_map[this.$store.state.currentUser][el.id], this.$store.state.clicked)) {
+          if (this.containsObject(this.$store.state.element_map[this.calID][el.getAttribute('userid')][el.getAttribute('dayid')],
+            this.$store.state.clicked)) {
             //this.$store.dispatch('removeClicked', el.id)
           }
           else {
             if (parseInt(el.getAttribute('userid')) === this.user['id'] || this.user['admin']) {
-              var payload = {"dayID": el.getAttribute('dayid'), "uID": el.getAttribute('userid')}
-              this.$store.dispatch('setClicked', payload)
+              var payload = {"dayID": el.getAttribute('dayid'), "userID": el.getAttribute('userid'), "calID": this.calID}
+              this.$store.dispatch('setSharedClicked', payload)
             }
           }
         }
         for (const el of evt.changed.removed) {
           if (parseInt(el.getAttribute('userid')) === this.user['id'] || this.user['admin']) {
-            payload = {"dayID": el.getAttribute('dayid'), "uID": el.getAttribute('userid')}
-            this.$store.dispatch('removeClicked', payload)
+            payload = {"dayID": el.getAttribute('dayid'), "userID": el.getAttribute('userid'), "calID": this.calID}
+            this.$store.dispatch('removeSharedClicked', payload)
           }
         }
       }).on('stop', evt => {
@@ -421,7 +422,7 @@
 </script>
 <style>
   body{
-    background-color: aliceblue;
+    background-color: #fff;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
     -khtml-user-select: none; /* Konqueror HTML */
@@ -445,7 +446,8 @@
     grid-auto-flow: column;
     grid-template-columns: 30% 10% 10% 10% 10% 10% 10% 10%;
     margin-top: 10px;
-    border: 3px solid #AED4E6;
+    border: 1px solid aliceblue;
+    background: aliceblue;
   }
   .gridMonth {
     display: grid;
@@ -453,8 +455,8 @@
     line-height: 1.3;
     grid-auto-flow: column;
     grid-template-columns: 20% repeat(31, 1fr);
-    border: 3px solid #AED4E6;
-    margin-top: 10px;
+    margin-top: 20px;
+    background:#f0f8ff;
   }
   .tagrahmen {
     cursor: pointer;
@@ -466,18 +468,16 @@
     background-color: aliceblue !important;
   }
   .wochentag {
-    background-color: #fff;
     margin-top: 5px;
   }
   .monatstitel {
-    background-color: #fff;
     padding: 3px;
     font-size: 18px;
     cursor: pointer;
+    background: #d9f0ff;
   }
 
   .jahrtitel {
-    background-color: #fff;
     display: inline-block;
     padding: 10px;
     margin: 10px;
@@ -500,18 +500,18 @@
   }
 
   .user {
-    background-color: #AED4E6;
+
     line-height: 2;
   }
   .currentUser{
-    background-color: #b7e1fc !important;
+    background-color: white !important;
   }
   .currentDate{
     background-color: #b7e1fc !important;
   }
   .kw, .datum{
     line-height: 2;
-    background-color: #AED4E6;
+    background-color: #d9f0ff;
   }
   .kw {
     cursor: pointer;
@@ -522,10 +522,10 @@
     background-color: aliceblue;
   }
   .wrapper {
-    width: 100%;
     max-width: 1200px;
     text-align: center;
     padding: 8px;
+    margin: auto;
   }
   .year{
     display: inline-block;

@@ -2,13 +2,14 @@
   <div class="counters">
     <div v-for="calender in $store.getters.getMergedCals" class="calCats"
          v-if="$store.state.activeCal === -1 || $store.state.activeCal === calender.id" :id="calender.id">
-      <span class="calTitle">{{calender.name}}</span>
+      <span class="count" id="catName">{{calender.name}}:</span>
       <span class="count" v-for="cat in $store.getters.getCats(calender.id)" :id="cat['id']"
             :key="cat.id"
             :style="cat.style" @click="click_on_cat(cat.id, calender.id)">
         {{ cat.name }}
         <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
+    <br/>
     </div>
   </div>
 </template>
@@ -75,19 +76,6 @@
 </script>
 
 <style scoped>
-
-  .cat_box {
-    background-color: beige;
-    display: inline-block;
-    text-align: center;
-    height: 30%;
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    opacity: 1;
-
-  }
   .count{
     margin: 5px;
     display: block;
@@ -99,14 +87,19 @@
     font-weight: bold;
   }
 
+  #catName {
+    background: #000;
+    color: #fff;
+    display: block;
+    cursor: auto;
+  }
+
   .counters {
     display: flow-root;
     position: sticky;
     top: 5px;
-    background-color: #fff;
+    background-color: aliceblue;
     box-shadow: 5px 2.5px 2.5px grey;
-    border: solid;
-    border-width: 1px;
     font-size: inherit;
     min-height: 10%;
   }
@@ -115,14 +108,9 @@
     cursor: pointer;
     vertical-align: middle;
   }
-  #plus {
-    padding: 3px;
-    margin: 5px;
-    float: left;
-  }
 
   .calCats{
-    display: flex;
+    display: flow-root;
   }
 
 </style>

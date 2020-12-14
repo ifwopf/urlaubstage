@@ -117,7 +117,6 @@
 </script>
 <style>
   body{
-    background-color: aliceblue;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
     -khtml-user-select: none; /* Konqueror HTML */
@@ -128,7 +127,7 @@
 </style>
 <style scoped>
   .box {
-    background-color: #fff;
+    background-color: #d9f0ff;
     box-shadow: 5px 2.5px 2.5px grey;
     border: solid;
     border-width: 1px;
@@ -161,7 +160,7 @@
     text-align: center;
     text-decoration: none;
     font-size: 16px;
-    background-color: aliceblue;
+    background-color: #d9f0ff;
     margin: 5px auto;
     max-width: 400px;
     cursor: pointer;

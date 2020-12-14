@@ -4,16 +4,16 @@ import axios from 'axios'
 import VueInputAutowidth from 'vue-input-autowidth'
 
 // imports of AJAX functions will go here
-import {authenticate, register, addUnreg, deleteUser, removeUserFromShared} from '@/api'
+import {authenticate, register, addUnreg, deleteUser, removeUserFromShared, changePassword} from '@/api'
 import {isValidJwt, EventBus} from '@/utils'
 import router from '@/router'
 
 Vue.use(Vuex)
 Vue.use(VueInputAutowidth)
 
-export const backendURL = 'http://127.0.0.1:5000'
+//export const backendURL = 'http://127.0.0.1:5000'
 
-//export const backendURL = "https://urlaubskalender.herokuapp.com"
+export const backendURL = "https://urlaubskalender.herokuapp.com"
 
 function compare (a, b) {
   if (a.day < b.day) {
@@ -427,6 +427,15 @@ export default new Vuex.Store(
             EventBus.$emit('failedAuthentication', error)
           })
       },
+      changePassword (context, userData) {
+        //context.commit('setUserData', {userData})
+        return changePassword(userData, context.state.jwt.token)
+          .then(response => context.commit('setJwtToken', {jwt: response.data}))
+          .catch(error => {
+            console.log('Error Authenticating: ', error)
+            EventBus.$emit('failedAuthentication', error)
+          })
+      },
       logout (context) {
         context.commit('setJwtToken', {jwt: {token: null}})
         router.go('/')
@@ -487,6 +496,7 @@ export default new Vuex.Store(
           })
       },
       mergeReady ({commit, state, jwt}, data) {
+        console.log(data)
         if (data === undefined) {
           data = '2020'
         }

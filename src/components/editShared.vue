@@ -140,7 +140,6 @@
 </script>
 <style>
   body{
-    background-color: aliceblue;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
     -khtml-user-select: none; /* Konqueror HTML */
@@ -156,7 +155,7 @@
     padding: 5px;
   }
   .box {
-    background-color: #fff;
+    background-color: #d9f0ff;
     box-shadow: 5px 2.5px 2.5px grey;
     border: solid;
     border-width: 1px;

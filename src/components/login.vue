@@ -134,7 +134,7 @@
 </script>
 <style>
   body{
-    background-color: aliceblue;
+    background-color: #fff;
     width: 100%;
     margin:0;
     -webkit-touch-callout: none; /* iOS Safari */
@@ -155,7 +155,7 @@
 
     position: sticky;
     top: 5px;
-    background-color: #fff;
+    background-color: #d9f0ff;
     box-shadow: 5px 3px 5px grey;
     font-size: 20px;
     padding: 5px;
@@ -178,7 +178,7 @@
     border: none
   }
   .button:hover{
-    background-color: aliceblue;
+    background-color: #d9f0ff;
   }
 
   .input {
@@ -188,10 +188,10 @@
     display: inline-block;
     width: 90%;
     font-size: 16px;
-    background-color: aliceblue;
+    background-color: #fff;
   }
   .active{
-    background-color: aliceblue;
+    background-color: #d9f0ff;
   }
   .titlebox {
     text-align: center;

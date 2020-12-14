@@ -336,7 +336,7 @@
     background-color: rgba(0, 128, 255, 0.2);
   }
   body{
-    background-color: aliceblue;
+    background-color: #fff;
     width: 100%;
     margin:0;
     -webkit-touch-callout: none; /* iOS Safari */
@@ -359,6 +359,8 @@
   .monat {
     flex: 1;
     width: 100%;
+    background: #f0f8ff;
+    margin-top: 20px;
   }
   @media only screen and (min-width: 961px) {
     .monat {
@@ -373,12 +375,13 @@
       width: 49%;
       display: inline-block;
       vertical-align: top;
-      margin: 0 0.5%;
+      margin-right: 1%;
     }
   }
   @media only screen and (max-width: 600px) {
     .monat {
       margin: auto;
+      margin-top: 20px;
     }
   }
   .tag {
@@ -431,10 +434,10 @@
     cursor: pointer;
     background-color: aliceblue;
   }
-  .wochentag, .monatstitel, .jahrtitel {
-    color: #000;
-    background-color: #fff;
+  .wochentag, .monatstitel {
+    background-color: #d9f0ff;
     text-align: center;
+    margin-top: 0;
   }
   .jahrtitel {
     display: inline-block;
@@ -455,7 +458,7 @@
     display: flow-root;
     position: sticky;
     top: 5px;
-    background-color: #fff;
+    background-color: #f0f8ff;
     box-shadow: 5px 2.5px 2.5px grey;
     font-size: inherit;
     width: 90%;
