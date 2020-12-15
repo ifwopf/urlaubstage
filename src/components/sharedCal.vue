@@ -499,6 +499,13 @@
     font-size: 24px;
   }
 
+  @media only screen and (max-width: 700px) {
+    #view  {
+      display: none;
+    }
+  }
+
+
   .user {
 
     line-height: 2;

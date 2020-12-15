@@ -7,7 +7,6 @@
             :key="cat.id"
             :style="cat.style" @click="click_on_cat(cat.id, calender.id)">
         {{ cat.name }}
-        <i class="material-icons" v-show="parseInt(selectedCat)===cat.id" @click="showCatEdit">settings_applications</i>
       </span>
     <br/>
     </div>

@@ -1,17 +1,17 @@
 <template>
-  <div v-show='$store.getters.getDayBox && !multipleUsers' class="dayBox">
+  <div v-show='$store.getters.getDayBox' class="dayBox">
     <button id="x" @click="resetDayBox"><i class="material-icons md-48">clear</i></button>
     <button id="lock" @click="toggleLock">
       <i v-if="!$store.state.locked" class="material-icons md-48">lock_open</i>
       <i v-else class="material-icons md-48">lock</i>
     </button>
-    <span id="selectedDaysText">
+    <span id="selectedDaysText" v-show="!multipleUsers">
     {{ selectedDaysString }}
     </span>
-    <div class="notebox">
+    <div class="notebox" >
       <div class="note">
         <div v-if="!editNote">
-          <span v-if="$store.state.clicked.length == 1">
+          <span v-if="$store.state.clicked.length === 1">
           {{ note }}
             </span>
           <button class="noteButton" v-if="!editNote" @click="editNoteToggle">
@@ -183,6 +183,7 @@ export default {
     background-color: #ffffff;
     text-align: center;
     height: 15%;
+    min-height: 100px;
     position: sticky;
     bottom: 20px;
     box-shadow: 5px 2.5px 2.5px grey;

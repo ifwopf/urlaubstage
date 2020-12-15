@@ -7,7 +7,8 @@
       <div class="kalender" v-if="!cal.shared" v-for="cal in $store.state.cals"
            @click="redirect('Urlaubskalender2', {calID: cal.id, year: '2020'})">
         <span>{{cal.name}}</span>
-        <input :label="cal.id" :value="cal" class="merge" v-model="$store.state.checkedCalenders" onclick="event.stopPropagation()" type="checkbox"/>
+        <input :label="cal.id" :value="cal" class="merge" v-model="$store.state.checkedCalenders" onclick="event.stopPropagation()"
+               type="checkbox"/>
       </div>
       <div class="kalender">
         <input class="input" v-model="newCalender">
@@ -167,6 +168,13 @@
 
   .merge {
     float: right;
-    font-size: 15px;
+    font-size: 55px;
+    padding: 10px;
   }
+
+  input[type='checkbox'] {
+    width: 20px;
+    height: 20px;
+  }
+
 </style>

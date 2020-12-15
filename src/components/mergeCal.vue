@@ -508,6 +508,12 @@
     font-size: 24px;
   }
 
+  @media only screen and (max-width: 700px) {
+    #view  {
+      display: none;
+    }
+  }
+
   .calender {
     line-height: 2;
     font-weight: bold;
