@@ -11,14 +11,14 @@
     </div>
     <select v-model="catID">
       <option :value="-1">Neue Kategorie</option>
-      <option v-for="cat in $store.getters.getCats" :value="cat.id">{{cat.name}}</option>
+      <option v-for="cat in $store.getters.getCats($store.state.currentCal)" :value="cat.id">{{cat.name}}</option>
     </select>
     <br/><br/>
+    <div class="button" @click="removeFeiertage">
+      Abbrechen
+    </div>
     <div class="button" @click="addFeiertage">
       Hinzufügen
-    </div>
-    <div class="button" @click="removeFeiertage">
-      Fertig
     </div>
   </div>
 </template>
@@ -41,7 +41,6 @@
     },
     methods: {
       removeFeiertage() {
-        console.log(this.catID)
         this.$store.commit('removeFeiertage')
       },
       getFeiertage (token) {
@@ -54,7 +53,7 @@
           })
       },
       addFeiertage() {
-        if (this.catID != null && this.region != ''){
+        if (this.catID != null && this.region !== ''){
           var payload = {'region': this.region, 'catID': this.catID}
           this.$store.dispatch('addFeiertage', payload)
         }

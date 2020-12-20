@@ -1,7 +1,7 @@
 {
   "name": "urlaubstage",
   "version": "1.0.0",
-  "description": "Kalender zum Organieseren des Urlaubs",
+  "description": "Kalender zum Organisieren des Urlaubs",
   "author": "Ilija Frankoivc",
   "private": true,
   "scripts": {
@@ -11,9 +11,9 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "@simonwep/selection-js": "^1.2.0",
     "axios": "^0.18.1",
     "vue": "^2.5.2",
+    "vue-drag-select": "^0.2.0",
     "vue-input-autowidth": "^1.0.9",
     "vue-router": "^3.0.1",
     "vuex": "^3.1.0"

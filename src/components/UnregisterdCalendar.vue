@@ -61,7 +61,6 @@
   import {mapGetters} from 'vuex'
   import { readyUnreg } from '@/api'
   import { loadAllRowsFromIndexedDB, loadFromIndexedDB, saveToIndexedDB } from '@/indexedDB'
-  import * as Selection from '@simonwep/selection-js'
   import dayBox from '@/components/dayBox'
   import catEditBox from '@/components/catEditBox'
   import Feiertage from '@/components/Feiertage'

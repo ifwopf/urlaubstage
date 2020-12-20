@@ -22,8 +22,8 @@
          @click="setColor" style="grid-column: 2; grid-row: 3; background-color: rgb(102, 153, 255)"></div>
     <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(0, 102, 255)' }"
          @click="setColor" style="grid-column: 3; grid-row: 3; background-color: rgb(0, 102, 255)"></div>
-    <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(153, 102, 0)' }"
-         @click="setColor" style="grid-column: 4; grid-row: 3; background-color: rgb(153, 102, 0)"></div>
+    <div class="colorField" v-bind:class="{ bordered: catColor === '#f5b461' }"
+         @click="setColor" style="grid-column: 4; grid-row: 3; background-color: #f5b461"></div>
     <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 204, 255)' }"
          @click="setColor" style="grid-column: 1; grid-row: 4; background-color: rgb(255, 204, 255)"></div>
     <div class="colorField" v-bind:class="{ bordered: catColor === 'rgb(255, 102, 204)' }"

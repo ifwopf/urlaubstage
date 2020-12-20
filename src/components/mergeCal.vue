@@ -55,8 +55,9 @@
                v-if="activeMonths.includes(day.month-1) &&
                 activeWeeks.includes(getKW(day.year, day.month, day.day))"
                :dayID="day.id" :calID="day.calID" :key="day.id+'u'+jindex"
-               @click="mouse_on_day($event)" :style="[
-               $store.getters.getElementMapByIDStyle(day.id, day.calID), $store.getters.getCatByID(day.cat_id, day.calID).style,
+               @click="mouse_on_day($event)"  v-on:mouseenter="selectDays"
+               :style="[$store.getters.getElementMapByIDStyle(day.id, day.calID),
+               $store.getters.getCatByID(day.cat_id, day.calID).style,
                day.clicked ? {'border-color': 'black'} : {'border-color': 'lightgrey'},
                {'grid-column': weekday[day.weekday], 'grid-row': getRow(weekday[day.weekday], day.day,
                $store.state.checkedCalenders.length)+4+jindex}]">
@@ -92,7 +93,8 @@
                v-for="day in $store.getters.getInfo(calender.id)[index]" :id="'d'+day.id+'u'+jindex"
                v-if="activeMonths.includes(day.month-1)"
                :dayID="day.id" :calID="day.calID" :key="day.id+'u'+jindex"
-               @click="mouse_on_day($event)" :style="[
+               @click="mouse_on_day($event)" v-on:mouseenter="selectDays"
+               :style="[
                $store.getters.getElementMapByIDStyle(day.id, day.calID),
                $store.getters.getCatByID(day.cat_id, day.calID).style,
                day.clicked ? {'border-color': 'black'} : {'border-color': 'lightgrey'},
@@ -114,7 +116,6 @@
 
 <script>
   import {mapGetters} from 'vuex'
-  import * as Selection from '@simonwep/selection-js'
   import dayBox from '@/components/dayBox'
   import catEditBox from '@/components/catEditBox'
   import mergedCatBox from '@/components/mergedCatBox'
@@ -183,84 +184,6 @@
       this.activeWeeks.push(currentTime.getWeek())
       this.$store.dispatch('mergeReady', this.year)
       //this.getCal(this.calID, this.$store.state.jwt.token)
-      Selection.create({
-        // Class for the selection-area-element
-        class: 'selection-area',
-
-        // px, how many pixels the point should move before starting the selection
-        startThreshold: 10,
-
-        // Disable the selection functionality for touch devices
-        disableTouch: true,
-
-        // On which point an element should be selected.
-        // Available modes are cover (cover the entire element), center (touch the center) or
-        // the default mode is touch (just touching it).
-        mode: 'touch',
-
-        // Enable single-click selection (Also disables range-selection via shift + ctrl)
-        singleClick: false,
-
-        // Query selectors from elements which can be selected
-        selectables: ['.tagrahmen'],
-
-        // Query selectors for elements from where a selection can be start
-        startareas: ['.grid', '.gridMonth'],
-
-        // Query selectors for elements which will be used as boundaries for the selection
-        boundaries: ['html'],
-
-        // Query selector or dom node to set up container for selection-area-element
-        selectionAreaContainer: ['.grid', '.gridMonth'],
-
-        // On scrollable areas the number on px per frame is devided by this amount.
-        // Default is 10 to provide a enjoyable scroll experience.
-        scrollSpeedDivider: 10,
-      }).on('beforestart', evt => {
-        // This function can return "false" to abort the selection
-        //console.log('beforestart', evt);
-      }).on('start', evt => {
-        //const selected = this.containsObject(this.$store.state.element_map[evt.target.id], this.$store.state.clicked);
-        //console.log('start', evt);
-
-        // Remove class if user don't press the control key or ⌘ key
-        if (!evt.oe.ctrlKey && !evt.oe.metaKey && !this.$store.state.locked) {
-          // clearClicked
-          this.$store.dispatch('resetClicked')
-          // Unselect all elements
-          for (const el of evt.selected) {
-            el.classList.remove('selected')
-            evt.inst.removeFromSelection(el)
-          }
-          // Clear previous selection
-          evt.inst.clearSelection()
-        }
-
-      }).on('move', evt => {
-        for (const el of evt.changed.added) {
-          if (this.containsObject(this.$store.state.element_map[el.getAttribute('calID')][el.getAttribute('dayID')],
-            this.$store.state.clicked)) {
-          }
-          else {
-            if (this.$store.state.clicked.length === 0) {
-              this.$store.commit('setActiveCal', event.target.getAttribute('calid'))
-              this.$store.dispatch('setClicked', {'dayID': el.getAttribute('dayid'), 'calID': el.getAttribute('calID')})
-            }
-            else if (parseInt(el.getAttribute('calID')) === parseInt(this.$store.state.clicked[0].calID)) {
-              this.$store.dispatch('setClicked', {'dayID': el.getAttribute('dayid'), 'calID': el.getAttribute('calID')})
-            }
-          }
-        }
-        for (const el of evt.changed.removed) {
-            this.$store.dispatch('removeClicked', {'dayID': el.getAttribute('dayid'), 'calID': el.getAttribute('calid')})
-        }
-      }).on('stop', evt => {
-        //this.$forceUpdate()
-        if (this.$store.state.clicked.length === 0) {
-          this.$store.commit('setActiveCal', -1)
-        }
-      })
-
     },
     computed: {
       ...mapGetters([
@@ -315,6 +238,34 @@
           this.$store.dispatch('setClicked', {'dayID': event.target.getAttribute('dayid'),
             'calID': event.target.getAttribute('calid')})
           this.$store.commit('setActiveCal', event.target.getAttribute('calid'))
+        }
+      },
+      selectDays(event) {
+        if(event.buttons === 1 || event.buttons === 3){
+          if (!event.ctrlKey && !event.metaKey && !this.$store.state.locked) {
+            this.$store.commit('removeAllClicked')
+          }
+          if (this.$store.state.clicked.length > 0) {
+            const calID = event.target.getAttribute('calID')
+            if (this.$store.state.clicked[0].calID == calID){
+              const dayID = event.target.getAttribute('dayid')
+              if (!this.containsObject(this.$store.state.element_map[calID][dayID], this.$store.state.clicked)) {
+                this.$store.dispatch('setClicked', {'dayID': dayID, 'calID': calID})
+                this.$store.commit('setActiveCal', calID)
+              }
+              else {
+                this.$store.dispatch('removeClicked', {'dayID': dayID, 'calID': calID})
+              }
+            }
+            else {
+              this.$store.commit('setInfoText', 'Du kannst nur jeweils Tage eines Kalenders wählen!')
+            }
+          }
+          else {
+            this.$store.dispatch('setClicked', {'dayID': event.target.getAttribute('dayid'),
+              'calID': event.target.getAttribute('calid')})
+            this.$store.commit('setActiveCal', event.target.getAttribute('calid'))
+          }
         }
       },
       containsObject (obj, list) {

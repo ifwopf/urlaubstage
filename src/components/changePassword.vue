@@ -19,9 +19,11 @@
             <input type="password" class="input" v-model="passwordConfirm">
           </div>
         </div>
-
-        <div class="control">
-          <a class="button reglog is-large is-success" @click="changePassword">Ändern</a>
+        <div class="buttonBox">
+          <button class="button reglog is-large is-success" @click="redirect2('/#/calOverview')">Abbrechen</button>
+        </div>
+        <div class="buttonBox">
+          <button class="button reglog is-large is-success" @click="changePassword">Ändern</button>
         </div>
 
       </form>
@@ -46,6 +48,9 @@
       }
     },
     methods: {
+      redirect2 (link) {
+        window.location.href = link
+      },
       changePassword () {
         if (this.passwordNew === this.passwordConfirm) {
           this.$store.dispatch('changePassword', { oldPassword: this.password, newPassword: this.passwordNew })
@@ -104,6 +109,9 @@
   }
   .field, .control {
     margin: 10px;
+  }
+  .buttonBox {
+    display: inline-block;
   }
   .button {
     padding: 10px 24px;

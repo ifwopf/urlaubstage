@@ -5,7 +5,7 @@
         <h2 class="title">Deine Kalender</h2>
       </div>
       <div class="kalender" v-if="!cal.shared" v-for="cal in $store.state.cals"
-           @click="redirect('Urlaubskalender2', {calID: cal.id, year: '2020'})">
+           @click="redirect('Urlaubskalender2', {calID: cal.id, year: '2021'})">
         <span>{{cal.name}}</span>
         <input :label="cal.id" :value="cal" class="merge" v-model="$store.state.checkedCalenders" onclick="event.stopPropagation()"
                type="checkbox"/>
@@ -14,10 +14,11 @@
         <input class="input" v-model="newCalender">
         <div class="button" @click="addCal">+</div>
       </div>
-      <div v-if="$store.state.checkedCalenders.length > 1" class="kalender">
-        <h4>Mixed View</h4>
+      <div v-if="$store.state.checkedCalenders.length > 1" class="kalender"
+           @click="redirect('mergeCal', {year: '2021'})">
+        <div class="headMixed">Mixed View</div>
         <div v-for="calender in $store.state.checkedCalenders">{{calender.name}}</div>
-        <div class="button" @click="redirect('mergeCal', {year: '2020'})">Ansehen</div>
+        <div class="button" @click="redirect('mergeCal', {year: '2021'})">Ansehen</div>
       </div>
     </div>
     <div class="shared">
@@ -25,7 +26,7 @@
         <h2 class="title">Team-Kalender</h2>
       </div>
       <div class="kalender" v-if="cal.shared" v-for="cal in $store.state.cals"
-           @click="redirect('sharedCal', {calID: cal.id, year: '2020'})">
+           @click="redirect('sharedCal', {calID: cal.id, year: '2021'})">
         <span>{{cal.name}}</span>
       </div>
       <div class="kalender" @click="redirect('createSharedCal', {})">
@@ -135,6 +136,7 @@
     overflow: hidden; /* add this to contain floated children */
     max-width: 1200px;
     margin: auto;
+    text-align: center;
   }
 
   .personal, .shared, .settings {
@@ -157,6 +159,10 @@
     background-color: aliceblue;
   }
 
+  .button:hover {
+    background: #d9f0ff;
+  }
+
   .input {
     border: solid;
     border-width: 1px;
@@ -175,6 +181,11 @@
   input[type='checkbox'] {
     width: 20px;
     height: 20px;
+  }
+
+  .headMixed {
+    font-weight: bold;
+    margin: 10px;
   }
 
 </style>

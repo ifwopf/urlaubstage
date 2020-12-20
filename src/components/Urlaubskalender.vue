@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper" v-if="$store.state.dataReady">
+  <div class="wrapper" v-show="$store.state.dataReady">
     <h1 class="jahrtitel">
       <i class="material-icons" id="home" @click="redirect('/#/calOverview')">
         home
@@ -36,7 +36,8 @@
         <div class="wochentag" style="grid-row: 1; grid-column: 5">Fr</div>
         <div class="wochentag" style="grid-row: 1; grid-column: 6">Sa</div>
         <div class="wochentag" style="grid-row: 1; grid-column: 7">So</div>
-        <div class="tagrahmen" @click="mouse_on_day" :id="day.id" v-for="day in month"
+        <div class="tagrahmen" @click="mouse_on_day" v-on:mouseenter="selectDays"
+             :id="day.id" v-for="day in month"
              :class="{ 'currentDay': (day.month == currentMonth && day.day == currentDay && year == currentYear)}"
              :style="[$store.getters.getElementMapByIDStyle(day.id, calID),
              $store.getters.getCatByID(day.cat_id, calID).style,
@@ -71,12 +72,10 @@
 <script>
   import {mapGetters} from 'vuex'
   import { getCalName, resetCats } from '@/api'
-  import * as Selection from '@simonwep/selection-js'
   import dayBox from '@/components/dayBox'
   import catEditBox from '@/components/catEditBox'
   import Feiertage from '@/components/Feiertage'
   import calSettingsBox from '@/components/calSettingsBox'
-  import infobox from '@/components/infobox'
   import Infobox from './infobox'
 
 
@@ -151,6 +150,21 @@
         }
         else {
           this.$store.dispatch('removeClicked', {"dayID": event.target.id, "calID": this.calID})
+        }
+      },
+      selectDays(event) {
+        if(event.buttons === 1 || event.buttons === 3){
+          if (!event.ctrlKey && !event.metaKey && ! this.$store.state.locked) {
+            this.$store.commit('removeAllClicked')
+            this.selectedCat = null
+            this.$store.dispatch('setClicked', {"dayID": event.target.id, "calID": this.calID})
+          }
+          else if (!this.containsObject(this.$store.state.element_map[this.calID][event.target.id], this.$store.state.clicked)) {
+            this.$store.dispatch('setClicked', {"dayID": event.target.id, "calID": this.calID})
+          }
+          else {
+            this.$store.dispatch('removeClicked', {"dayID": event.target.id, "calID": this.calID})
+          }
         }
       },
       click_on_cat (catID) {
@@ -249,6 +263,7 @@
       }
 
     },
+
     mounted () {
       this.$store.commit('setCurrentCal', this.calID)
       this.$store.dispatch('ready', [this.calID, this.year])
@@ -257,74 +272,6 @@
       this.currentMonth = currentTime.getMonth() + 1;
       this.currentDay = currentTime.getDate();
       this.currentYear = currentTime.getFullYear()
-      Selection.create({
-        // Class for the selection-area-element
-        class: 'selection-area',
-
-        // px, how many pixels the point should move before starting the selection
-        startThreshold: 10,
-
-        // Disable the selection functionality for touch devices
-        disableTouch: true,
-
-        // On which point an element should be selected.
-        // Available modes are cover (cover the entire element), center (touch the center) or
-        // the default mode is touch (just touching it).
-        mode: 'touch',
-
-        // Enable single-click selection (Also disables range-selection via shift + ctrl)
-        singleClick: false,
-
-        // Query selectors from elements which can be selected
-        selectables: ['.tagrahmen'],
-
-        // Query selectors for elements from where a selection can be start
-        startareas: ['.monat'],
-
-        // Query selectors for elements which will be used as boundaries for the selection
-        boundaries: ['html'],
-
-        // Query selector or dom node to set up container for selection-area-element
-        selectionAreaContainer: '.monat',
-
-        // On scrollable areas the number on px per frame is devided by this amount.
-        // Default is 10 to provide a enjoyable scroll experience.
-        scrollSpeedDivider: 10,
-      }).on('beforestart', evt => {
-        // This function can return "false" to abort the selection
-        //console.log('beforestart', evt);
-      }).on('start', evt => {
-        //const selected = this.containsObject(this.$store.state.element_map[evt.target.id], this.$store.state.clicked);
-        //console.log('start', evt);
-
-        // Remove class if user don't press the control key or ⌘ key
-        if (!evt.oe.ctrlKey && !evt.oe.metaKey && !this.$store.state.locked) {
-          // clearClicked
-          this.$store.dispatch('resetClicked')
-          // Unselect all elements
-          for (const el of evt.selected) {
-            el.classList.remove('selected')
-            evt.inst.removeFromSelection(el)
-          }
-          // Clear previous selection
-          evt.inst.clearSelection()
-        }
-
-      }).on('move', evt => {
-        for (const el of evt.changed.added) {
-          if (this.containsObject(this.$store.state.element_map[this.calID][el.id], this.$store.state.clicked)) {
-            //this.$store.dispatch('removeClicked', el.id)
-          }
-          else {
-            this.$store.dispatch('setClicked', {"dayID": el.id, "calID": this.calID})
-          }
-        }
-        for (const el of evt.changed.removed) {
-          var payload = {"dayID": el.id, "calID": this.calID}
-          this.$store.dispatch('removeClicked', payload)
-        }
-      }).on('stop', evt => {
-      })
     }
   }
 </script>
@@ -432,7 +379,6 @@
     display: block;
     float: left;
     cursor: pointer;
-    background-color: aliceblue;
   }
   .wochentag, .monatstitel {
     background-color: #d9f0ff;

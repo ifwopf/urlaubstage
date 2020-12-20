@@ -61,7 +61,7 @@
                 v-if="activeMonths.includes(day.month-1) &&
                 activeWeeks.includes(getKW(day.year, day.month, day.day))"
                 :dayID="day.id" :userID="day.userID" :key="day.id+'u'+day.userID"
-                @click="mouse_on_day(day.userID, $event)"
+                @click="mouse_on_day(day.userID, $event)" v-on:mouseenter="selectDays(day.userID, $event)"
                 :style="[$store.getters.getSharedElement(day.id, day.userID, day.calID),
                $store.getters.getCatByID(day.cat_id, day.calID).style,
                day.clicked ? {'border-color': 'black'} : {'border-color': 'lightgrey'},
@@ -98,7 +98,8 @@
                 v-for="day in userCal" :id="'d'+day.id+'u'+day.userID"
                 v-if="activeMonths.includes(index)"
                 :dayID="day.id" :userID="day.userID" :key="day.id+'u'+day.userID"
-                @click="mouse_on_day(day.userID, $event)" :style="[$store.getters.getSharedElement(day.id, day.userID, day.calID),
+                @click="mouse_on_day(day.userID, $event)" v-on:mouseenter="selectDays(day.userID, $event)"
+                :style="[$store.getters.getSharedElement(day.id, day.userID, day.calID),
                $store.getters.getCatByID(day.cat_id, day.calID).style,
                day.clicked ? {'border-color': 'black'} : {'border-color': 'lightgrey'},
                {'grid-column': day.day+1, 'grid-row': jindex+3}]">
@@ -119,7 +120,6 @@
 
 <script>
   import {mapGetters} from 'vuex'
-  import * as Selection from '@simonwep/selection-js'
   import dayBox from '@/components/dayBox'
   import catEditBox from '@/components/catEditBox'
   import catBox from '@/components/catBox'
@@ -186,81 +186,10 @@
       this.currentYear = currentTime.getFullYear()
       this.activeWeeks = []
       this.activeWeeks.push(currentTime.getWeek());
-      Selection.create({
-        // Class for the selection-area-element
-        class: 'selection-area',
-
-        // px, how many pixels the point should move before starting the selection
-        startThreshold: 10,
-
-        // Disable the selection functionality for touch devices
-        disableTouch: true,
-
-        // On which point an element should be selected.
-        // Available modes are cover (cover the entire element), center (touch the center) or
-        // the default mode is touch (just touching it).
-        mode: 'touch',
-
-        // Enable single-click selection (Also disables range-selection via shift + ctrl)
-        singleClick: false,
-
-        // Query selectors from elements which can be selected
-        selectables: ['.tagrahmen'],
-
-        // Query selectors for elements from where a selection can be start
-        startareas: ['.grid', '.gridMonth'],
-
-        // Query selectors for elements which will be used as boundaries for the selection
-        boundaries: ['html'],
-
-        // Query selector or dom node to set up container for selection-area-element
-        selectionAreaContainer: ['.grid', '.gridMonth'],
-
-        // On scrollable areas the number on px per frame is devided by this amount.
-        // Default is 10 to provide a enjoyable scroll experience.
-        scrollSpeedDivider: 10,
-      }).on('beforestart', evt => {
-        // This function can return "false" to abort the selection
-        //console.log('beforestart', evt);
-      }).on('start', evt => {
-        //const selected = this.containsObject(this.$store.state.element_map[evt.target.id], this.$store.state.clicked);
-        //console.log('start', evt);
-
-        // Remove class if user don't press the control key or ⌘ key
-        if (!evt.oe.ctrlKey && !evt.oe.metaKey && !this.$store.state.locked) {
-          // clearClicked
-          this.$store.dispatch('resetClicked')
-          // Unselect all elements
-          for (const el of evt.selected) {
-            el.classList.remove('selected')
-            evt.inst.removeFromSelection(el)
-          }
-          // Clear previous selection
-          evt.inst.clearSelection()
-        }
-
-      }).on('move', evt => {
-        for (const el of evt.changed.added) {
-          if (this.containsObject(this.$store.state.element_map[this.calID][el.getAttribute('userid')][el.getAttribute('dayid')],
-            this.$store.state.clicked)) {
-            //this.$store.dispatch('removeClicked', el.id)
-          }
-          else {
-            if (parseInt(el.getAttribute('userid')) === this.user['id'] || this.user['admin']) {
-              var payload = {"dayID": el.getAttribute('dayid'), "userID": el.getAttribute('userid'), "calID": this.calID}
-              this.$store.dispatch('setSharedClicked', payload)
-            }
-          }
-        }
-        for (const el of evt.changed.removed) {
-          if (parseInt(el.getAttribute('userid')) === this.user['id'] || this.user['admin']) {
-            payload = {"dayID": el.getAttribute('dayid'), "userID": el.getAttribute('userid'), "calID": this.calID}
-            this.$store.dispatch('removeSharedClicked', payload)
-          }
-        }
-      }).on('stop', evt => {
-      })
-
+      console.log(window.innerWidth)
+      if(window.innerWidth > 700) {
+        this.weekView = false
+      }
     },
     computed: {
       ...mapGetters([
@@ -269,7 +198,7 @@
         'getCats',
         'getCatCount',
         'getSharedUsers'
-      ])
+      ]),
     },
     methods: {
       redirect (link) {
@@ -307,6 +236,31 @@
         }
         else{
           this.$store.commit('setInfoText', "Du kannst nur eigene Tage auswählen!")
+        }
+      },
+      selectDays(userID ,event) {
+        if(event.buttons === 1 || event.buttons === 3){
+          if (this.user['id'] === userID || this.user['admin']){
+            if (!event.ctrlKey && !event.metaKey && !this.$store.state.locked) {
+              // clearClicked
+              this.$store.commit('resetClicked')
+            }
+            if (!this.containsObject(this.$store.state.element_map[this.calID][event.target.getAttribute('userid')]
+                [event.target.getAttribute('dayid')]
+              , this.$store.state.clicked)) {
+              var payload1 = {"dayID": event.target.getAttribute('dayid'),
+                "userID": event.target.getAttribute('userid'), "calID": this.calID}
+              this.$store.dispatch('setSharedClicked', payload1)
+            }
+            else {
+              var payload = {"dayID": event.target.getAttribute('dayid'), "cID": this.calID,
+                "uID": event.target.getAttribute('userid')}
+              this.$store.dispatch('removeSharedClicked', payload)
+            }
+          }
+          else{
+            this.$store.commit('setInfoText', "Du kannst nur eigene Tage auswählen!")
+          }
         }
       },
       containsObject (obj, list) {
