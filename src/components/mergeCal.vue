@@ -204,7 +204,7 @@
       redirect2 (link) {
         window.location.href = link
       },
-      changeYear (direction) {np
+      changeYear (direction) {
         if (direction) {
           var yearString = String(parseInt(this.year) + 1)
           this.redirect('mergeCal', {year: yearString})

@@ -84,28 +84,7 @@
       },
       register () {
         if (this.password === this.passwordConfirm) {
-          var dbconnect = window.indexedDB.open("MeineDatenbank", 1);
-          dbconnect.onupgradeneeded = ev => {
-            console.log('No DB');
-          }
-          dbconnect.onsuccess = ev => {
-            const db = ev.target.result;
-
-            //cats
-            loadAllRowsFromIndexedDB('MeineDatenbank', 'cats')
-              .then(response1 => {
-                //months
-                loadAllRowsFromIndexedDB('MeineDatenbank', 'months')
-                  .then(response2 => {
-                    this.$store.dispatch('register', { email: this.email, password: this.password, years:response2, cats:response1 })
-
-                  }).catch(error => {
-                    this.$store.dispatch('register', { email: this.email, password: this.password , years:null, cats:null})
-                });
-              }).catch(function (error) {
-                this.$store.dispatch('register', { email: this.email, password: this.password, years:null, cats:null })
-            });
-          }
+          this.$store.dispatch('register', { email: this.email, password: this.password, years:null, cats:null })
         }
         else {
           this.$store.commit("setInfoText", "Password stimmt nicht überein!")
