@@ -3,7 +3,7 @@
     <span class="nameDisplay" v-if="!editName & !$store.state.border" :style="{backgroundColor: catColor}">
           {{ $store.getters.getCatByID(this.$store.state.clickedCatCounter, calID).name }}
         </span>
-    <input class="nameDisplay input" v-model="catNameInit" @change="" @click.stop="" type="text"
+    <input class="nameDisplay input" v-model="catNameInit" @change="" @click.stop="" type="text" id="newCat" ref="newCat"
            :style="{backgroundColor: catColor}" v-if="editName || $store.state.border"/>
     <i class="material-icons" @click="reset" v-if="editName || editColor">arrow_back</i>
     <i class="material-icons" @click="changeName" v-if="editName">save</i>
@@ -187,12 +187,12 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    background-color: #fff;
     box-shadow: 10px 5px 5px grey;
     font-size: 24px;
     padding: 5px;
     text-align: center;
     min-width: 220px;
+    background: #f0f8ff;
   }
 
   .material-icons {
@@ -212,7 +212,8 @@
   }
 
   input{
-    background-color: aliceblue;
+    background-color: #fff;
+    border: none
   }
 
 </style>

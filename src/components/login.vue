@@ -16,18 +16,19 @@
         <div class="field">
           <label class="label is-large" for="email">Email</label>
           <div class="control">
-            <input type="email" class="input" id="email" v-model="email" autocomplete="on">
+            <input type="email" class="input" id="email" v-model="email" v-on:keyup="enterLogin($event)" autocomplete="on">
           </div>
         </div>
         <div class="field">
           <label class="label is-large" for="password">Passwort</label>
           <div class="control">
-            <input type="password" class="input" id="password" v-model="password" autocomplete="on">
+            <input type="password" class="input" id="password" v-model="password" v-on:keyup="enterLogin($event)"
+                   autocomplete="on">
           </div>
         </div>
 
         <div class="control">
-          <a class="button reglog is-large is-primary" @click="authenticate">Login</a>
+          <a class="button reglog is-large is-primary" id="authenticate" @click="authenticate">Login</a>
         </div>
 
       </form>
@@ -47,12 +48,12 @@
           </div>
           <label class="label is-large" for="password">Passwort bestätigen</label>
           <div class="control">
-            <input type="password" class="input" v-model="passwordConfirm">
+            <input type="password" class="input" v-on:keyup="enterRegister($event)" v-model="passwordConfirm">
           </div>
         </div>
 
         <div class="control">
-          <a class="button reglog is-large is-success" @click="register">Register</a>
+          <a class="button reglog is-large is-success" id="register "@click="register">Register</a>
         </div>
 
       </form>
@@ -81,6 +82,20 @@
       authenticate () {
         this.$store.dispatch('login', { email: this.email, password: this.password })
           .then(() => this.$router.push('/calOverview'))
+      },
+      enterLogin (event) {
+        var key = event.key || event.keyCode;
+        if (key === 13 || key === "Enter") {
+          event.preventDefault();
+          document.getElementById("authenticate").click();
+        }
+      },
+      enterRegister (event) {
+        var key = event.key || event.keyCode;
+        if (key === 13 || key === "Enter") {
+          event.preventDefault();
+          document.getElementById("register").click();
+        }
       },
       register () {
         if (this.password === this.passwordConfirm) {

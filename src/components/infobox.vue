@@ -22,32 +22,16 @@
 
 <style scoped>
   .infobox {
-    position:fixed;
-    top:50%;
-    left:50%;
-    width:400px;
-    margin-left:-200px;
-    margin-top:-200px;
     background-color: white;
     text-align: center;
     box-shadow: 10px 5px 5px grey;
-    border: 1px solid #000;
-    max-width: 95%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
-  @media only screen and (min-width: 1200px) {
-    .infobox{
-      left: 600px;
-    }
-  }
-  @media only screen and (max-width: 380px) {
-    .infobox{
-      margin-left:-47.5%;
-      margin-top:-10px;
-    }
-  }
+
   .button {
-    border: solid;
-    border-width: 1px;
     padding: 10px 24px;
     text-align: center;
     text-decoration: none;
@@ -56,6 +40,9 @@
     background-color: #d9f0ff;
     margin-bottom: 10px;
     cursor: pointer;
+  }
+  .button:hover {
+    background: #f0f8ff;
   }
   .text {
     top: 10%;

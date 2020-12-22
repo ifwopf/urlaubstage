@@ -68,6 +68,13 @@
         this.$store.commit('setClickedCatName', '')
         this.$store.commit('setCatColor', 'rgb(255, 255, 255)')
         this.$store.dispatch('editCatDisplay')
+        this.$nextTick(() => {
+          document.getElementById("newCat").focus();
+          document.getElementById("newCat").select();
+
+        });
+
+
       }
     },
   }

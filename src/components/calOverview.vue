@@ -11,8 +11,8 @@
                type="checkbox"/>
       </div>
       <div class="kalender">
-        <input class="input" v-model="newCalender">
-        <div class="button" @click="addCal">+</div>
+        <input class="input" v-on:keyup="enterAddCal($event)" v-model="newCalender">
+        <div class="button"  @click="addCal">+</div>
       </div>
       <div v-if="$store.state.checkedCalenders.length > 1" class="kalender"
            @click="redirect('mergeCal', {year: '2021'})">
@@ -80,6 +80,13 @@
     methods: {
       addCal () {
         this.$store.dispatch('addCal', this.newCalender)
+      },
+      enterAddCal (event) {
+        var key = event.key || event.keyCode;
+        if (key === 13 || key === "Enter") {
+          event.preventDefault();
+          this.addCal();
+        }
       },
       redirect (comp, parameters) {
         this.$store.dispatch('resetClicked')
